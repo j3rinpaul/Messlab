@@ -1,5 +1,6 @@
 # mini_project
 Team 2
+abstract
 A new Flutter project.
 
 ## Getting Started
