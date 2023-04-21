@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:mini_project/screens/Pointsscreen/screen_points.dart';
+import 'package:mini_project/screens/homescreen/ScreenAccouncement.dart';
 //import 'package:intl/intl.dart';
-import 'package:mini_project/screens/widgets/calender.dart';
+import 'package:mini_project/screens/homescreen/calender.dart';
+import 'package:mini_project/screens/homescreen/checkout.dart';
 
 
 class ScreenHome extends StatelessWidget {
@@ -49,7 +52,13 @@ class ScreenHome extends StatelessWidget {
                     fit: BoxFit.cover,
                     height: 50, // set the desired height
                     width: 50,),
-                    TextButton(onPressed: (){}, child: Text('Bill',style: TextStyle(color: Colors.white),))
+                    TextButton(onPressed: (){
+                      Navigator.push(
+                      context,
+                        MaterialPageRoute(builder: (context) => ScreenPoints()),
+                      );
+                    }, 
+                    child: Text('Bill',style: TextStyle(color: Colors.white),))
                   ],
                 ),
               )
@@ -57,6 +66,7 @@ class ScreenHome extends StatelessWidget {
           ),
          
         ),
+        body:ScreenCheckBox()
         
       ),
     );
