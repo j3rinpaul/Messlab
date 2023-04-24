@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
-
+import 'dart:ui';
 
 import '../Pointsscreen/screen_points.dart';
-import 'ScreenHome.dart';
-//import 'package:intl/intl.dart';
 
-
-class ScreenHome extends StatelessWidget {
-  const ScreenHome({super.key});
+class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-   // var date;
-    //var day;
-    
-    return   Scaffold(
-        appBar: AppBar(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft: Radius.circular(25),bottomRight: Radius.circular(25))),
+    return AppBar(
                 automaticallyImplyLeading: false,
                 toolbarHeight: 130,
-                
                title: Row(
                 
                   children: [
@@ -65,14 +56,8 @@ class ScreenHome extends StatelessWidget {
                   ],
                 )
         
-              ),
-        body: CalendarPage(),
-               //body:ScreenCheckBox();
-      );
-          
-    
-      // body:ScreenCheckBox();
-        
+              );
   }
-    
-  }
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
