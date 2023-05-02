@@ -24,7 +24,7 @@ class _ScreenReviewState extends State<ScreenReview> {
             border: Border.all(),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
-          width: 400,
+          width: 425,
           height: 180,
           child: Column(
             children: [
@@ -49,7 +49,7 @@ class _ScreenReviewState extends State<ScreenReview> {
               border: Border.all(),
               borderRadius: BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
-            width: 400,
+            width: 425,
             height: 150,
             child: Column(
               children: [
