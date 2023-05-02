@@ -24,8 +24,8 @@ class _ScreenReviewState extends State<ScreenReview> {
             border: Border.all(),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
-          width: 350,
-          height: 150,
+          width: 425,
+          height: 180,
           child: Column(
             children: [
               Center(
@@ -49,8 +49,8 @@ class _ScreenReviewState extends State<ScreenReview> {
               border: Border.all(),
               borderRadius: BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
-            width: 350,
-            height: 125,
+            width: 425,
+            height: 150,
             child: Column(
               children: [
                 Center(
@@ -59,7 +59,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                 Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(right: 10, left: 10),
+                      padding: EdgeInsets.only(right: 10, left: 10, top: 15),
                       child: TextField(
                         controller: _reviewCont,
                         decoration: InputDecoration(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 final List<String> items = [
   'Morning',
@@ -31,6 +32,7 @@ class _CheckboxListState extends State<CheckboxList> {
       //checking whether the dates are same if same then disabling
       _submitCheck = false; //else another date then enabling
       _formCheck = false;
+      isCheckedList.fillRange(0, isCheckedList.length, false);
     }
     return Column(
       children: [
@@ -95,24 +97,49 @@ class _CheckboxListState extends State<CheckboxList> {
                 _submitCheck = true;
                 print(isCheckedList);
                 print('Date is ${widget.date!.day}');
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Timetable Submitted'),
-                      content: Text('Timetable submitted successfully'),
-                      actions: [
-                        TextButton(
-                          child: Text('OK'),
-                          onPressed: () {
-                            // Do something
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
+                if (DateTime.now().day == widget.date!.day) {
+                  String dayOfWeek = DateFormat('EEEE').format(widget.date!);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Timetable Submitted'),
+                        content: Text(
+                            'Timetable submitted successfully for ${dayOfWeek}'),
+                        actions: [
+                          TextButton(
+                            child: Text('OK'),
+                            onPressed: () {
+                              // Do something
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  String dayOfWeek = DateFormat('EEEE').format(widget.date!);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Error'),
+                        content:
+                            Text('You can\'t submit meals of ${dayOfWeek}'),
+                        actions: [
+                          TextButton(
+                            child: Text('OK'),
+                            onPressed: () {
+                              // Do something
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               });
             }
           },

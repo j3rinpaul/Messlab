@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:mini_project/screens/login.dart';
 
-
 void main(List<String> args) {
   runApp(MyApp());
 }
@@ -15,6 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(primaryColor: Colors.green),
       home: HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
