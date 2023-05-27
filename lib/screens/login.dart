@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/homescreen/home_screen.dart';
 import 'package:mini_project/screens/managerHome/home_screen.dart';
+import 'package:mini_project/screens/signup.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -129,7 +130,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                )
+                ),
+                TextButton(
+                    onPressed: () {
+                      print("Signup completed");
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return Signup();
+                      }));
+                    },
+                    child: Text("Signup"))
               ],
             ),
           ),
