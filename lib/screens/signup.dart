@@ -103,11 +103,11 @@ class Signup extends StatelessWidget {
                         _password.text, _confirmPassword.text);
 
                     //using the db endpoint submit the data
-                    print(namm.fname);
-                    print(namm.lname);
-                    print(namm.username);
-                    print(namm.password);
-                    print(namm.department);
+                    // print(namm.fname);
+                    // print(namm.lname);
+                    // print(namm.username);
+                    // print(namm.password);
+                    // print(namm.department);
 
                     if (_fname.text == "" ||
                         _lname.text == "" ||
