@@ -24,19 +24,23 @@ class _ScreenReviewState extends State<ScreenReview> {
             border: Border.all(),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
-          width: 425,
+          width: 370,
           height: 180,
           child: Column(
             children: [
               Center(
                   child: Padding(
-                      padding: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(10),
                       child: Text(
                         "Announcements",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ))),
-              Column(
-                children: [Text("No Announcements Today")],
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Text("No Announcements Today"),
+                  ],
+                ),
               )
             ],
           ),
@@ -49,7 +53,7 @@ class _ScreenReviewState extends State<ScreenReview> {
               border: Border.all(),
               borderRadius: BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
-            width: 425,
+            width: 370,
             height: 150,
             child: Column(
               children: [

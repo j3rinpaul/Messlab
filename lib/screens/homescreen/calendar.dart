@@ -12,17 +12,11 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {
   DateTime? selectedValue = DateTime.now();
-  final List<bool> isCheckedList = List.filled(items.length, false);
-  final List<Color> _checkBoxc = List.filled(items.length, Colors.red);
-  bool _formCheck = false;
-  bool _submitCheck = false;
+  
 
   @override
   Widget build(BuildContext context) {
-    if (DateTime.now().hour == 0) {
-      _submitCheck = false;
-      _formCheck = false;
-    }
+   
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -36,9 +30,7 @@ class _CalendarState extends State<Calendar> {
             setState(() {
               selectedValue = date;
               print(selectedValue);
-              if (DateTime.now() != selectedValue) {
-                isCheckedList.fillRange(0, items.length, false);
-              }
+             
             });
           },
         ),
