@@ -29,12 +29,10 @@ class _ScreenReviewState extends State<ScreenReview> {
           child: Column(
             children: [
               Center(
-                  child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Text(
-                        "Announcements",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ))),
+                  child: Text(
+                    "Announcements",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
               SingleChildScrollView(
                 child: Column(
                   children: [

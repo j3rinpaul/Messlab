@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class CheckboxList extends StatefulWidget {
-  final DateTime? date;
+  final DateTime? date; //date to be passed to the db along with this data
   const CheckboxList({super.key, required this.date});
 
   @override
@@ -103,16 +103,14 @@ class _CheckboxListState extends State<CheckboxList> {
                   width: 1.0,
                 )),
             leading: CircleAvatar(
-              backgroundColor:
-                  isMorningSelected ? Colors.green : Colors.transparent,
-              child: Text(
-                'M',
-                style: TextStyle(color: Colors.black),
-              ),
+             backgroundColor: Colors.blue[400],
+              child: Icon(Icons.wb_sunny, color: Colors.white,)
             ),
             title: Text('Morning'),
             trailing: Switch(
               value: isMorningSelected,
+              activeColor: Colors.green,
+
               onChanged: canToggleMorning()
                   ? (value) {
                       setState(() {
@@ -133,10 +131,10 @@ class _CheckboxListState extends State<CheckboxList> {
                 )),
             leading: CircleAvatar(
               backgroundColor:
-                  isNoonSelected ? Colors.blue[400] : Colors.transparent,
+                   Colors.blue[400] ,
               child: Icon(
                 Icons.sunny,
-                color: isNoonSelected ? Colors.white : Colors.black,
+                color: Colors.white ,
               ),
             ),
             title: Text(
@@ -144,6 +142,8 @@ class _CheckboxListState extends State<CheckboxList> {
             ),
             trailing: Switch(
               value: isNoonSelected,
+              activeColor: Colors.green,
+
               onChanged: canToggleNoon()
                   ? (value) {
                       setState(() {
@@ -162,20 +162,21 @@ class _CheckboxListState extends State<CheckboxList> {
                   width: 1.0,
                 )),
             leading: CircleAvatar(
-                backgroundColor:
-                    isEveningSelected ? Colors.blue[400] : Colors.transparent,
+                backgroundColor: Colors.blue[400],
                 child: Icon(
-                  Icons.sunny,
-                  color: isEveningSelected ? Colors.white : Colors.black,
+                  Icons.nightlight_round,
+                  color: Colors.white,
                 )),
             title: Text('Evening'),
             trailing: Switch(
+              activeColor: Colors.green,
               value: isEveningSelected,
               onChanged: canToggleEvening()
                   ? (value) {
                       setState(() {
                         isEveningSelected = value;
                       });
+                      print("selectre");
                     }
                   : null,
             ),

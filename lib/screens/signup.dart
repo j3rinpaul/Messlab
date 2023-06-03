@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mini_project/supabase_config.dart';
 
 class User {
   String fname;
@@ -17,7 +18,7 @@ class Signup extends StatelessWidget {
   final _lname = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _confirmPassword = TextEditingController();
+  final _department = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +87,7 @@ class Signup extends StatelessWidget {
                   height: 20,
                 ),
                 TextField(
-                  controller: _confirmPassword,
+                  controller: _department,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -98,28 +99,34 @@ class Signup extends StatelessWidget {
                   height: 20,
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    var namm = new User(_fname.text, _lname.text, _email.text,
-                        _password.text, _confirmPassword.text);
-
-                    //using the db endpoint submit the data
-                    // print(namm.fname);
-                    // print(namm.lname);
-                    // print(namm.username);
-                    // print(namm.password);
-                    // print(namm.department);
-
+                  onPressed: () async {
                     if (_fname.text == "" ||
                         _lname.text == "" ||
                         _email.text == "" ||
                         _password.text == "" ||
-                        _confirmPassword.text == "") {
+                        _department.text == "") {
                       showVar(context, "Please fill all the fields", "Error");
                     } else {
-                      showVar(
+                      final response =
+                          await supabase.from('signup_details').insert({
+                        'first_name': _fname.text,
+                        'last_name': _lname.text,
+                        'username': _email.text,
+                        'password': _password.text,
+                        'department': _department.text,
+                      }).execute();
+
+                      if (response.status != 200) {
+                        showVar(context, "Failed to create user", "Error");
+                      } else {
+                        showVar(
                           context,
-                          "User created successfully wait for validation from the admin",
-                          "Success");
+                          "User created successfully. Wait for validation from the admin",
+                          "Success",
+                          //refresh page after submit
+                          //route to sign in page -- loading animations 
+                        );
+                      }
                     }
                   },
                   child: Text("Submit"),
