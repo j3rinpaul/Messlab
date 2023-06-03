@@ -18,7 +18,7 @@ class ManagerHome extends StatelessWidget {
       appBar: AppBar(
         title: Text("Manager Home"),
       ),
-      body: CalendarPage(),
+      body: CalendarPage(uid: u_id,),
       //body:ScreenCheckBox();
     );
 

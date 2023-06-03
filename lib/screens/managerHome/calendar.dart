@@ -5,7 +5,8 @@ import 'checkBox.dart';
 import 'verify.dart';
 
 class Calendar extends StatefulWidget {
-  const Calendar({super.key});
+  final String? uid;
+  const Calendar({super.key, required this.uid});
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -31,7 +32,7 @@ class _CalendarState extends State<Calendar> {
             });
           },
         ),
-        CheckboxList(date: selectedValue),
+        CheckboxList(date: selectedValue,userId:widget.uid,),
         Wrap(
           children: [
             Padding(

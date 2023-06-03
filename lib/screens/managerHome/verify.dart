@@ -84,12 +84,17 @@ class _VerifyUserState extends State<VerifyUser> {
                             );
                           },
                           child: Text("Delete")),
-                      TextButton(
-                          onPressed: () {}, child: Text("Add to Profile")),
                       ElevatedButton(
                           onPressed: () {
                             verifyData(
-                                context, item['username'], item['password'], item['first_name'], item['last_name'], item['designation'], item['department'], item['phone']);
+                                context,
+                                item['username'],
+                                item['password'],
+                                item['first_name'],
+                                item['last_name'],
+                                item['designation'],
+                                item['department'],
+                                item['phone']);
                             print(item['username'] + item['password']);
                           },
                           child: Text("Verify")),

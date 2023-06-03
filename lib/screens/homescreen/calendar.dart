@@ -35,7 +35,7 @@ class _CalendarState extends State<Calendar> {
             });
           },
         ),
-        CheckboxList(date: selectedValue, u_id: "${widget.u_id}"),
+        CheckboxList(date: selectedValue, userId: widget.u_id),
         //the announcement and review below
       ],
     );

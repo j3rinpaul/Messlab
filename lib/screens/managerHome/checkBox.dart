@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../supabase_config.dart';
+
 class CheckboxList extends StatefulWidget {
-  final DateTime? date; //date to be passed to the db along with this data
-  const CheckboxList({super.key, required this.date});
+  final DateTime? date;
+  final String? userId; //date to be passed to the db along with this data
+  const CheckboxList({super.key, required this.date, this.userId});
 
   @override
   _CheckboxListState createState() => _CheckboxListState();
@@ -28,6 +31,7 @@ class _CheckboxListState extends State<CheckboxList> {
       setState(() {
         isMorningSelected = false;
       });
+      // startStatusTimer(01,"food_morning","morning_food",isMorningSelected);
     }
 
     // Deactivate Noon toggle button after 9 AM
@@ -35,6 +39,8 @@ class _CheckboxListState extends State<CheckboxList> {
       setState(() {
         isNoonSelected = false;
       });
+      // startStatusTimer(9,"food_noon","noon_food",isNoonSelected);
+
     }
 
     // Deactivate Evening toggle button after 5 PM
@@ -103,20 +109,78 @@ class _CheckboxListState extends State<CheckboxList> {
                   width: 1.0,
                 )),
             leading: CircleAvatar(
-             backgroundColor: Colors.blue[400],
-              child: Icon(Icons.wb_sunny, color: Colors.white,)
-            ),
+                backgroundColor: Colors.blue[400],
+                child: Icon(
+                  Icons.wb_sunny,
+                  color: Colors.white,
+                )),
             title: Text('Morning'),
             trailing: Switch(
               value: isMorningSelected,
               activeColor: Colors.green,
-
               onChanged: canToggleMorning()
-                  ? (value) {
+                  ? (value) async {
                       setState(() {
                         isMorningSelected = value;
                       });
-                      print("Selected mrng");
+                      print("Selected morning");
+                      try {
+                        final userId = widget.userId;
+                        final date =
+                            DateTime.now().toLocal().toString().split(' ')[0];
+
+                        final existingDataResponse = await supabase
+                            .from('food_morning')
+                            .select()
+                            .eq('u_id', userId)
+                            .eq('mark_date', date)
+                            .execute();
+
+                        if (existingDataResponse.error != null) {
+                          // Handle error
+                          throw existingDataResponse.error!;
+                        }
+
+                        final existingData = existingDataResponse.data;
+
+                        if (existingData != null && existingData.length == 1) {
+                          // Existing data found, perform update
+                          final updateResponse = await supabase
+                              .from('food_morning')
+                              .update({
+                                'morning_food': value,
+                              })
+                              .eq('u_id', userId)
+                              .eq('mark_date', date)
+                              .execute();
+
+                          if (updateResponse.error != null) {
+                            // Handle error
+                            throw updateResponse.error!;
+                          }
+
+                          print('Update operation completed successfully!');
+                        } else {
+                          // No existing data, perform insert
+                          final insertResponse =
+                              await supabase.from('food_morning').insert([
+                            {
+                              'u_id': userId,
+                              'mark_date': date,
+                              'morning_food': value,
+                            }
+                          ]).execute();
+
+                          if (insertResponse.error != null) {
+                            // Handle error
+                            throw insertResponse.error!;
+                          }
+
+                          print('Insert operation completed successfully!');
+                        }
+                      } catch (e) {
+                        print('An error occurred: $e');
+                      }
                     }
                   : null,
             ),
@@ -130,11 +194,10 @@ class _CheckboxListState extends State<CheckboxList> {
                   width: 1.0,
                 )),
             leading: CircleAvatar(
-              backgroundColor:
-                   Colors.blue[400] ,
+              backgroundColor: Colors.blue[400],
               child: Icon(
                 Icons.sunny,
-                color: Colors.white ,
+                color: Colors.white,
               ),
             ),
             title: Text(
@@ -143,12 +206,68 @@ class _CheckboxListState extends State<CheckboxList> {
             trailing: Switch(
               value: isNoonSelected,
               activeColor: Colors.green,
-
               onChanged: canToggleNoon()
-                  ? (value) {
+                  ? (value) async {
                       setState(() {
                         isNoonSelected = value;
                       });
+                      print("Selected Noon");
+                      try {
+                        final userId = widget.userId;
+                        final date = DateTime.now().day.toString();
+
+                        final existingDataResponse = await supabase
+                            .from('food_noon')
+                            .select()
+                            .eq('u_id', userId)
+                            .eq('mark_date', date)
+                            .execute();
+
+                        if (existingDataResponse.error != null) {
+                          // Handle error
+                          throw existingDataResponse.error!;
+                        }
+
+                        final existingData = existingDataResponse.data;
+
+                        if (existingData != null && existingData.length == 1) {
+                          // Existing data found, perform update
+                          final updateResponse = await supabase
+                              .from('food_noon')
+                              .update({
+                                'noon_food': value,
+                              })
+                              .eq('u_id', userId)
+                              .eq('mark_date', date)
+                              .execute();
+
+                          if (updateResponse.error != null) {
+                            // Handle error
+                            throw updateResponse.error!;
+                          }
+
+                          print('Update operation completed successfully!');
+                        } else {
+                          // No existing data, perform insert
+                          final insertResponse =
+                              await supabase.from('food_noon').insert([
+                            {
+                              'u_id': userId,
+                              'mark_date': date,
+                              'noon_food': value,
+                            }
+                          ]).execute();
+
+                          if (insertResponse.error != null) {
+                            // Handle error
+                            throw insertResponse.error!;
+                          }
+
+                          print('Insert operation completed successfully!');
+                        }
+                      } catch (e) {
+                        print('An error occurred: $e');
+                      }
                     }
                   : null,
             ),
@@ -169,14 +288,70 @@ class _CheckboxListState extends State<CheckboxList> {
                 )),
             title: Text('Evening'),
             trailing: Switch(
-              activeColor: Colors.green,
               value: isEveningSelected,
+              activeColor: Colors.green,
               onChanged: canToggleEvening()
-                  ? (value) {
+                  ? (value) async {
                       setState(() {
                         isEveningSelected = value;
                       });
-                      print("selectre");
+                      print("Selected Evening");
+                      try {
+                        final userId = widget.userId;
+                        final date = DateTime.now().day.toString();
+
+                        final existingDataResponse = await supabase
+                            .from('food_evening')
+                            .select()
+                            .eq('u_id', userId)
+                            .eq('mark_date', date)
+                            .execute();
+
+                        if (existingDataResponse.error != null) {
+                          // Handle error
+                          throw existingDataResponse.error!;
+                        }
+
+                        final existingData = existingDataResponse.data;
+
+                        if (existingData != null && existingData.length == 1) {
+                          // Existing data found, perform update
+                          final updateResponse = await supabase
+                              .from('food_evening')
+                              .update({
+                                'evening_food': value,
+                              })
+                              .eq('u_id', userId)
+                              .eq('mark_date', date)
+                              .execute();
+
+                          if (updateResponse.error != null) {
+                            // Handle error
+                            throw updateResponse.error!;
+                          }
+
+                          print('Update operation completed successfully!');
+                        } else {
+                          // No existing data, perform insert
+                          final insertResponse =
+                              await supabase.from('food_evening').insert([
+                            {
+                              'u_id': userId,
+                              'mark_date': date,
+                              'evening_food': value,
+                            }
+                          ]).execute();
+
+                          if (insertResponse.error != null) {
+                            // Handle error
+                            throw insertResponse.error!;
+                          }
+
+                          print('Insert operation completed successfully!');
+                        }
+                      } catch (e) {
+                        print('An error occurred: $e');
+                      }
                     }
                   : null,
             ),
@@ -188,7 +363,7 @@ class _CheckboxListState extends State<CheckboxList> {
 
   bool canToggleMorning() {
     DateTime currentTime = DateTime.now();
-    return currentTime.hour < 1; // Allow toggle before 11 PM
+    return currentTime.hour < 1; // Allow toggle before 1 PM
   }
 
   bool canToggleNoon() {
@@ -200,4 +375,32 @@ class _CheckboxListState extends State<CheckboxList> {
     DateTime currentTime = DateTime.now();
     return currentTime.hour < 17; // Allow toggle before 5 PM
   }
+
+  // void startStatusTimer(int time,String db,String tb,bool isSelect) {
+  //   Timer(Duration(hours: time), () async {
+  //     if (!isSelect) {
+        
+  //       try {
+  //         final userId = widget.userId;
+  //         final date = DateTime.now().toLocal().toString().split(' ')[0];
+
+  //         final response = await supabase
+  //             .from(db) // Updated table name
+  //             .update({tb: false}) // Updated column name
+  //             .eq('u_id', userId)
+  //             .eq('mark_date', date)
+  //             .execute();
+
+  //         if (response.error != null) {
+  //           // Handle error
+  //           throw response.error!;
+  //         }
+
+  //         print('Status updated to false automatically!');
+  //       } catch (e) {
+  //         print('An error occurred: $e');
+  //       }
+  //     }
+  //   });
+  // }
 }
