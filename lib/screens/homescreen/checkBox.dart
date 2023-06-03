@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 
 class CheckboxList extends StatefulWidget {
   final DateTime? date; //date to be passed to the db along with this data
-  const CheckboxList({super.key, required this.date});
+  final String? u_id;
+  const CheckboxList({super.key, required this.date, this.u_id});
+
+//u_id is the user id of the current user
+
 
   @override
   _CheckboxListState createState() => _CheckboxListState();

@@ -24,8 +24,8 @@ class _ScreenReviewState extends State<ScreenReview> {
             border: Border.all(),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
-          width: 425,
-          height: 180,
+          width: MediaQuery.of(context).size.width * 0.87,
+          height: MediaQuery.of(context).size.height * 0.25,
           child: Column(
             children: [
               Center(
@@ -49,8 +49,8 @@ class _ScreenReviewState extends State<ScreenReview> {
               border: Border.all(),
               borderRadius: BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
-            width: 425,
-            height: 150,
+            width: MediaQuery.of(context).size.width * 0.87,
+            height: MediaQuery.of(context).size.height * 0.2,
             child: Column(
               children: [
                 Center(

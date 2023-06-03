@@ -1,14 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'dart:async';
 
-final List<String> items = [
-  'Morning',
-  'Afternoon',
-  'Night',
-];
+import 'package:flutter/material.dart';
 
 class CheckboxList extends StatefulWidget {
-  final DateTime? date;
+  final DateTime? date; //date to be passed to the db along with this data
   const CheckboxList({super.key, required this.date});
 
   @override
@@ -16,199 +11,193 @@ class CheckboxList extends StatefulWidget {
 }
 
 class _CheckboxListState extends State<CheckboxList> {
-  final List<bool> isCheckedList = List.filled(items.length, false);
-  final List<Color> _checkBoxc = List.filled(items.length, Colors.red);
-  List<IconData> _icons = [Icons.sunny_snowing, Icons.sunny, Icons.cloud];
-  bool _formCheck = false;
-  bool _submitCheck = false;
+  bool toggleValue = false;
+  bool isMorningSelected = false;
+  bool isNoonSelected = false;
+  bool isEveningSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get the current time
+    DateTime currentTime = DateTime.now();
+
+    // Deactivate Morning toggle button after 11 PM
+    if (currentTime.hour >= 01) {
+      setState(() {
+        isMorningSelected = false;
+      });
+    }
+
+    // Deactivate Noon toggle button after 9 AM
+    if (currentTime.hour >= 9) {
+      setState(() {
+        isNoonSelected = false;
+      });
+    }
+
+    // Deactivate Evening toggle button after 5 PM
+    if (currentTime.hour >= 17) {
+      setState(() {
+        isEveningSelected = false;
+      });
+    }
+
+    // Reset Morning toggle after 8 AM
+    if (currentTime.hour >= 8) {
+      Timer(Duration(minutes: 1), () {
+        setState(() {
+          isMorningSelected = false;
+        });
+      });
+    }
+
+    // Reset Noon toggle after 2 PM
+    if (currentTime.hour >= 14) {
+      Timer(Duration(minutes: 1), () {
+        setState(() {
+          isNoonSelected = false;
+        });
+      });
+    }
+
+    // Reset Evening toggle after 10 PM
+    if (currentTime.hour >= 22) {
+      Timer(Duration(minutes: 1), () {
+        setState(() {
+          isEveningSelected = false;
+        });
+      });
+    }
+
+    // Schedule timer to reset the toggles at the start of the next day
+    Timer(
+      Duration(
+        hours: 24 - currentTime.hour,
+        minutes: 60 - currentTime.minute,
+        seconds: 60 - currentTime.second,
+      ),
+      () {
+        setState(() {
+          isMorningSelected = false;
+          isNoonSelected = false;
+          isEveningSelected = false;
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (DateTime.now().hour == 0) {
-      _submitCheck = false;
-      _formCheck = false;
-    }
-    if (DateTime.now().day != widget.date!.day) {
-      //checking whether the dates are same if same then disabling
-      _submitCheck = false; //else another date then enabling
-      _formCheck = false;
-      isCheckedList.fillRange(0, isCheckedList.length, false);
-    }
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                )),
+            leading: CircleAvatar(
+             backgroundColor: Colors.blue[400],
+              child: Icon(Icons.wb_sunny, color: Colors.white,)
+            ),
+            title: Text('Morning'),
+            trailing: Switch(
+              value: isMorningSelected,
+              activeColor: Colors.green,
 
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(7),
-          child: SizedBox(
-            height: 250,
-            width: 500,
-            child: ListView.separated(
-              padding: EdgeInsets.all(10),
-              itemCount: items.length,
-              separatorBuilder: (BuildContext context, int index) => Divider(),
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 25,
-                      child: Icon(_icons[index]),
-                    ),
-                    subtitle: Container(
-                      color: _checkBoxc[index],
-                    ),
-                    title: CheckboxListTile(
-                      title: Text(items[index]),
-                      value: isCheckedList[index],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (_formCheck /*|| DateTime.now().hour >= 12*/) {
-                            return null;
-                          } else {
-                            isCheckedList[index] = value!;
-                            print(isCheckedList[index].toString() +
-                                index.toString());
-                            print(_formCheck);
-                            print(DateTime.now().day);
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                );
-              },
+              onChanged: canToggleMorning()
+                  ? (value) {
+                      setState(() {
+                        isMorningSelected = value;
+                      });
+                      print("Selected mrng");
+                    }
+                  : null,
             ),
           ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formCheck /*|| DateTime.now().hour >= 12 ||*/ ||
-                _submitCheck) {
-              return null;
-            } else {
-              //submitform code here
-              setState(() {
-                _formCheck = true;
-                _submitCheck = true;
-                print(isCheckedList);
-                print('Date is ${widget.date!.day}');
-                if (DateTime.now().day == widget.date!.day) {
-                  String dayOfWeek = DateFormat('EEEE').format(widget.date!);
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Timetable Submitted'),
-                        content: Text(
-                            'Timetable submitted successfully for ${dayOfWeek}'),
-                        actions: [
-                          TextButton(
-                            child: Text('OK'),
-                            onPressed: () {
-                              // Do something
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  String dayOfWeek = DateFormat('EEEE').format(widget.date!);
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Error'),
-                        content:
-                            Text('You can\'t submit meals of ${dayOfWeek}'),
-                        actions: [
-                          TextButton(
-                            child: Text('OK'),
-                            onPressed: () {
-                              // Do something
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              });
-            }
-          },
-          child: Text('Submit'),
-        ),
-      ],
+          Padding(padding: EdgeInsets.only(bottom: 5)),
+          ListTile(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                )),
+            leading: CircleAvatar(
+              backgroundColor:
+                   Colors.blue[400] ,
+              child: Icon(
+                Icons.sunny,
+                color: Colors.white ,
+              ),
+            ),
+            title: Text(
+              'Noon',
+            ),
+            trailing: Switch(
+              value: isNoonSelected,
+              activeColor: Colors.green,
+
+              onChanged: canToggleNoon()
+                  ? (value) {
+                      setState(() {
+                        isNoonSelected = value;
+                      });
+                    }
+                  : null,
+            ),
+          ),
+          Padding(padding: EdgeInsets.only(bottom: 5)),
+          ListTile(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                )),
+            leading: CircleAvatar(
+                backgroundColor: Colors.blue[400],
+                child: Icon(
+                  Icons.nightlight_round,
+                  color: Colors.white,
+                )),
+            title: Text('Evening'),
+            trailing: Switch(
+              activeColor: Colors.green,
+              value: isEveningSelected,
+              onChanged: canToggleEvening()
+                  ? (value) {
+                      setState(() {
+                        isEveningSelected = value;
+                      });
+                      print("selectre");
+                    }
+                  : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  bool canToggleMorning() {
+    DateTime currentTime = DateTime.now();
+    return currentTime.hour < 1; // Allow toggle before 11 PM
+  }
+
+  bool canToggleNoon() {
+    DateTime currentTime = DateTime.now();
+    return currentTime.hour < 9; // Allow toggle before 9 AM
+  }
+
+  bool canToggleEvening() {
+    DateTime currentTime = DateTime.now();
+    return currentTime.hour < 17; // Allow toggle before 5 PM
+  }
 }
-
-/*
-the value array is passed into this class as a params
-using index of the array we decide whether checked or not
-
- */
-
-//here we get the result we need to send it to the db
-//connect to the db 
-//send the data along with the username to the db which is obtained from the shared preferences
-//after certain day hour the submit button shouldn't work
-//once this is submitted it cannot be resubmitted
-
-
-
-
-
-
-
-/*
-this code will help to do so
-bool _checkboxChecked = false;
-bool _formSubmitted = false;
-
-CheckboxListTile( // for checkbutton 
-  title: Text('Checkbox'),
-  value: _checkboxChecked,
-  onChanged: (bool value) {
-    if (_checkboxChecked || DateTime.now().hour >= 12) {
-      // Checkbox already checked or past 12 pm
-      return null;
-    } else {
-      // Check the checkbox and set flag to true
-      setState(() {
-        _checkboxChecked = value;
-      });
-    }
-  },
-);
-
-RaisedButton( for elevated button
-  child: Text('Submit'),
-  onPressed: () {
-    if (_formSubmitted || DateTime.now().hour >= 12 || !_checkboxChecked) {
-      // Form already submitted, past 12 pm, or checkbox not checked
-      return null;
-    } else {
-      // Submit form and set flag to true
-      submitForm();
-      _formSubmitted = true;
-    }
-  },
-);
-
-// Reset checkbox and form flags at midnight
-if (DateTime.now().hour == 0) {
-  _checkboxChecked = false;
-  _formSubmitted = false;
-}
-
-
- */
