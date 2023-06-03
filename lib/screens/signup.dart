@@ -76,6 +76,7 @@ class Signup extends StatelessWidget {
                 ),
                 TextField(
                   controller: _password,
+                  obscureText: true,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -115,17 +116,17 @@ class Signup extends StatelessWidget {
                         'password': _password.text,
                         'department': _department.text,
                       }).execute();
-
-                      if (response.status != 200) {
-                        showVar(context, "Failed to create user", "Error");
-                      } else {
+                      print(response.status);
+                      if (response.status == 201) {
                         showVar(
                           context,
                           "User created successfully. Wait for validation from the admin",
                           "Success",
                           //refresh page after submit
-                          //route to sign in page -- loading animations 
+                          //route to sign in page -- loading animations
                         );
+                      } else {
+                        showVar(context, "Failed to create user", "Error");
                       }
                     }
                   },
