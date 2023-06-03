@@ -1,16 +1,17 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:mini_project/screens/Pointsscreen/screen_points.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screens/homescreen/home_screen.dart';
 import '../screens/login.dart';
 
 class BottomNav extends StatelessWidget {
-  BottomNav({super.key,});
+  BottomNav({
+    super.key,
+  });
 
-  void _navigateToPage(BuildContext context, int newIndex) {
+  void _navigateToPage(BuildContext context, int newIndex) async {
+    final sharedprefs = await SharedPreferences.getInstance();
     if (newIndex == 1) {
       // Logout button clicked, navigate to the logout page or perform logout logic
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
@@ -21,6 +22,7 @@ class BottomNav extends StatelessWidget {
         return ScreenHome(); // Replace with the actual home page
       }));
     } else if (newIndex == 2) {
+      await sharedprefs.clear();
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => HomeScreen()),
         (Route<dynamic> route) => false,

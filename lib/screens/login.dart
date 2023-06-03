@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/signup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../supabase_config.dart';
 import 'homescreen/home_screen.dart';
 import 'managerHome/home_screen.dart';
@@ -11,13 +13,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
-
 class _HomeScreenState extends State<HomeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = true;
+
   @override
   Widget build(BuildContext context) {
     EdgeInsets paddings = EdgeInsets.only(
@@ -33,13 +34,13 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('mEssLab',
+              const Text('messLab',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 30,
                   )),
 
-                  //random comment added
+              //random comment added
               const Text(
                 'Mess Management',
                 style: TextStyle(
@@ -119,12 +120,24 @@ class _HomeScreenState extends State<HomeScreen> {
                           .execute();
                       final roles = role.data[0]['role'];
                       if (roles == "user") {
+                        final sharedprefs =
+                            await SharedPreferences.getInstance();
+                        await sharedprefs.setBool('SAVE_KEY', true);
+                        await sharedprefs.setString('role', 'user');
+                        await sharedprefs.setString(
+                            'uid', response.data[0]['u_id'].toString());
                         Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {
                           return ScreenHome(u_id: response.data[0]['u_id']);
                         }));
                         print("user");
                       } else if (roles == "manager") {
+                        final sharedprefs =
+                            await SharedPreferences.getInstance();
+                        await sharedprefs.setBool('SAVE_KEY', true);
+                        await sharedprefs.setString('role', 'manager');
+                        await sharedprefs.setString(
+                            'uid', response.data[0]['u_id'].toString());
                         print("manager");
                         Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {
@@ -182,8 +195,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ));
   }
-
- 
-
- 
 }
