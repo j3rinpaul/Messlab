@@ -30,8 +30,7 @@ environment:
 dependencies:
   date_picker_timeline: ^1.2.3
   shared_preferences: ^2.1.1
-  supabase: ^1.9.1
-  supabase_flutter: ^1.10.1
+  supabase_flutter: ^0.1.0
 #flutter:
 #   sdk: flutter
 # calendar_strip: ^1.0.6

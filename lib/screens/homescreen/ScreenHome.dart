@@ -6,7 +6,8 @@ import 'ScreenReview.dart';
 import 'calendar.dart';
 
 class CalendarPage extends StatelessWidget {
-  const CalendarPage({super.key});
+  final String? u_id;
+  const CalendarPage({super.key, this.u_id});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class CalendarPage extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.only(bottom: 10, top: 10),
           child: Column(
-            children: [Calendar(), ScreenReview()],
+            children: [Calendar(u_id: u_id), ScreenReview()],
           ),
         ),
       ),

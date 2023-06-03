@@ -6,7 +6,8 @@ import 'ScreenHome.dart';
 //import 'package:intl/intl.dart';
 
 class ScreenHome extends StatelessWidget {
-  const ScreenHome({super.key});
+  final String? u_id;
+  const ScreenHome({super.key,this.u_id});
 
   @override
   Widget build(BuildContext context) {
@@ -18,67 +19,7 @@ class ScreenHome extends StatelessWidget {
       appBar: AppBar(
         title: Text("Home"),
       ),
-      // appBar: AppBar(
-      //     shape: RoundedRectangleBorder(
-      //         borderRadius: BorderRadius.only(
-      //             bottomLeft: Radius.circular(25),
-      //             bottomRight: Radius.circular(25))),
-      //     automaticallyImplyLeading: false,
-      //     toolbarHeight: 130,
-      //     title: Row(
-      //       children: [
-      //         CircleAvatar(
-      //           radius: 35,
-      //           backgroundImage: AssetImage('assets/images/profilepic.png'),
-      //         ),
-      //         SizedBox(width: 25),
-      //         Column(
-      //           mainAxisAlignment: MainAxisAlignment.center,
-      //           crossAxisAlignment: CrossAxisAlignment.start,
-      //           children: const [
-      //             Text(
-      //               'Name',
-      //               style: TextStyle(fontSize: 18),
-      //             ),
-      //             SizedBox(
-      //               height: 7,
-      //             ),
-      //             Text(
-      //               'Designation',
-      //               style: TextStyle(fontSize: 18),
-      //             ),
-      //             SizedBox(
-      //               height: 7,
-      //             ),
-      //             Text(
-      //               'Role',
-      //               style: TextStyle(fontSize: 18),
-      //             )
-      //           ],
-      //         ),
-      //         SizedBox(width: 80),
-      //          Expanded(
-      //           child: Column(
-      //         mainAxisAlignment: MainAxisAlignment.center,
-      //         children: [
-      //           TextButton.icon(
-      //             onPressed: () {
-      //               // do something
-      //               Navigator.push(
-      //                 context,
-      //                 MaterialPageRoute(builder: (context) => ScreenPoints()),
-      //               );
-      //             },
-      //             icon: Image.asset(
-      //                 'assets/images/bill.png'), // add your image here
-      //             label: Text('Bill'), // add your button text here
-      //           )
-      //         ],
-      //       )),
-      //       ],
-      //     )),
-      body: CalendarPage(),
-      //body:ScreenCheckBox();
+      body: CalendarPage(u_id: u_id,),
     );
 
     // body:ScreenCheckBox();

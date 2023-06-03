@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'checkBox.dart';
 
 class Calendar extends StatefulWidget {
-  const Calendar({super.key});
+  final String? u_id;
+  const Calendar({super.key, this.u_id});
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -34,7 +35,7 @@ class _CalendarState extends State<Calendar> {
             });
           },
         ),
-        CheckboxList(date: selectedValue),
+        CheckboxList(date: selectedValue, u_id: "${widget.u_id}"),
         //the announcement and review below
       ],
     );
