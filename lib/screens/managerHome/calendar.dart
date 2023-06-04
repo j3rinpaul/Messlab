@@ -1,6 +1,6 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
-
+import '../wardenpage/DailyCount.dart';
 import 'checkBox.dart';
 import 'verify.dart';
 
@@ -38,24 +38,25 @@ class _CalendarState extends State<Calendar> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:
-                  ElevatedButton(onPressed: () {}, child: const Text("Daily Count")),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {}, child: const Text("Role Assign")),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
+                  ElevatedButton(onPressed: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
-                      return const VerifyUser();
+                      return const DailyCount();
                     }));
-                  },
-                  child: const Text("User Verify")),
+                  }, child: const Text("Daily Count")),
             ),
+            
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.of(context)
+            //             .push(MaterialPageRoute(builder: (ctx) {
+            //           return const VerifyUser();
+            //         }));
+            //       },
+            //       child: const Text("User Verify")),
+            // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:
