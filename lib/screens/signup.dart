@@ -12,7 +12,7 @@ class User {
 }
 
 class Signup extends StatefulWidget {
-  Signup({super.key});
+  const Signup({super.key});
 
   @override
   State<Signup> createState() => _SignupState();
@@ -32,16 +32,16 @@ class _SignupState extends State<Signup> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Signup"),
+          title: const Text("Signup"),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
         ),
         body: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -54,7 +54,7 @@ class _SignupState extends State<Signup> {
                     labelText: "First Name",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextField(
@@ -66,7 +66,7 @@ class _SignupState extends State<Signup> {
                     labelText: "Last Name",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextField(
@@ -78,7 +78,7 @@ class _SignupState extends State<Signup> {
                     labelText: "Email",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextField(
@@ -91,7 +91,7 @@ class _SignupState extends State<Signup> {
                     labelText: "Password",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Container(
@@ -102,22 +102,22 @@ class _SignupState extends State<Signup> {
                   ),
                   child: Row(
                     children: [
-                      Expanded(
+                      const Expanded(
                         child: Padding(
                           padding: EdgeInsets.only(left: 8),
                           child: Text("Department:"),
                         ),
                       ),
                       DropdownButton<String>(
-                        padding: EdgeInsets.only(right: 20),
+                        padding: const EdgeInsets.only(right: 20),
                         value: _selectedOption,
-                        hint: Text('Select Option'),
+                        hint: const Text('Select Option'),
                         onChanged: (String? newValue) {
                           setState(() {
                             _selectedOption = newValue;
                           });
                         },
-                        items: [
+                        items: const [
                           DropdownMenuItem(
                             value: 'CSE',
                             child: Text('CSE'),
@@ -140,18 +140,18 @@ class _SignupState extends State<Signup> {
                           ),
                         ],
                         underline: Container(), // Remove the default underline
-                        icon: Icon(Icons
+                        icon: const Icon(Icons
                             .arrow_drop_down), // Customize the dropdown icon
                         iconSize: 24,
                         elevation: 12,
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                         isExpanded: false,
                         dropdownColor: Colors.white,
                       ),
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextField(
@@ -163,7 +163,7 @@ class _SignupState extends State<Signup> {
                     labelText: "Designation",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextField(
@@ -175,7 +175,7 @@ class _SignupState extends State<Signup> {
                     labelText: "Phone Number",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 ElevatedButton(
@@ -228,7 +228,7 @@ class _SignupState extends State<Signup> {
                       }
                     }
                   },
-                  child: Text("Submit"),
+                  child: const Text("Submit"),
                 ),
               ],
             ),
@@ -248,7 +248,7 @@ class _SignupState extends State<Signup> {
           content: Text(content),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
                 if (callback != null) {

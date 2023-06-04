@@ -49,7 +49,7 @@ class _CheckboxListState extends State<CheckboxList> {
 
     // Reset Morning toggle after 8 AM
     if (currentTime.hour >= 8) {
-      Timer(Duration(minutes: 1), () {
+      Timer(const Duration(minutes: 1), () {
         setState(() {
           isMorningSelected = false;
         });
@@ -58,7 +58,7 @@ class _CheckboxListState extends State<CheckboxList> {
 
     // Reset Noon toggle after 2 PM
     if (currentTime.hour >= 14) {
-      Timer(Duration(minutes: 1), () {
+      Timer(const Duration(minutes: 1), () {
         setState(() {
           isNoonSelected = false;
         });
@@ -67,7 +67,7 @@ class _CheckboxListState extends State<CheckboxList> {
 
     // Reset Evening toggle after 10 PM
     if (currentTime.hour >= 22) {
-      Timer(Duration(minutes: 1), () {
+      Timer(const Duration(minutes: 1), () {
         setState(() {
           isEveningSelected = false;
         });
@@ -94,24 +94,24 @@ class _CheckboxListState extends State<CheckboxList> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
                 backgroundColor: Colors.blue[400],
-                child: Icon(
+                child: const Icon(
                   Icons.wb_sunny,
                   color: Colors.white,
                 )),
-            title: Text('Morning'),
+            title: const Text('Morning'),
             trailing: Switch(
               value: isMorningSelected,
               activeColor: Colors.green,
@@ -182,22 +182,22 @@ class _CheckboxListState extends State<CheckboxList> {
                   : null,
             ),
           ),
-          Padding(padding: EdgeInsets.only(bottom: 5)),
+          const Padding(padding: EdgeInsets.only(bottom: 5)),
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
               backgroundColor: Colors.blue[400],
-              child: Icon(
+              child: const Icon(
                 Icons.sunny,
                 color: Colors.white,
               ),
             ),
-            title: Text(
+            title: const Text(
               'Noon',
             ),
             trailing:Switch(
@@ -269,21 +269,21 @@ class _CheckboxListState extends State<CheckboxList> {
                   : null,
             ),
           ),
-          Padding(padding: EdgeInsets.only(bottom: 5)),
+          const Padding(padding: EdgeInsets.only(bottom: 5)),
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
                 backgroundColor: Colors.blue[400],
-                child: Icon(
+                child: const Icon(
                   Icons.nightlight_round,
                   color: Colors.white,
                 )),
-            title: Text('Evening'),
+            title: const Text('Evening'),
             trailing: Switch(
               value: isEveningSelected,
               activeColor: Colors.green,

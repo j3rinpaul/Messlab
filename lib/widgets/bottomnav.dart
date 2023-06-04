@@ -6,7 +6,7 @@ import '../screens/homescreen/home_screen.dart';
 import '../screens/login.dart';
 
 class BottomNav extends StatelessWidget {
-  BottomNav({
+  const BottomNav({
     super.key,
   });
 
@@ -19,12 +19,12 @@ class BottomNav extends StatelessWidget {
       }));
     } else if (newIndex == 0) {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-        return ScreenHome(); // Replace with the actual home page
+        return const ScreenHome(); // Replace with the actual home page
       }));
     } else if (newIndex == 2) {
       await sharedprefs.clear();
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
         (Route<dynamic> route) => false,
       );
     } else {
@@ -43,7 +43,7 @@ class BottomNav extends StatelessWidget {
             ScreenPoints.selectedIndexNotifier.value = newIndex;
             _navigateToPage(context, newIndex);
           },
-          items: [
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

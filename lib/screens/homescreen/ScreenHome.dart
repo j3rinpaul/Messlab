@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
 import 'ScreenReview.dart';
 import 'calendar.dart';
@@ -14,9 +12,9 @@ class CalendarPage extends StatelessWidget {
     return SingleChildScrollView(
       child: SafeArea(
         child: Container(
-          padding: EdgeInsets.only(bottom: 10, top: 10),
+          padding: const EdgeInsets.only(bottom: 10, top: 10),
           child: Column(
-            children: [Calendar(u_id: u_id), ScreenReview()],
+            children: [Calendar(u_id: u_id), const ScreenReview()],
           ),
         ),
       ),

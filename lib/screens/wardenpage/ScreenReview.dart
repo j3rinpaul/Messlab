@@ -8,7 +8,7 @@ class ScreenReview extends StatefulWidget {
 }
 
 class _ScreenReviewState extends State<ScreenReview> {
-  final TextEditingController _reviewCont = TextEditingController();
+  TextEditingController _reviewCont = TextEditingController();
 
   @override
   void dispose() {
@@ -22,11 +22,11 @@ class _ScreenReviewState extends State<ScreenReview> {
       Container(
         decoration: BoxDecoration(
             border: Border.all(),
-            borderRadius: const BorderRadius.all(Radius.circular(20))),
+            borderRadius: BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.87,
           height: MediaQuery.of(context).size.height * 0.25,
-          child: const Column(
+          child: Column(
             children: [
               Center(
                   child: Padding(
@@ -47,19 +47,19 @@ class _ScreenReviewState extends State<ScreenReview> {
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(),
-              borderRadius: const BorderRadius.all(Radius.circular(20))),
+              borderRadius: BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.87,
             height: MediaQuery.of(context).size.height * 0.2,
             child: Column(
               children: [
-                const Center(
+                Center(
                     child: Padding(
                         padding: EdgeInsets.all(5), child: Text("Reviews"))),
                 Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right: 10, left: 10, top: 15),
+                      padding: EdgeInsets.only(right: 10, left: 10, top: 15),
                       child: TextField(
                         controller: _reviewCont,
                         decoration: InputDecoration(
@@ -69,9 +69,9 @@ class _ScreenReviewState extends State<ScreenReview> {
                                 _showDialog(context);
                                 _reviewCont.clear();
                               },
-                              icon: const Icon(Icons.send)),
+                              icon: Icon(Icons.send)),
                           hintText: "Review",
-                          border: const OutlineInputBorder(
+                          border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(20))),
                         ),
@@ -92,11 +92,11 @@ class _ScreenReviewState extends State<ScreenReview> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Review'),
-          content: const Text("Review successfully submitted"),
+          title: Text('Review'),
+          content: Text("Review successfully submitted"),
           actions: <Widget>[
             TextButton(
-              child: const Text('Ok'),
+              child: Text('Ok'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

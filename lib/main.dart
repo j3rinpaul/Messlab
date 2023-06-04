@@ -10,7 +10,7 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFveXZycnZnenZmbXFvcHRtYnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODMwMzk4NDYsImV4cCI6MTk5ODYxNTg0Nn0.oPxfpyZiVrabR_TL6iBF7OzpkTW2MpPgJSjuY_ksZqU',
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primaryColor: Colors.green),
-      home: SplashScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

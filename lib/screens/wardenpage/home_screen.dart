@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mini_project/widgets/bottomnav.dart';
 
-import '../../widgets/bottomnav.dart';
 import 'ScreenHome.dart';
 //import 'package:intl/intl.dart';
 
-class ScreenHome extends StatelessWidget {
-  final String? u_id;
-  const ScreenHome({super.key,this.u_id});
+class wardenPage extends StatelessWidget {
+  const wardenPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +13,12 @@ class ScreenHome extends StatelessWidget {
     //var day;
 
     return Scaffold(
-      bottomNavigationBar: const BottomNav(),
+      bottomNavigationBar: BottomNav(),
       appBar: AppBar(
-        title: const Text("Home"),
+        title: Text("Warden Home"),
       ),
-      body: CalendarPage(u_id: u_id,),
+      body: CalendarPage(),
+      //body:ScreenCheckBox();
     );
 
     // body:ScreenCheckBox();

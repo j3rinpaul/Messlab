@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Text("Loading..."),
       ),
@@ -29,10 +29,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> gotoLogin() async {
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
 
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => HomeScreen()));
+        .push(MaterialPageRoute(builder: (context) => const HomeScreen()));
   }
 
   Future<void> checkLogin() async {

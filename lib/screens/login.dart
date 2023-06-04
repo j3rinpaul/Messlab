@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../supabase_config.dart';
 import 'homescreen/home_screen.dart';
 import 'managerHome/home_screen.dart';
+import 'wardenpage/home_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,21 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 30,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 18.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 18.0),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40.0),
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               TextFormField(
@@ -82,14 +83,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   hintText: 'Password',
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 18.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 18.0),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40.0),
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               ElevatedButton(
@@ -141,7 +142,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         print("manager");
                         Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {
-                          return ManagerHome();
+                          return const ManagerHome();
+                        }));
+                      } else if (roles == "warden") {
+                        print("warden");
+                        Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) {
+                          return wardenPage();
                         }));
                       } else {
                         print("error");
@@ -152,11 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Error'),
-                            content: Text('Wrong Email or Password'),
+                            title: const Text('Error'),
+                            content: const Text('Wrong Email or Password'),
                             actions: [
                               TextButton(
-                                child: Text('OK'),
+                                child: const Text('OK'),
                                 onPressed: () {
                                   // Do something
                                   Navigator.of(context).pop();
@@ -170,25 +177,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   }
                 },
-                child: Text('Sign In'),
                 style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(400, 56)),
+                  minimumSize: MaterialStateProperty.all(const Size(400, 56)),
                   shape: MaterialStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(40),
                     ),
                   ),
                 ),
+                child: const Text('Sign In'),
               ),
               TextButton(
                   onPressed: () {
                     print("Signup completed");
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
-                      return Signup();
+                      return const Signup();
                     }));
                   },
-                  child: Text("Signup"))
+                  child: const Text("Signup"))
             ],
           ),
         ),

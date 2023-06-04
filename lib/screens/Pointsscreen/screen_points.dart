@@ -1,7 +1,4 @@
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
-import 'package:mini_project/logout.dart';
 import 'package:mini_project/screens/homescreen/home_screen.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 import 'package:intl/intl.dart';
@@ -36,9 +33,9 @@ class ScreenPoints extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNav(),
+      bottomNavigationBar: const BottomNav(),
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
       ),
       body: SingleChildScrollView(
         child: SafeArea(
@@ -58,7 +55,7 @@ class ScreenPoints extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                       color: Colors.grey[300],
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Row(
                         // mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -115,15 +112,15 @@ class ScreenPoints extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 50,
                   ),
-                  Text(
+                  const Text(
                     'Detailed Bill',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 10),
-                  Row(
+                  const SizedBox(height: 10),
+                  const Row(
                     children: [
                       Expanded(
                         child: Align(
@@ -156,16 +153,16 @@ class ScreenPoints extends StatelessWidget {
                     itemCount: dates.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Card(
-                        margin: EdgeInsets.symmetric(
+                        margin: const EdgeInsets.symmetric(
                             horizontal: 15.0, vertical: 4.0),
                         child: Padding(
-                          padding: EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 DateFormat('yyyy-MM-dd').format(dates[index]),
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               Row(
                                 children: [
@@ -174,7 +171,7 @@ class ScreenPoints extends StatelessWidget {
                                       width: 10,
                                       height: 10,
                                       margin:
-                                          EdgeInsets.symmetric(horizontal: 5.0),
+                                          const EdgeInsets.symmetric(horizontal: 5.0),
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: foodConsumption[index][i]

@@ -14,9 +14,9 @@ class ManagerHome extends StatelessWidget {
     //var day;
 
     return Scaffold(
-      bottomNavigationBar: BottomNav(),
+      bottomNavigationBar: const BottomNav(),
       appBar: AppBar(
-        title: Text("Manager Home"),
+        title: const Text("Manager Home"),
       ),
       body: CalendarPage(uid: u_id,),
       //body:ScreenCheckBox();

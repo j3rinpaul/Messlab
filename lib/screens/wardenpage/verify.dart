@@ -33,7 +33,7 @@ class _VerifyUserState extends State<VerifyUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Verification'),
+        title: Text('Verification'),
       ),
       body: ListView.builder(
         itemCount: parsedData.length,
@@ -60,11 +60,11 @@ class _VerifyUserState extends State<VerifyUser> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text('Warning'),
-                                  content: const Text('Do you want to delete user?'),
+                                  title: Text('Warning'),
+                                  content: Text('Do you want to delete user?'),
                                   actions: [
                                     TextButton(
-                                      child: const Text('Confirm'),
+                                      child: Text('Confirm'),
                                       onPressed: () {
                                         // Do something
                                         DeleteData(item['id']);
@@ -72,7 +72,7 @@ class _VerifyUserState extends State<VerifyUser> {
                                       },
                                     ),
                                     TextButton(
-                                      child: const Text('Cancel'),
+                                      child: Text('Cancel'),
                                       onPressed: () {
                                         // Do something
                                         Navigator.of(context).pop();
@@ -83,21 +83,16 @@ class _VerifyUserState extends State<VerifyUser> {
                               },
                             );
                           },
-                          child: const Text("Delete")),
+                          child: Text("Delete")),
+                      TextButton(
+                          onPressed: () {}, child: Text("Add to Profile")),
                       ElevatedButton(
                           onPressed: () {
                             verifyData(
-                                context,
-                                item['username'],
-                                item['password'],
-                                item['first_name'],
-                                item['last_name'],
-                                item['designation'],
-                                item['department'],
-                                item['phone']);
+                                context, item['username'], item['password'], item['first_name'], item['last_name'], item['designation'], item['department'], item['phone']);
                             print(item['username'] + item['password']);
                           },
-                          child: const Text("Verify")),
+                          child: Text("Verify")),
                     ],
                   )
                 ],
@@ -117,7 +112,7 @@ class _VerifyUserState extends State<VerifyUser> {
       fetchData();
     } else {
       showVar(context, "Failed to delete user", "Failed");
-      print("error${response.error}");
+      print("error" + response.error.toString());
     }
   }
 
@@ -125,8 +120,8 @@ class _VerifyUserState extends State<VerifyUser> {
       BuildContext context,
       String username,
       dynamic password,
-      dynamic firstName,
-      dynamic lastName,
+      dynamic first_name,
+      dynamic last_name,
       dynamic designation,
       dynamic deptartment,
       dynamic phone) async {
@@ -134,8 +129,8 @@ class _VerifyUserState extends State<VerifyUser> {
       {
         'email': username,
         'password': password,
-        'first_name': firstName,
-        'last_name': lastName,
+        'first_name': first_name,
+        'last_name': last_name,
         'designation': designation,
         'department': deptartment,
         'phone': phone,
@@ -145,7 +140,7 @@ class _VerifyUserState extends State<VerifyUser> {
       showVar(context, "User created successfully", "Created");
     } else {
       showVar(context, "Failed to create user", "Failed");
-      print("error${response.error}");
+      print("error" + response.error.toString());
     }
   }
 
@@ -158,7 +153,7 @@ class _VerifyUserState extends State<VerifyUser> {
           content: Text('$content'),
           actions: [
             TextButton(
-              child: const Text('OK'),
+              child: Text('OK'),
               onPressed: () {
                 // Do something
                 Navigator.of(context).pop();
