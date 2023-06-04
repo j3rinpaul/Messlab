@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../supabase_config.dart';
 import 'homescreen/home_screen.dart';
 import 'managerHome/home_screen.dart';
