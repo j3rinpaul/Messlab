@@ -3,7 +3,16 @@ import 'package:mini_project/screens/homescreen/home_screen.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 import 'package:intl/intl.dart';
 
-class ScreenPoints extends StatelessWidget {
+class ScreenPoints extends StatefulWidget {
+
+  ScreenPoints({super.key});
+  static ValueNotifier<int> selectedIndexNotifier = ValueNotifier(0);
+
+  @override
+  State<ScreenPoints> createState() => _ScreenPointsState();
+}
+
+class _ScreenPointsState extends State<ScreenPoints> {
   final List<DateTime> dates = [
     DateTime(2023, 6, 1),
     DateTime(2023, 6, 2),
@@ -24,12 +33,11 @@ class ScreenPoints extends StatelessWidget {
     // Add more consumption data as needed
   ];
 
-  ScreenPoints({super.key});
-  static ValueNotifier<int> selectedIndexNotifier = ValueNotifier(0);
   final _pages = const [
     ScreenHome(),
     //ScreenLogout(),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

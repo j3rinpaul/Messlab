@@ -8,16 +8,19 @@ import '../screens/login.dart';
 class BottomNav extends StatelessWidget {
   const BottomNav({
     super.key,
+    String? roles,
   });
 
-  void _navigateToPage(BuildContext context, int newIndex) async {
+  void _navigateToPage(BuildContext context, int newIndex, ) async {
     final sharedprefs = await SharedPreferences.getInstance();
     if (newIndex == 1) {
       // Logout button clicked, navigate to the logout page or perform logout logic
+      
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-        return ScreenPoints(); // Replace with the actual logout page
+        return ScreenPoints( ); // Replace with the actual logout page
       }));
     } else if (newIndex == 0) {
+
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
         return const ScreenHome(); // Replace with the actual home page
       }));

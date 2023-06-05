@@ -11,13 +11,12 @@ class DailyCount extends StatefulWidget {
 
 class _DailyCountState extends State<DailyCount> {
   Future<dynamic> fetchDataWithDateParameter(
-      String date, String db, String pref) async {
-    final response = await supabase
-        .from(db)
-        .select()
-        .eq('mark_date', date)
-        .eq(pref, true)
-        .execute();
+    String date,
+    String db,
+    String pref
+  ) async {
+    final response =
+        await supabase.from(db).select().eq('mark_date', date).eq(pref, true).execute();
     if (response.error == null) {
       final data = response.data;
       final count = data.length;
@@ -30,7 +29,6 @@ class _DailyCountState extends State<DailyCount> {
   final date = DateTime.now().toLocal().toString().split(' ')[0];
   Map<dynamic, List<bool>> foodDetails = {};
   List<bool> foodList = [];
-  Map<dynamic, String> userNames = {};
 
   Future<dynamic> Userdetails() async {
     final respo = await supabase
@@ -38,17 +36,7 @@ class _DailyCountState extends State<DailyCount> {
         .select('u_id ,first_name , last_name')
         .execute();
 
-    for (final user in respo.data) {
-      final uId = user['u_id'];
-      final firstName = user['first_name'];
-      final lastName = user['last_name'];
-      final fullName = '$firstName $lastName';
-
-      userNames[uId] = fullName;
-      print(userNames.toString());
-    }
     if (respo.error == null) {
-      print(respo.data);
       final data = respo.data;
       final List<dynamic> userIds =
           data.map<dynamic>((user) => user['u_id']).toList();
@@ -107,11 +95,10 @@ class _DailyCountState extends State<DailyCount> {
 
   Future<void> fetchDataCount() async {
     final morningFoodCount =
-        await fetchDataWithDateParameter(date, "food_morning", "morning_food");
-    final noonFoodCount =
-        await fetchDataWithDateParameter(date, "food_noon", "noon_food");
+        await fetchDataWithDateParameter(date, "food_morning","morning_food");
+    final noonFoodCount = await fetchDataWithDateParameter(date, "food_noon","noon_food");
     final eveningFoodCount =
-        await fetchDataWithDateParameter(date, "food_evening", "evening_food");
+        await fetchDataWithDateParameter(date, "food_evening","evening_food");
 
     setState(() {
       parsedData[0]['date'] = date;
@@ -261,7 +248,6 @@ class _DailyCountState extends State<DailyCount> {
                 itemBuilder: (BuildContext context, int index) {
                   final uids = foodDetails.keys.elementAt(index);
                   final foodList = foodDetails[uids];
-                  // final foodList = repons[uids];
 
                   final morningFood = foodList![0];
                   final noonFood = foodList![1];
@@ -276,10 +262,9 @@ class _DailyCountState extends State<DailyCount> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            width: 100,
+                            width: 50,
                             child: Text(
-                              // '$uids',
-                              userNames[uids]!,
+                              '$uids',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -327,119 +312,120 @@ class _DailyCountState extends State<DailyCount> {
         final foodList = foodDetails[uids]!;
         List<bool> currentConsumption = List.from(foodList);
 
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: Text('Edit Food Consumption'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < 3; i++)
-                    CheckboxListTile(
-                      title: Text(mealTitles[i]),
-                      value: currentConsumption[i],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          currentConsumption[i] = value ?? false;
-                        });
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    // Update the foodDetails map with the edited foodList
+        return AlertDialog(
+          title: Text('Edit Food Consumption'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < 3; i++)
+                CheckboxListTile(
+                  title: Text(mealTitles[i]),
+                  value: currentConsumption[i],
+                  onChanged: (bool? value) {
                     setState(() {
-                      foodDetails[uids] = List.from(currentConsumption);
+                      currentConsumption[i] = value ?? false;
                     });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Update the foodDetails map with the edited foodList
+                setState(() {
+                  foodDetails[uids] = List.from(currentConsumption);
+                });
+                
+                final mrngFood = currentConsumption[0];
+                final noonFood = currentConsumption[1];
+                final eveningFood = currentConsumption[2];
+                if (mrngFood || !mrngFood) {
+                  final existingDataResponse = await supabase
+                      .from('food_morning')
+                      .select()
+                      .eq('u_id', uids)
+                      .eq('mark_date', date)
+                      .execute();
 
-                    final mrngFood = currentConsumption[0];
-                    final noonFood = currentConsumption[1];
-                    final eveningFood = currentConsumption[2];
+                  if (existingDataResponse.error != null) {
+                    // Handle error
+                    throw existingDataResponse.error!;
+                  }
 
-                    // Check if the entry already exists in the database
-                    final existingDataResponse = await supabase
+                  final existingData = existingDataResponse.data;
+
+                  if (existingData != null && existingData.length == 1) {
+                    // Existing data found, perform update
+                    final updateResponse = await supabase
                         .from('food_morning')
-                        .select()
+                        .update({
+                          'morning_food': mrngFood,
+                        })
                         .eq('u_id', uids)
                         .eq('mark_date', date)
                         .execute();
 
-                    if (existingDataResponse.error != null) {
+                    if (updateResponse.error != null) {
                       // Handle error
-                      throw existingDataResponse.error!;
+                      throw updateResponse.error!;
                     }
 
-                    final existingData = existingDataResponse.data;
-
-                    if (existingData != null && existingData.length == 1) {
-                      // Existing data found, perform update
-                      final updateResponse = await supabase
-                          .from('food_morning')
-                          .update({
-                            'morning_food': mrngFood,
-                          })
-                          .eq('u_id', uids)
-                          .eq('mark_date', date)
-                          .execute();
-
-                      if (updateResponse.error != null) {
-                        // Handle error
-                        throw updateResponse.error!;
+                    print('Update operation completed successfully!');
+                  } else {
+                    // No existing data, perform insert
+                    final insertResponse =
+                        await supabase.from('food_morning').insert([
+                      {
+                        'u_id': uids,
+                        'mark_date': date,
+                        'morning_food': mrngFood,
                       }
+                    ]).execute();
 
-                      print('Update operation completed successfully!');
-                    } else {
-                      // No existing data, perform insert
-                      final insertResponse =
-                          await supabase.from('food_morning').insert([
-                        {
-                          'u_id': uids,
-                          'mark_date': date,
-                          'morning_food': mrngFood,
-                        }
-                      ]).execute();
-
-                      if (insertResponse.error != null) {
-                        // Handle error
-                        throw insertResponse.error!;
-                      }
-
-                      print('Insert operation completed successfully!');
+                    if (insertResponse.error != null) {
+                      // Handle error
+                      throw insertResponse.error!;
                     }
 
-                    await supabase.from('food_noon').upsert({
-                      'u_id': uids,
-                      'mark_date': date,
-                      'noon_food': noonFood
-                    }).execute();
+                    print('Insert operation completed successfully!');
+                  }
+                }
 
-                    await supabase.from('food_evening').upsert({
-                      'u_id': uids,
-                      'mark_date': date,
-                      'evening_food': eveningFood
-                    }).execute();
+                await supabase
+                    .from('food_noon')
+                    .update({'noon_food': noonFood})
+                    .eq('u_id', uids)
+                    .eq('mark_date', date)
+                    .execute();
 
-                    Navigator.pop(context); // Close the dialog
-                    _showSuccessDialog();
+                await supabase
+                    .from('food_evening')
+                    .update({'evening_food': eveningFood})
+                    .eq('u_id', uids)
+                    .eq('mark_date', date)
+                    .execute();
 
-                    print(foodDetails.toString());
-                  },
-                  child: Text('Save'),
-                ),
-              ],
-            );
-          },
+                Navigator.pop(context); // Close the dialog
+                _showSuccessDialog();
+
+                print(foodDetails.toString());
+                
+              },
+              child: Text('Save'),
+            ),
+          ],
         );
       },
     );
   }
+
+  
 }

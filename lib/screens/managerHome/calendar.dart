@@ -1,13 +1,13 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+
 import '../wardenpage/DailyCount.dart';
+import '../wardenpage/monthlyExp.dart';
 import 'checkBox.dart';
-import 'verify.dart';
 
 class Calendar extends StatefulWidget {
   final String? uid;
-  const Calendar({super.key, required this.uid});
-
+  const Calendar({super.key, this.uid});
   @override
   State<Calendar> createState() => _CalendarState();
 }
@@ -32,20 +32,25 @@ class _CalendarState extends State<Calendar> {
             });
           },
         ),
-        CheckboxList(date: selectedValue,userId:widget.uid,),
+        CheckboxList(
+          date: selectedValue,
+          userId: widget.uid,
+        ),
+
         Wrap(
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {
+              child: ElevatedButton(
+                  onPressed: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
                       return const DailyCount();
                     }));
-                  }, child: const Text("Daily Count")),
+                  },
+                  child: const Text("Daily Count")),
             ),
-            
+
             // Padding(
             //   padding: const EdgeInsets.all(8.0),
             //   child: ElevatedButton(
@@ -59,8 +64,15 @@ class _CalendarState extends State<Calendar> {
             // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {}, child: const Text("Monthly Bill")),
+              child: ElevatedButton(
+                onPressed: () {
+                  print(widget.uid);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return MonthlyExp(uid: widget.uid);
+                  }));
+                },
+                child: const Text("Monthly Expense"),
+              ),
             )
           ],
         )

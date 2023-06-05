@@ -1,13 +1,15 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 
-import 'checkBox.dart';
-import 'Roleassign_warden.dart';
-import 'verify.dart';
 import 'DailyCount.dart';
+import 'Roleassign_warden.dart';
+import 'checkBox.dart';
+import 'monthlyExp.dart';
+import 'verify.dart';
 
 class Calendar extends StatefulWidget {
-  const Calendar({super.key});
+  final String? uid;
+  Calendar({Key? key, this.uid}) : super(key: key);
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -71,8 +73,14 @@ class _CalendarState extends State<Calendar> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {}, child: Text("Monthly Bill")),
+              child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (ctx) {
+                      return MonthlyExp(uid: widget.uid);
+                    }));
+                  },
+                  child: const Text("Monthly Expence")),
             )
           ],
         )

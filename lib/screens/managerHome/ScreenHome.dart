@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 
-
-
 import 'ScreenReview.dart';
 import 'calendar.dart';
 
 class CalendarPage extends StatelessWidget {
   final String? uid;
-  const CalendarPage ({super.key, required this.uid});
+  const CalendarPage({super.key, required this.uid});
+  
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 10,top: 10),
+          padding: const EdgeInsets.only(bottom: 10, top: 10),
           child: Column(
-            children: [Calendar(uid: uid,), const ScreenReview()],
+            children: [
+              Calendar(
+                uid: uid,
+              ),
+              const ScreenReview()
+            ],
           ),
         ),
       ),

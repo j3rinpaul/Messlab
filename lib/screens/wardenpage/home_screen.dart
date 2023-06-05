@@ -5,7 +5,8 @@ import 'ScreenHome.dart';
 //import 'package:intl/intl.dart';
 
 class wardenPage extends StatelessWidget {
-  const wardenPage({super.key});
+  final String? u_id;
+  const wardenPage({super.key, this.u_id});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class wardenPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("Warden Home"),
       ),
-      body: CalendarPage(),
+      body: CalendarPage(uid: u_id,),
       //body:ScreenCheckBox();
     );
 

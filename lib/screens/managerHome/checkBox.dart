@@ -40,7 +40,6 @@ class _CheckboxListState extends State<CheckboxList> {
         isNoonSelected = false;
       });
       // startStatusTimer(9,"food_noon","noon_food",isNoonSelected);
-
     }
 
     // Deactivate Evening toggle button after 5 PM
@@ -128,6 +127,7 @@ class _CheckboxListState extends State<CheckboxList> {
                         final userId = widget.userId;
                         final date =
                             DateTime.now().toLocal().toString().split(' ')[0];
+                  
 
                         final existingDataResponse = await supabase
                             .from('food_morning')
@@ -214,7 +214,8 @@ class _CheckboxListState extends State<CheckboxList> {
                       print("Selected Noon");
                       try {
                         final userId = widget.userId;
-                        final date = DateTime.now().day.toString();
+                        final date =
+                            DateTime.now().toLocal().toString().split(' ')[0];
 
                         final existingDataResponse = await supabase
                             .from('food_noon')
@@ -298,7 +299,8 @@ class _CheckboxListState extends State<CheckboxList> {
                       print("Selected Evening");
                       try {
                         final userId = widget.userId;
-                        final date = DateTime.now().day.toString();
+                        final date =
+                            DateTime.now().toLocal().toString().split(' ')[0];
 
                         final existingDataResponse = await supabase
                             .from('food_evening')
@@ -376,31 +378,30 @@ class _CheckboxListState extends State<CheckboxList> {
     return currentTime.hour < 17; // Allow toggle before 5 PM
   }
 
-  // void startStatusTimer(int time,String db,String tb,bool isSelect) {
-  //   Timer(Duration(hours: time), () async {
-  //     if (!isSelect) {
-        
-  //       try {
-  //         final userId = widget.userId;
-  //         final date = DateTime.now().toLocal().toString().split(' ')[0];
+  void startStatusTimer(int time, String db, String tb, bool isSelect) {
+    Timer(Duration(hours: time), () async {
+      if (!isSelect) {
+        try {
+          final userId = widget.userId;
+          final date = DateTime.now().toLocal().toString().split(' ')[0];
 
-  //         final response = await supabase
-  //             .from(db) // Updated table name
-  //             .update({tb: false}) // Updated column name
-  //             .eq('u_id', userId)
-  //             .eq('mark_date', date)
-  //             .execute();
+          final response = await supabase
+              .from(db) // Updated table name
+              .update({tb: false}) // Updated column name
+              .eq('u_id', userId)
+              .eq('mark_date', date)
+              .execute();
 
-  //         if (response.error != null) {
-  //           // Handle error
-  //           throw response.error!;
-  //         }
+          if (response.error != null) {
+            // Handle error
+            throw response.error!;
+          }
 
-  //         print('Status updated to false automatically!');
-  //       } catch (e) {
-  //         print('An error occurred: $e');
-  //       }
-  //     }
-  //   });
-  // }
+          print('Status updated to false automatically!');
+        } catch (e) {
+          print('An error occurred: $e');
+        }
+      }
+    });
+  }
 }
