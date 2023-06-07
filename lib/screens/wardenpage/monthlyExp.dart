@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mini_project/supabase_config.dart';
+import 'package:supabase/supabase.dart';
 
 class MonthlyExp extends StatefulWidget {
   final String? uid;
-  const MonthlyExp({Key? key, this.uid}) : super(key: key);
+  MonthlyExp({Key? key, this.uid}) : super(key: key);
 
   @override
-  State<MonthlyExp> createState() => _MonthlyExpState();
+  _MonthlyExpState createState() => _MonthlyExpState();
 }
 
 class _MonthlyExpState extends State<MonthlyExp> {
@@ -19,20 +20,6 @@ class _MonthlyExpState extends State<MonthlyExp> {
 
   DateTime? selectedDate;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchExpenses();
-  }
-
-  @override
-  void dispose() {
-    dateController.dispose();
-    amountController.dispose();
-    remarkController.dispose();
-    super.dispose();
-  }
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -41,10 +28,8 @@ class _MonthlyExpState extends State<MonthlyExp> {
       lastDate: DateTime(2025),
     );
     if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-        dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate!);
-      });
+      selectedDate = picked;
+      dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate!);
     }
   }
 
@@ -67,13 +52,11 @@ class _MonthlyExpState extends State<MonthlyExp> {
       if (response.error == null) {
         // Expense saved successfully
         final insertedExpense = response.data?.first;
-        setState(() {
-          expenses.add(ExpenseItem(
-            date: insertedExpense['date'],
-            amount: insertedExpense['amount'],
-            remark: insertedExpense['remark'],
-          ));
-        });
+        expenses.add(ExpenseItem(
+          date: insertedExpense['date'],
+          amount: insertedExpense['amount'],
+          remark: insertedExpense['remark'],
+        ));
 
         // Clear the text fields after adding an expense
         dateController.clear();
@@ -92,18 +75,16 @@ class _MonthlyExpState extends State<MonthlyExp> {
 
     if (response.error == null) {
       final data = response.data;
-      print(data.toString());
+
       if (data != null && data.isNotEmpty) {
-        final newExpenses = data
-            .map((expense) => ExpenseItem(
-                  date: expense['date'] as String,
-                  amount: (expense['amount'] as num).toDouble(),
-                  remark: expense['remark'] as String,
-                ))
-            .toList();
+        final list = data.map((expense) => ExpenseItem(
+              date: expense['date'] as String,
+              amount: (expense['amount'] as num).toDouble(),
+              remark: expense['remark'] as String,
+            ));
 
         setState(() {
-          expenses = newExpenses;
+          expenses = List.from(list);
         });
       }
     } else {
@@ -111,7 +92,36 @@ class _MonthlyExpState extends State<MonthlyExp> {
     }
   }
 
-  
+  void subscribeToRealtimeUpdates() {
+    supabase
+        .from('daily_expense')
+        .on(SupabaseEventTypes.insert,
+            (payload) => handleRealtimeUpdate(payload))
+        .subscribe();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    subscribeToRealtimeUpdates();
+    // Fetch initial expenses
+    fetchExpenses();
+
+    // Listen for real-time updates on the daily_expense table
+    // supabase.from('daily_expense').on('INSERT', (payload) => handleRealtimeUpdate(payload)).subscribe();
+  }
+
+  void handleRealtimeUpdate(payload) {
+    final insertedExpense = payload.newRecord;
+
+    setState(() {
+      expenses.add(ExpenseItem(
+        date: insertedExpense['date'],
+        amount: insertedExpense['amount'],
+        remark: insertedExpense['remark'],
+      ));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +183,9 @@ class _MonthlyExpState extends State<MonthlyExp> {
             child: Column(
               children: [
                 ElevatedButton(
-                  onPressed: addExpense,
+                  onPressed: () {
+                    addExpense();
+                  },
                   child: const Text('Add'),
                 ),
                 ElevatedButton(onPressed: () {}, child: Text("Generate Bill"))
@@ -181,41 +193,11 @@ class _MonthlyExpState extends State<MonthlyExp> {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
-                  columns: const [
-                    DataColumn(label: Text('Date')),
-                    DataColumn(label: Text('Amount')),
-                    DataColumn(label: Text('Remark')),
-                  ],
-                  rows: expenses.map((expense) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(expense.date)),
-                        DataCell(Text(expense.amount.toString())),
-                        DataCell(Text(expense.remark)),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
+            child: ShowList(expenses: expenses),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> userDetails() async {
-    final response = await supabase.from('users').select().execute();
-    print(response.data.toString());
   }
 }
 
@@ -230,3 +212,35 @@ class ExpenseItem {
     required this.remark,
   });
 }
+
+class ShowList extends StatelessWidget {
+  final List<ExpenseItem> expenses;
+
+  const ShowList({Key? key, required this.expenses}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: DataTable(
+          columns: [
+            DataColumn(label: Text('Date')),
+            DataColumn(label: Text('Amount')),
+            DataColumn(label: Text('Remark')),
+          ],
+          rows: expenses.map<DataRow>((expense) {
+            return DataRow(
+              cells: [
+                DataCell(Text(expense.date)),
+                DataCell(Text(expense.amount.toString())),
+                DataCell(Text(expense.remark)),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+

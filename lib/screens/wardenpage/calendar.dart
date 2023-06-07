@@ -80,7 +80,7 @@ class _CalendarState extends State<Calendar> {
                       return MonthlyExp(uid: widget.uid);
                     }));
                   },
-                  child: const Text("Monthly Expence")),
+                  child: const Text("Monthly Expense")),
             )
           ],
         )

@@ -119,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           .eq('password', password)
                           .execute();
                       final roles = role.data[0]['role'];
+                      final u_ids = response.data[0]['u_id'];
                       if (roles == "user") {
                         final sharedprefs =
                             await SharedPreferences.getInstance();
@@ -141,13 +142,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         print("manager");
                         Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {
-                          return const ManagerHome();
+                          return  ManagerHome(u_id:response.data[0]['u_id'] ,);
                         }));
                       } else if (roles == "warden") {
+                         final sharedprefs =
+                            await SharedPreferences.getInstance();
+                        await sharedprefs.setBool('SAVE_KEY', true);
+                        await sharedprefs.setString('role', 'warden');
+                        await sharedprefs.setString(
+                            'uid', response.data[0]['u_id'].toString());
                         print("warden");
                         Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {
-                          return wardenPage();
+                          return wardenPage(u_id: response.data[0]["u_id"],);
                         }));
                       } else {
                         print("error");

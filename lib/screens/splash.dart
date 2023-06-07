@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mini_project/screens/homescreen/home_screen.dart';
 import 'package:mini_project/screens/login.dart';
 import 'package:mini_project/screens/managerHome/home_screen.dart';
+import 'package:mini_project/screens/wardenpage/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -37,12 +38,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> checkLogin() async {
     final sharedprefs =
-        await SharedPreferences.getInstance(); //getting the shared preferences
+        await SharedPreferences.getInstance(); 
     final islogged = sharedprefs.getBool(
-        'SAVE_KEY'); //checking whether the save_key is logged in or nor
+        'SAVE_KEY'); 
     final roleuse = sharedprefs.getString('role');
     final uid = sharedprefs.getString('uid');
-    //ie the true or false is returned to the save_key and the save_key value is stored into islogged
     if (islogged == null || islogged == false) {
       gotoLogin();
     } else if (roleuse == "user") {
@@ -58,6 +58,14 @@ class _SplashScreenState extends State<SplashScreen> {
       print(uid);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (ctx1) => ManagerHome(
+                u_id: uid,
+              )));
+    }
+    else if (roleuse == "warden") {
+      print("warden--");
+      print(uid);
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (ctx1) => wardenPage(
                 u_id: uid,
               )));
     }
