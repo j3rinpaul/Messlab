@@ -73,7 +73,32 @@ class _CalendarState extends State<Calendar> {
                 },
                 child: const Text("Monthly Expense"),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  print(widget.uid);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return MonthlyExp(uid: widget.uid);
+                  }));
+                },
+                child: const Text("Generate Bill"),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  print(widget.uid);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return MonthlyExp(uid: widget.uid);
+                  }));
+                },
+                child: const Text("Generate Bill"),
+              ),
+            ),
+            
           ],
         )
 

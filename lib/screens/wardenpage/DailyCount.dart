@@ -31,6 +31,7 @@ class _DailyCountState extends State<DailyCount> {
   Map<dynamic, List<bool>> foodDetails = {};
   List<bool> foodList = [];
   Map<dynamic, String> userNames = {};
+  bool isLoading = false;
 
   Future<dynamic> Userdetails() async {
     final respo = await supabase
@@ -114,6 +115,7 @@ class _DailyCountState extends State<DailyCount> {
         await fetchDataWithDateParameter(date, "food_evening", "evening_food");
 
     setState(() {
+      isLoading = true;
       parsedData[0]['date'] = date;
       parsedData[0]['morning_food'] = morningFoodCount;
       parsedData[0]['noon_food'] = noonFoodCount;

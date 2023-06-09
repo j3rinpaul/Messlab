@@ -38,6 +38,10 @@ class _MonthlyExpState extends State<MonthlyExp> {
     final double amount = double.tryParse(amountController.text) ?? 0;
     final String remark = remarkController.text;
 
+    DateTime currentDate = DateTime.now();
+    int curMonth = selectedDate!.month;
+    int curYear = currentDate.year;
+
     if (date.isNotEmpty && amount > 0) {
       // Save expense to Supabase
       final response = await supabase.from('daily_expense').insert([
@@ -46,6 +50,8 @@ class _MonthlyExpState extends State<MonthlyExp> {
           'amount': amount,
           'remark': remark,
           'u_id': widget.uid,
+          'month': curMonth,
+          'year': curYear,
         }
       ]).execute();
 
@@ -70,8 +76,16 @@ class _MonthlyExpState extends State<MonthlyExp> {
     }
   }
 
-  Future<void> fetchExpenses() async {
-    final response = await supabase.from('daily_expense').select().execute();
+  Future<void> fetchExpenses(String? date) async {
+    if (date == null) {
+      date = DateFormat('MM').format(DateTime.now());
+    }
+
+    final response = await supabase
+        .from('daily_expense')
+        .select()
+        .eq('month', date)
+        .execute();
 
     if (response.error == null) {
       final data = response.data;
@@ -105,7 +119,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
     super.initState();
     subscribeToRealtimeUpdates();
     // Fetch initial expenses
-    fetchExpenses();
+    fetchExpenses(null);
 
     // Listen for real-time updates on the daily_expense table
     // supabase.from('daily_expense').on('INSERT', (payload) => handleRealtimeUpdate(payload)).subscribe();
@@ -180,23 +194,161 @@ class _MonthlyExpState extends State<MonthlyExp> {
           ),
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    addExpense();
+                  onPressed: () async {
+                    //check whether the bil is generated or not
+                    final response = await supabase
+                        .from('bill_generated')
+                        .select()
+                        .eq('month', DateFormat('MM').format(DateTime.now()))
+                        .execute();
+                    final generate = response.data[0]['generate_bill'];
+                    print(generate);
+                    //if generated then disable the button
+
+                    if (generate) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Bill Not Added'),
+                            content: Text(
+                                'The bill has already been generated for this month.'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      print("bill not added");
+                      return null;
+                    } else {
+                      print("bill added");
+                      addExpense();
+                    }
                   },
                   child: const Text('Add'),
                 ),
-                ElevatedButton(onPressed: () {}, child: Text("Generate Bill"))
+                TextButton(
+                    onPressed: () {
+                      _selectMonthAndYear();
+
+                      
+                    },
+                    child: Text("View Bill")),
               ],
             ),
           ),
           Expanded(
-            child: ShowList(expenses: expenses),
+            child: ShowList(
+              expenses: expenses,
+            ),
           ),
         ],
       ),
+    );
+  }
+ String? selectedMonth;
+  int? selectedYear;
+
+   List<String> months = [
+    '01',
+    '02',
+    '03',
+    '04',
+    '05',
+    '06',
+    '07',
+    '08',
+    '09',
+    '10',
+    '11',
+    '12',
+  ];
+  List<int> years =
+      List<int>.generate(10, (index) => DateTime.now().year - 5 + index);
+
+   Future<void> _selectMonthAndYear() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Month and Year'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: selectedMonth,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedMonth = newValue;
+                  });
+                },
+                items: months.map((String month) {
+                  return DropdownMenuItem<String>(
+                    value: month,
+                    child: Text(month),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Month',
+                ),
+              ),
+              SizedBox(height: 10),
+              DropdownButtonFormField<int>(
+                value: selectedYear,
+                onChanged: (int? newValue) {
+                  setState(() {
+                    selectedYear = newValue;
+                  });
+                },
+                items: years.map((int year) {
+                  return DropdownMenuItem<int>(
+                    value: year,
+                    child: Text(year.toString()),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Year',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  selectedMonth = null;
+                  selectedYear = null;
+                });
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Perform actions with selectedMonth and selectedYear
+                if (selectedMonth != null && selectedYear != null) {
+                  print(
+                      'Selected month and year: $selectedMonth $selectedYear');
+                }
+                fetchExpenses(selectedMonth);
+
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -215,32 +367,34 @@ class ExpenseItem {
 
 class ShowList extends StatelessWidget {
   final List<ExpenseItem> expenses;
-
-  const ShowList({Key? key, required this.expenses}) : super(key: key);
+  ShowList({Key? key, required this.expenses}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
-        child: DataTable(
-          columns: [
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Amount')),
-            DataColumn(label: Text('Remark')),
-          ],
-          rows: expenses.map<DataRow>((expense) {
-            return DataRow(
-              cells: [
-                DataCell(Text(expense.date)),
-                DataCell(Text(expense.amount.toString())),
-                DataCell(Text(expense.remark)),
+        child: Column(
+          children: [
+            DataTable(
+              columns: [
+                DataColumn(label: Text('Date')),
+                DataColumn(label: Text('Amount')),
+                DataColumn(label: Text('Remark')),
               ],
-            );
-          }).toList(),
+              rows: expenses.map<DataRow>((expense) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(expense.date)),
+                    DataCell(Text(expense.amount.toString())),
+                    DataCell(Text(expense.remark)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
