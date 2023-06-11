@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_project/screens/homescreen/home_screen.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
-import 'package:intl/intl.dart';
 
 import '../../supabase_config.dart';
 
@@ -34,47 +32,84 @@ class _ScreenPointsState extends State<ScreenPoints> {
     [true, true, true], // Example consumption data for third date
     // Add more consumption data as needed
   ];
+  final Map<String, List<bool>> dateMap = {};
+
+  Future<void> getDate(String date, String year, String? uid) async {
+    final int selectedYear = int.parse(year);
+    final int selectedMonth = int.parse(date);
+
+    final eveningFoodResponse = await supabase
+        .from('food_evening')
+        .select('mark_date,evening_food')
+        .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
+        .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
+        .eq("u_id", uid)
+        .execute();
+
+    final morningFoodResponse = await supabase
+        .from('food_morning')
+        .select('mark_date,morning_food')
+        .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
+        .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
+        .eq("u_id", uid)
+        .execute();
+
+    final noonFoodResponse = await supabase
+        .from('food_noon')
+        .select('mark_date,noon_food')
+        .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
+        .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
+        .eq("u_id", uid)
+        .execute();
+
+    for (final data in eveningFoodResponse.data) {
+      final date = data['mark_date'].toString().split(' ')[0];
+      dateMap[date] = [false, false, data['evening_food']];
+    }
+
+    for (final data in morningFoodResponse.data) {
+      final date = data['mark_date'].toString().split(' ')[0];
+      dateMap[date]?[0] = data['morning_food'];
+    }
+
+    for (final data in noonFoodResponse.data) {
+      final date = data['mark_date'].toString().split(' ')[0];
+      dateMap[date]?[1] = data['noon_food'];
+    }
+
+    print(dateMap);
+  }
 
   Username? currentUser;
   DueDate? dueDate;
   final date = DateTime.now().month.toString();
   final year = DateTime.now().year.toString();
 
-  Future<void> getDue(String? uid, String? date, String? year) async {
-  
-
-    final rate_per = await supabase
-        .from('monthly_bill')
-        .select('rate_per_cons')
-        .eq('month', date)
-        .eq('year', year)
-        .execute();
-    final rate = rate_per.data[0]['rate_per_cons'];
-    final mrng = await supabase
+//get the detailed bill of the user of that month
+//get all the data of that user in that month
+  Future<void> detailedB(String month, String year, String? uid) async {
+    final response = await supabase
         .from('food_morning')
         .select()
         .eq('u_id', uid)
-        .eq("morning_food", true)
+        .eq('month', month)
+        .eq('year', year)
         .execute();
-    final noon = await supabase
-        .from('food_noon')
-        .select()
-        .eq('u_id', uid)
-        .eq("noon_food", true)
-        .execute();
-    final night = await supabase
-        .from('food_evening')
-        .select()
-        .eq('u_id', uid)
-        .eq("evening_food", true)
-        .execute();
+    print(response.data);
+  }
 
-    final total = mrng.data.length + noon.data.length + night.data.length;
-  
+  Future<void> getDue(String? uid, String? date, String? year) async {
+    final totalv = await supabase
+        .from('user_bill')
+        .select('total_bill,total_cons')
+        .eq('month', date)
+        .eq('year', year)
+        .eq("u_id", uid)
+        .execute();
 
     dueDate = DueDate(
-      points: total.toString(),
-      amount: (total * rate).toString(),
+      points: totalv.data[0]['total_cons'].toString(),
+      amount: totalv.data[0]['total_bill'].toString(),
     );
   }
 
@@ -112,10 +147,16 @@ class _ScreenPointsState extends State<ScreenPoints> {
   }
 
   @override
-  initState() {
+  void initState() {
     super.initState();
-    userDetails(widget.uid);
-    getDue(widget.uid, date, year);
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    await userDetails(widget.uid);
+    await getDue(widget.uid, date, year);
+    await detailedB(date, year, widget.uid);
+    await getDate(date, year, widget.uid);
   }
 
   @override
@@ -127,7 +168,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
       ),
       body: FutureBuilder(
           future: Future.wait(
-              [userDetails(widget.uid), getDue(widget.uid, date, year)]),
+              [userDetails(widget.uid), getDue(widget.uid, date, year),getDate(date, year, widget.uid)]),
           builder:
               (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -276,7 +317,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                                   height: 5,
                                                 ),
                                                 Text(
-                                                  dueDate!.amount! ,
+                                                  dueDate!.amount!,
                                                   style: TextStyle(
                                                       fontSize: 15,
                                                       fontWeight:
@@ -329,49 +370,81 @@ class _ScreenPointsState extends State<ScreenPoints> {
                               ),
                             ],
                           ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: dates.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Card(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 15.0, vertical: 4.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        DateFormat('yyyy-MM-dd')
-                                            .format(dates[index]),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Row(
+                          Container(
+                            height: 300,
+                            child: SingleChildScrollView(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: dateMap.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final date = dateMap.keys.toList()[index];
+                                  final consumption = dateMap[date];
+                          
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 15.0, vertical: 4.0),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          for (int i = 0; i < 3; i++)
-                                            Container(
-                                              width: 10,
-                                              height: 10,
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 5.0),
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: foodConsumption[index][i]
-                                                    ? Colors.green
-                                                    : Colors.red,
+                                          Text(
+                                            date,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                width: 10,
+                                                height: 10,
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: consumption![0]
+                                                      ? Colors.green
+                                                      : Colors.red,
+                                                ),
                                               ),
-                                            ),
+                                              Container(
+                                                width: 10,
+                                                height: 10,
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: consumption![1]
+                                                      ? Colors.green
+                                                      : Colors.red,
+                                                ),
+                                              ),
+                                              Container(
+                                                width: 10,
+                                                height: 10,
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: consumption![2]
+                                                      ? Colors.green
+                                                      : Colors.red,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          )
                         ]),
                   ),
                 ),

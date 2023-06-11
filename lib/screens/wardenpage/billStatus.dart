@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mini_project/supabase_config.dart';
 
 class MonthlyBill extends StatefulWidget {
   @override
@@ -10,24 +11,62 @@ class _MonthlyBillState extends State<MonthlyBill> {
   DateTime? selectedDate;
   List<BillItem> billItems = [];
   List<String> months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    '01',
+    '02',
+    '03',
+    '04',
+    '05',
+    '06',
+    '07',
+    '08',
+    '09',
+    '10',
+    '11',
+    '12',
   ];
   List<int> years =
       List<int>.generate(10, (index) => DateTime.now().year - 5 + index);
 
   String? selectedMonth;
   int? selectedYear;
+
+  Future<void> userAmount(String? date, String? year) async {
+    final response = await supabase
+        .from("user_bill")
+        .select("total_bill,bill_status,u_id")
+        .eq('month', date)
+        .eq('year', year)
+        .execute();
+
+    if (response.data != null) {
+      List<BillItem> items = [];
+      for (var itemData in response.data) {
+        final userId = itemData['u_id'];
+        final userResponse = await supabase
+            .from("users")
+            .select("first_name,last_name")
+            .eq('u_id', userId)
+            .execute();
+        if (userResponse.data != null && userResponse.data.isNotEmpty) {
+          final name = userResponse.data[0]['first_name']+ " " + userResponse.data[0]['last_name'];
+          BillItem item = BillItem(
+            realname: name,
+            name: itemData['u_id'],
+            amount: itemData['total_bill'].toDouble(),
+            status: itemData['bill_status'] ? 'Paid' : 'Not Paid',
+          );
+          items.add(item);
+        } else {
+          print(userResponse.error!.message.toString());
+        }
+      }
+      setState(() {
+        billItems = items;
+      });
+    } else {
+      print(response.error!.message.toString());
+    }
+  }
 
   Future<void> _selectMonthAndYear() async {
     await showDialog(
@@ -89,6 +128,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                userAmount(selectedMonth, selectedYear.toString());
                 // Perform actions with selectedMonth and selectedYear
                 if (selectedMonth != null && selectedYear != null) {
                   print(
@@ -122,8 +162,26 @@ class _MonthlyBillState extends State<MonthlyBill> {
           title: Text('Select Status'),
           children: [
             SimpleDialogOption(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context, 'Paid');
+                if (selectedMonth == null && selectedYear == null) {
+                  setState(() {
+                    selectedMonth = DateTime.now().month.toString();
+                    selectedYear = DateTime.now().year;
+                  });
+                }
+                final response = await supabase
+                    .from("user_bill")
+                    .update({"bill_status": true})
+                    .eq('u_id', item.name)
+                    .eq('month', selectedMonth)
+                    .eq('year', selectedYear.toString())
+                    .execute();
+                if (response.error != null) {
+                  print(response.error!.message.toString());
+                } else {
+                  print("true");
+                }
               },
               child: Row(
                 children: [
@@ -134,8 +192,20 @@ class _MonthlyBillState extends State<MonthlyBill> {
               ),
             ),
             SimpleDialogOption(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context, 'Not Paid');
+                final response = await supabase
+                    .from("user_bill")
+                    .update({"bill_status": true})
+                    .eq('u_id', item.name)
+                    .eq('month', selectedMonth)
+                    .eq('year', selectedYear.toString())
+                    .execute();
+                if (response.error != null) {
+                  print(response.error!.message.toString());
+                } else {
+                  print("false");
+                }
               },
               child: Row(
                 children: [
@@ -149,38 +219,21 @@ class _MonthlyBillState extends State<MonthlyBill> {
         );
       },
     );
-
-    if (status != null) {
-      setState(() {
-        item.status = status;
-      });
-    }
   }
 
+  String month = DateFormat('MM').format(DateTime.now());
+  String year = DateFormat('yyyy').format(DateTime.now());
   @override
   void initState() {
     super.initState();
     fetchBillItemsFromDatabase(); // Fetch bill items from the database
+    userAmount(month, year);
   }
 
   Future<void> fetchBillItemsFromDatabase() async {
     // Replace with your own database connection and query logic
     await Future.delayed(Duration(seconds: 2)); // Simulating a delay
-    final List<BillItem> items = [
-      BillItem(name: 'John Doe', amount: 100),
-      BillItem(name: 'Jane ', amount: 150),
-      BillItem(name: 'Doe', amount: 100),
-      BillItem(name: 'Smith', amount: 150),
-      BillItem(name: 'vedi', amount: 100),
-      BillItem(name: 'Jane Smith', amount: 150),
-      BillItem(name: 'John Doe', amount: 100),
-      BillItem(name: 'Jane Smith', amount: 150),
-      BillItem(name: 'John Doe', amount: 100),
-      BillItem(name: 'Jane Smith', amount: 150),
-    ];
-    setState(() {
-      billItems = items;
-    });
+    await userAmount(selectedMonth, selectedYear.toString());
   }
 
   @override
@@ -221,10 +274,10 @@ class _MonthlyBillState extends State<MonthlyBill> {
               ),
             ),
           ),
-          SizedBox(height: 15),
+          // SizedBox(height: 5),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(10.0),
+              padding: EdgeInsets.all(8.0),
               child: Card(
                 color: const Color.fromARGB(255, 209, 206, 206),
                 child: SingleChildScrollView(
@@ -273,7 +326,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                             TableCell(
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
-                                child: Text(item.name),
+                                child: Text(item.realname.toString()),
                               ),
                             ),
                             TableCell(
@@ -312,12 +365,14 @@ class _MonthlyBillState extends State<MonthlyBill> {
 
 class BillItem {
   final String name;
+  final String? realname;
   final double amount;
   String status;
 
   BillItem({
     required this.name,
     required this.amount,
+    this.realname,
     this.status = 'Not Paid',
   });
-}                    
+}
