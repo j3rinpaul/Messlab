@@ -76,8 +76,8 @@ class _MonthlyExpState extends State<MonthlyExp> {
     }
   }
 
-  Future<void> fetchExpenses(String? date) async {
-    if (date == null) {
+  Future<void> fetchExpenses(String? date, int? year) async {
+    if (date == null && year == null) {
       date = DateFormat('MM').format(DateTime.now());
     }
 
@@ -85,6 +85,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
         .from('daily_expense')
         .select()
         .eq('month', date)
+        .eq(year != null ? 'year' : '', year)
         .execute();
 
     if (response.error == null) {
@@ -119,7 +120,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
     super.initState();
     subscribeToRealtimeUpdates();
     // Fetch initial expenses
-    fetchExpenses(null);
+    fetchExpenses(null, null);
 
     // Listen for real-time updates on the daily_expense table
     // supabase.from('daily_expense').on('INSERT', (payload) => handleRealtimeUpdate(payload)).subscribe();
@@ -240,8 +241,6 @@ class _MonthlyExpState extends State<MonthlyExp> {
                 TextButton(
                     onPressed: () {
                       _selectMonthAndYear();
-
-                      
                     },
                     child: Text("View Bill")),
               ],
@@ -256,10 +255,11 @@ class _MonthlyExpState extends State<MonthlyExp> {
       ),
     );
   }
- String? selectedMonth;
+
+  String? selectedMonth;
   int? selectedYear;
 
-   List<String> months = [
+  List<String> months = [
     '01',
     '02',
     '03',
@@ -276,7 +276,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
   List<int> years =
       List<int>.generate(10, (index) => DateTime.now().year - 5 + index);
 
-   Future<void> _selectMonthAndYear() async {
+  Future<void> _selectMonthAndYear() async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -341,8 +341,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                   print(
                       'Selected month and year: $selectedMonth $selectedYear');
                 }
-                fetchExpenses(selectedMonth);
-
+                fetchExpenses(selectedMonth, selectedYear);
               },
               child: Text('OK'),
             ),

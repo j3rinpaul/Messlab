@@ -16,7 +16,7 @@ class ManagerHome extends StatelessWidget {
     //var day;
 
     return Scaffold(
-      bottomNavigationBar: const BottomNav(),
+      bottomNavigationBar: BottomNav(uid: u_id,),
       appBar: AppBar(
         title: const Text("Manager Home"),
       ),

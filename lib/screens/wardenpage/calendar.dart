@@ -1,8 +1,9 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:mini_project/screens/wardenpage/billStatus.dart';
 import 'package:intl/intl.dart';
-import '../../supabase_config.dart';
+import 'package:mini_project/screens/wardenpage/billStatus.dart';
+import 'package:mini_project/screens/wardenpage/generateBill.dart';
+
 import 'DailyCount.dart';
 import 'Roleassign_warden.dart';
 import 'checkBox.dart';
@@ -20,10 +21,8 @@ class Calendar extends StatefulWidget {
 class _CalendarState extends State<Calendar> {
   DateTime? selectedValue = DateTime.now();
 
-  int month =  int.parse(DateFormat('MM').format(DateTime.now()));
- int year = int.parse(DateFormat('yy').format(DateTime.now()));
-  
-
+  int month = int.parse(DateFormat('MM').format(DateTime.now()));
+  int year = int.parse(DateFormat('yy').format(DateTime.now()));
 
   @override
   Widget build(BuildContext context) {
@@ -92,26 +91,10 @@ class _CalendarState extends State<Calendar> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: () async{
-                    print("Month: $month");
-                    print("year: $year");
-                    final response = await supabase.from('bill_generated').insert([
-                          {
-                            'month':month ,
-                            'year': year,
-                            'generate_bill':true,
-                            
-                          }
-                        ]).execute();
-                        if(response.error == null){
-                          print("Bill generated");
-                        }
-                        else{
-                          print("Error: ${response.error}");
-                        }
+                  onPressed: () async {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
-                      return MonthlyExp(uid: widget.uid);
+                      return generateBill();
                     }));
                   },
                   child: const Text("Generate Bill")),

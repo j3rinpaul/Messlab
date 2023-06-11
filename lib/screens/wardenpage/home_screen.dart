@@ -14,7 +14,7 @@ class wardenPage extends StatelessWidget {
     //var day;
 
     return Scaffold(
-      bottomNavigationBar: BottomNav(),
+      bottomNavigationBar: BottomNav(uid: u_id),
       appBar: AppBar(
         title: Text("Warden Home"),
       ),

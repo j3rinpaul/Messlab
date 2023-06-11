@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../supabase_config.dart';
 
@@ -22,9 +23,15 @@ class _CheckboxListState extends State<CheckboxList> {
   @override
   void initState() {
     super.initState();
-
+    // fetchMrng();
     // Get the current time
     DateTime currentTime = DateTime.now();
+    print(currentTime); //time now
+
+    //date selected
+
+    //if the user tries to mark another date these features will be disabled
+    if (widget.date == currentTime) {}
 
     // Deactivate Morning toggle button after 11 PM
     if (currentTime.hour >= 01) {
@@ -91,8 +98,26 @@ class _CheckboxListState extends State<CheckboxList> {
     );
   }
 
+  // Future<void> fetchMrng() async {
+  //   final sharedprefs = await SharedPreferences.getInstance();
+  //   final uid = sharedprefs.getString('u_id');
+  //   final morningdb =
+  //       await supabase.from('food_morning').select().eq('u_id', uid).execute();
+  //   if (morningdb.data[0]['morning_food'] == true) {
+  //     print(isMorningSelected);
+  //     setState(() {
+  //       isMorningSelected = true;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       isMorningSelected = false;
+  //     });
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
+    DateTime currentTime = DateTime.now();
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -113,12 +138,12 @@ class _CheckboxListState extends State<CheckboxList> {
                 )),
             title: Text('Morning'),
             trailing: Switch(
-              value: isNoonSelected,
+              value: isMorningSelected,
               activeColor: Colors.green,
-              onChanged: canToggleNoon()
+              onChanged: canToggleMorning()
                   ? (value) async {
                       setState(() {
-                        isNoonSelected = value;
+                        isMorningSelected = value;
                       });
                       print("Selected Noon");
                       try {
@@ -355,6 +380,7 @@ class _CheckboxListState extends State<CheckboxList> {
                   : null,
             ),
           ),
+         
         ],
       ),
     );
