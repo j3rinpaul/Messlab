@@ -85,7 +85,6 @@ class _SettingsState extends State<Settings> {
 
     return Scaffold(
       appBar: AppBar(
-       
         title: const Text('Change Timings'),
       ),
       body: Column(
@@ -138,6 +137,7 @@ class _SettingsState extends State<Settings> {
                         selectedTime1 = time ?? selectedTime1;
                       });
                     });
+                    print("selected"+selectedTime1.toString());
                   },
                   icon: Icon(Icons.access_time),
                 ),

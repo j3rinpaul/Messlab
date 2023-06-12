@@ -14,7 +14,7 @@ class CalendarPage extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.only(bottom: 10, top: 10),
           child: Column(
-            children: [Calendar(u_id: u_id), const ScreenReview()],
+            children: [Calendar(u_id: u_id), ScreenReview(uid: u_id,)],
           ),
         ),
       ),

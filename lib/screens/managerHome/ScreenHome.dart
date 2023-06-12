@@ -19,7 +19,7 @@ class CalendarPage extends StatelessWidget {
               Calendar(
                 uid: uid,
               ),
-              const ScreenReview()
+               ScreenReview(uid: uid)
             ],
           ),
         ),

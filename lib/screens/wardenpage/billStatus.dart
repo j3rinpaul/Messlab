@@ -29,8 +29,13 @@ class _MonthlyBillState extends State<MonthlyBill> {
 
   String? selectedMonth;
   int? selectedYear;
+  bool isloading = false;
 
   Future<void> userAmount(String? date, String? year) async {
+    setState(() {
+      isloading = true;
+    });
+
     final response = await supabase
         .from("user_bill")
         .select("total_bill,bill_status,u_id")
@@ -66,6 +71,9 @@ class _MonthlyBillState extends State<MonthlyBill> {
     } else {
       print(response.error!.message.toString());
     }
+    setState(() {
+      isloading = false;
+    });
   }
 
   Future<void> _selectMonthAndYear() async {
@@ -231,18 +239,22 @@ class _MonthlyBillState extends State<MonthlyBill> {
   }
 
   Future<void> fetchBillItemsFromDatabase() async {
+    
     // Replace with your own database connection and query logic
     await Future.delayed(Duration(seconds: 2)); // Simulating a delay
     await userAmount(selectedMonth, selectedYear.toString());
+    
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return 
+     Scaffold(
       appBar: AppBar(
         title: Text('Monthly Bill'),
       ),
-      body: Column(
+      body: isloading ? Center(child: CircularProgressIndicator()) :
+       Column(
         children: [
           GestureDetector(
             onTap: () => _selectMonthAndYear(),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../supabase_config.dart';
+
 class ScreenReview extends StatefulWidget {
-  const ScreenReview({super.key});
+  final String? uid;
+  const ScreenReview({super.key, this.uid});
 
   @override
   State<ScreenReview> createState() => _ScreenReviewState();
@@ -10,6 +13,31 @@ class ScreenReview extends StatefulWidget {
 class _ScreenReviewState extends State<ScreenReview> {
   final TextEditingController _reviewCont = TextEditingController();
 
+  List<String> announcementList = [];
+  Future<void> getAnnounce() async {
+    final response =
+        await supabase.from('announcements').select('announcemnts').execute();
+    if (response.error == null) {
+      setState(() {
+        announcementList = (response.data as List<dynamic>)
+            .map((item) => item['announcemnts'].toString())
+            .toList();
+      });
+      print(announcementList);
+      print(response.data);
+      print("Announce");
+    } else {
+      print(response.error);
+    }
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAnnounce();
+  }
   @override
   void dispose() {
     _reviewCont.dispose();
@@ -23,7 +51,7 @@ class _ScreenReviewState extends State<ScreenReview> {
         decoration: BoxDecoration(
             border: Border.all(),
             borderRadius: const BorderRadius.all(Radius.circular(20))),
-        child: const SizedBox(
+        child:  SizedBox(
           width: 370,
           height: 180,
           child: Column(
@@ -33,13 +61,19 @@ class _ScreenReviewState extends State<ScreenReview> {
                     "Announcements",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Text("No Announcements Today"),
-                  ],
+              Expanded(
+                  child: ListView.builder(
+                    itemCount: announcementList.length,
+                    itemBuilder: (context, index) {
+                      final adjustedIndex = index + 1;
+                      final announcement = announcementList[index];
+                      return ListTile(
+                        title: Text("$adjustedIndex"),
+                        trailing: Text(announcement),
+                      );
+                    },
+                  ),
                 ),
-              )
             ],
           ),
         ),
@@ -66,9 +100,19 @@ class _ScreenReviewState extends State<ScreenReview> {
                         controller: _reviewCont,
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
-                              onPressed: () {
+                              onPressed: () async {
+                                final response = await supabase
+                                    .from('reviews')
+                                    .insert({
+                                  'review': _reviewCont.text,
+                                  "u_id": widget.uid
+                                }).execute();
                                 print(_reviewCont.text);
-                                _showDialog(context);
+                                if (response.error == null) {
+                                  _showDialog(context);
+                                } else {
+                                  print(response.error);
+                                }
                                 _reviewCont.clear();
                               },
                               icon: const Icon(Icons.send)),

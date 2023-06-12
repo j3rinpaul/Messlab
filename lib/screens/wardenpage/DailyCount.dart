@@ -10,8 +10,10 @@ class DailyCount extends StatefulWidget {
 }
 
 class _DailyCountState extends State<DailyCount> {
+  bool? isloading = false;
   Future<dynamic> fetchDataWithDateParameter(
       String date, String db, String pref) async {
+        
     final response = await supabase
         .from(db)
         .select()
@@ -25,6 +27,7 @@ class _DailyCountState extends State<DailyCount> {
     } else {
       print("Failed to fetch data: ${response.error}");
     }
+    
   }
 
   final date = DateTime.now().toLocal().toString().split(' ')[0];
@@ -34,6 +37,9 @@ class _DailyCountState extends State<DailyCount> {
   bool isLoading = false;
 
   Future<dynamic> Userdetails() async {
+    setState(() {
+          isloading = true;
+        });
     final respo = await supabase
         .from('users')
         .select('u_id ,first_name , last_name')
@@ -97,6 +103,9 @@ class _DailyCountState extends State<DailyCount> {
     } else {
       print("Failed to fetch data: ${respo.error}");
     }
+    setState(() {
+          isloading = false;
+        });
   }
 
   @override
@@ -107,6 +116,9 @@ class _DailyCountState extends State<DailyCount> {
   }
 
   Future<void> fetchDataCount() async {
+    setState(() {
+          isloading = true;
+        });
     final morningFoodCount =
         await fetchDataWithDateParameter(date, "food_morning", "morning_food");
     final noonFoodCount =
@@ -115,7 +127,7 @@ class _DailyCountState extends State<DailyCount> {
         await fetchDataWithDateParameter(date, "food_evening", "evening_food");
 
     setState(() {
-      isLoading = true;
+      isLoading = false;
       parsedData[0]['date'] = date;
       parsedData[0]['morning_food'] = morningFoodCount;
       parsedData[0]['noon_food'] = noonFoodCount;
@@ -156,7 +168,8 @@ class _DailyCountState extends State<DailyCount> {
       appBar: AppBar(
         title: Text('Food Markings'),
       ),
-      body: Column(
+      body:isloading! ? Center(child: CircularProgressIndicator(),) :
+       Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),

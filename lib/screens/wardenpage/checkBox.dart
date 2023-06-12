@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../supabase_config.dart';
 
@@ -12,6 +11,10 @@ class CheckboxList extends StatefulWidget {
 
   @override
   _CheckboxListState createState() => _CheckboxListState();
+}
+
+Future<void> fetchToday(String date,String uid) async{
+  final morningval = await supabase.from('food_morning').select("morning_food").eq('mark_date', date).eq("u_id",uid ).execute();
 }
 
 class _CheckboxListState extends State<CheckboxList> {
@@ -26,12 +29,12 @@ class _CheckboxListState extends State<CheckboxList> {
     // fetchMrng();
     // Get the current time
     DateTime currentTime = DateTime.now();
-    print(currentTime); //time now
+    // print(currentTime); //time now
 
-    //date selected
+    // //date selected
 
-    //if the user tries to mark another date these features will be disabled
-    if (widget.date == currentTime) {}
+    // //if the user tries to mark another date these features will be disabled
+    // if (widget.date == currentTime) {}
 
     // Deactivate Morning toggle button after 11 PM
     if (currentTime.hour >= 01) {
@@ -118,6 +121,32 @@ class _CheckboxListState extends State<CheckboxList> {
   @override
   Widget build(BuildContext context) {
     DateTime currentTime = DateTime.now();
+    int year = currentTime.year;
+    int month = currentTime.month;
+    int day = currentTime.day;
+
+    String formattedDate = '$year-$month-$day';
+    print(formattedDate);
+
+    DateTime setDate = widget.date!;
+    int setyear = setDate.year;
+    int setmonth = setDate.month;
+    int setday = setDate.day;
+
+    String setdDate = '$setyear-$setmonth-$setday';
+    print(setdDate);
+
+    bool mrng = canToggleMorning();
+    bool noon = canToggleNoon();
+    bool evening = canToggleEvening();
+
+    if (formattedDate != setdDate) {
+      setState(() {
+        mrng = true;
+        noon = true;
+        evening = true;
+      });
+    }
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -140,7 +169,7 @@ class _CheckboxListState extends State<CheckboxList> {
             trailing: Switch(
               value: isMorningSelected,
               activeColor: Colors.green,
-              onChanged: canToggleMorning()
+              onChanged: mrng
                   ? (value) async {
                       setState(() {
                         isMorningSelected = value;
@@ -228,7 +257,7 @@ class _CheckboxListState extends State<CheckboxList> {
             trailing: Switch(
               value: isNoonSelected,
               activeColor: Colors.green,
-              onChanged: canToggleNoon()
+              onChanged: noon
                   ? (value) async {
                       setState(() {
                         isNoonSelected = value;
@@ -313,7 +342,7 @@ class _CheckboxListState extends State<CheckboxList> {
             trailing: Switch(
               value: isEveningSelected,
               activeColor: Colors.green,
-              onChanged: canToggleEvening()
+              onChanged: evening
                   ? (value) async {
                       setState(() {
                         isEveningSelected = value;
@@ -380,7 +409,6 @@ class _CheckboxListState extends State<CheckboxList> {
                   : null,
             ),
           ),
-         
         ],
       ),
     );
