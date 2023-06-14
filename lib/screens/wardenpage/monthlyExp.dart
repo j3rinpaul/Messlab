@@ -206,7 +206,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                         .select()
                         .eq('month', DateFormat('MM').format(DateTime.now()))
                         .execute();
-                    final generate = response.data[0]['generate_bill'];
+                    final generate = response.data.isNotEmpty?response.data[0]['generate_bill']:false;
                     print(generate);
                     //if generated then disable the button
 

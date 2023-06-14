@@ -12,7 +12,7 @@ class User {
 }
 
 class Signup extends StatefulWidget {
-  const Signup({super.key});
+  const Signup({Key? key}) : super(key: key);
 
   @override
   State<Signup> createState() => _SignupState();
@@ -26,6 +26,10 @@ class _SignupState extends State<Signup> {
   final _designation = TextEditingController();
   final _phonenumber = TextEditingController();
   String? _selectedOption;
+
+  final RegExp emailPattern = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+  final RegExp phoneNumberPattern = RegExp(r'^\+?[0-9]{8,15}$');
+  final RegExp passwordPattern = RegExp(r'^.{6,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +142,10 @@ class _SignupState extends State<Signup> {
                             value: 'IT',
                             child: Text('IT'),
                           ),
+                          DropdownMenuItem(
+                            value: 'Office',
+                            child: Text('Office'),
+                          ),
                         ],
                         underline: Container(), // Remove the default underline
                         icon: const Icon(Icons
@@ -180,50 +188,57 @@ class _SignupState extends State<Signup> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (_fname.text == "" ||
-                        _lname.text == "" ||
-                        _email.text == "" ||
-                        _password.text == "" ||
-                        _selectedOption == "" ||
-                        _designation.text == "" ||
-                        _phonenumber.text == "") {
-                      showVar(context, "Please fill all the fields", "Error",
-                          () {});
+                    final fname = _fname.text.trim();
+                    final lname = _lname.text.trim();
+                    final email = _email.text.trim();
+                    final password = _password.text;
+                    final designation = _designation.text.trim();
+                    final phonenumber = _phonenumber.text.trim();
+
+                    if (fname.isEmpty ||
+                        lname.isEmpty ||
+                        email.isEmpty ||
+                        password.isEmpty ||
+                        _selectedOption == null ||
+                        designation.isEmpty ||
+                        phonenumber.isEmpty) {
+                      showVar(context, "Please fill all the fields", "Error", () {});
+                    } else if (!emailPattern.hasMatch(email)) {
+                      showVar(context, "Invalid email address", "Error", () {});
+                    } else if (!passwordPattern.hasMatch(password)) {
+                      showVar(context, "Password should be at least 6 characters long", "Error", () {});
+                    } else if (!phoneNumberPattern.hasMatch(phonenumber)) {
+                      showVar(context, "Invalid phone number", "Error", () {});
                     } else {
-                      final response =
-                          await supabase.from('signup_details').insert({
-                        'first_name': _fname.text,
-                        'last_name': _lname.text,
-                        'username': _email.text,
-                        'password': _password.text,
-                        'department': _selectedOption,
-                        'designation': _designation.text,
-                        'phone': _phonenumber.text,
+                      final response = await supabase.from('signup_details').insert({
+                        'first_name': fname,
+                        'last_name': lname,
+                        'username': email,
+                        'password': password,
+                        'department': _selectedOption!,
+                        'designation': designation,
+                        'phone': phonenumber,
                       }).execute();
-                      print(response.status);
+
                       if (response.error != null) {
-                        showVar(
-                            context, "Failed to create user", "Error", () {});
+                        showVar(context, "Failed to create user", "Error", () {});
                       } else {
                         showVar(
                           context,
                           "User created successfully. Wait for validation from the admin",
                           "Success",
                           () {
+                            _fname.clear();
+                            _lname.clear();
+                            _email.clear();
+                            _password.clear();
+                            _designation.clear();
+                            _phonenumber.clear();
                             setState(() {
-                              _fname.text = "";
-                              _lname.text = "";
-                              _email.text = "";
-                              _password.text = "";
-                              _designation.text = "";
-                              _phonenumber.text = "";
                               _selectedOption = null;
                             });
                             Navigator.pop(context);
                           },
-
-                          //refresh page after submit
-                          //route to sign in page -- loading animations
                         );
                       }
                     }
@@ -238,8 +253,7 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  Future<void> showVar(
-      BuildContext ctx, String content, String head, Function? callback) async {
+  Future<void> showVar(BuildContext ctx, String content, String head, Function? callback) async {
     await showDialog(
       context: ctx,
       builder: (BuildContext context) {

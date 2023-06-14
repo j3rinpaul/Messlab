@@ -1,3 +1,5 @@
+// import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 
@@ -107,10 +109,15 @@ class _ScreenPointsState extends State<ScreenPoints> {
         .eq("u_id", uid)
         .execute();
 
-    dueDate = DueDate(
-      points: totalv.data[0]['total_cons'].toString(),
-      amount: totalv.data[0]['total_bill'].toString(),
-    );
+    if (totalv.error == null && totalv.data.isNotEmpty) {
+      print(totalv.data);
+      dueDate = DueDate(
+        points: totalv.data[0]['total_cons'].toString(),
+        amount: totalv.data[0]['total_bill'].toString(),
+      );
+    } else {
+      dueDate = DueDate(points: "0", amount: "0");
+    }
   }
 
   Future<void> userDetails(String? uid) async {
@@ -167,8 +174,11 @@ class _ScreenPointsState extends State<ScreenPoints> {
         title: const Text('Profile'),
       ),
       body: FutureBuilder(
-          future: Future.wait(
-              [userDetails(widget.uid), getDue(widget.uid, date, year),getDate(date, year, widget.uid)]),
+          future: Future.wait([
+            userDetails(widget.uid),
+            getDue(widget.uid, date, year),
+            getDate(date, year, widget.uid)
+          ]),
           builder:
               (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -379,7 +389,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final date = dateMap.keys.toList()[index];
                                   final consumption = dateMap[date];
-                          
+
                                   return Card(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 15.0, vertical: 4.0),

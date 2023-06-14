@@ -23,6 +23,8 @@ class _CalendarState extends State<Calendar> {
 
   int month = int.parse(DateFormat('MM').format(DateTime.now()));
   int year = int.parse(DateFormat('yy').format(DateTime.now()));
+  bool morning = false;
+  bool noon = false;
 
   @override
   Widget build(BuildContext context) {
