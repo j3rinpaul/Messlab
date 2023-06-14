@@ -18,12 +18,18 @@ class wardenPage extends StatelessWidget {
       bottomNavigationBar: BottomNav(uid: u_id),
       appBar: AppBar(
         title: Text("Warden Home"),
-        actions:[ IconButton(onPressed: (){
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (ctx1) => Settings()));
-        }, icon: Icon(Icons.settings))],
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (ctx1) => Settings()));
+              },
+              icon: Icon(Icons.settings))
+        ],
       ),
-      body: CalendarPage(uid: u_id,),
+      body: CalendarPage(
+        uid: u_id,
+      ),
       //body:ScreenCheckBox();
     );
 

@@ -14,6 +14,20 @@ class CheckboxList extends StatefulWidget {
   _CheckboxListState createState() => _CheckboxListState();
 }
 
+Future<void> mtime() async {
+  final mtime = await supabase
+      .from('timer')
+      .select('value')
+      .eq('time', 'morning')
+      .execute();
+
+  if (mtime.error == null) {
+    print(mtime.data[0]["value"]);
+  } else {
+    print(mtime.error);
+  }
+}
+
 Future<bool> getMorningToggleValue(String date, String uid) async {
   DateTime dateTime = DateFormat('yyyy-MM-dd').parse(date);
   String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
@@ -96,6 +110,7 @@ class _CheckboxListState extends State<CheckboxList> {
   @override
   void initState() {
     super.initState();
+    mtime();
     // fetchMrng();
     // Get the current time
     DateTime currentTime = DateTime.now();

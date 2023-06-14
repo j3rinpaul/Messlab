@@ -29,6 +29,8 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  
+
   Future<void> _showConfirmationDialog(BuildContext context) async {
     return showDialog(
       context: context,
@@ -211,6 +213,7 @@ class _SettingsState extends State<Settings> {
           ElevatedButton(
             onPressed: () {
               _showConfirmationDialog(context);
+              print(formattedTime);
             },
             child: Text('Update'),
           ),

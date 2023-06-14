@@ -10,10 +10,10 @@ class DailyCount extends StatefulWidget {
 }
 
 class _DailyCountState extends State<DailyCount> {
-  bool? isloading = false;
+  bool? isuserloading = false;
+  bool? isdetail = false;
   Future<dynamic> fetchDataWithDateParameter(
       String date, String db, String pref) async {
-        
     final response = await supabase
         .from(db)
         .select()
@@ -27,7 +27,6 @@ class _DailyCountState extends State<DailyCount> {
     } else {
       print("Failed to fetch data: ${response.error}");
     }
-    
   }
 
   final date = DateTime.now().toLocal().toString().split(' ')[0];
@@ -38,8 +37,8 @@ class _DailyCountState extends State<DailyCount> {
 
   Future<dynamic> Userdetails() async {
     setState(() {
-          isloading = true;
-        });
+      isdetail = true;
+    });
     final respo = await supabase
         .from('users')
         .select('u_id ,first_name , last_name')
@@ -104,21 +103,21 @@ class _DailyCountState extends State<DailyCount> {
       print("Failed to fetch data: ${respo.error}");
     }
     setState(() {
-          isloading = false;
-        });
+      isdetail = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    fetchDataCount();
     Userdetails();
+    fetchDataCount();
   }
 
   Future<void> fetchDataCount() async {
     setState(() {
-          isloading = true;
-        });
+      isuserloading = true;
+    });
     final morningFoodCount =
         await fetchDataWithDateParameter(date, "food_morning", "morning_food");
     final noonFoodCount =
@@ -127,11 +126,11 @@ class _DailyCountState extends State<DailyCount> {
         await fetchDataWithDateParameter(date, "food_evening", "evening_food");
 
     setState(() {
-      isLoading = false;
       parsedData[0]['date'] = date;
       parsedData[0]['morning_food'] = morningFoodCount;
       parsedData[0]['noon_food'] = noonFoodCount;
       parsedData[0]['evening_food'] = eveningFoodCount;
+      isuserloading = false;
     });
     print("parse:" + parsedData.toString());
   }
@@ -168,8 +167,9 @@ class _DailyCountState extends State<DailyCount> {
       appBar: AppBar(
         title: Text('Food Markings'),
       ),
-      body:isloading! ? Center(child: CircularProgressIndicator(),) :
-       Column(
+      body:
+          // isloading! ? Center(child: CircularProgressIndicator(),) :
+          Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -187,7 +187,7 @@ class _DailyCountState extends State<DailyCount> {
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+              child:isuserloading! ? Center(child: CircularProgressIndicator(),): Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
@@ -268,7 +268,9 @@ class _DailyCountState extends State<DailyCount> {
             ],
           ),
           Expanded(
-            child: SingleChildScrollView(
+            child:
+            // isdetail! ? Center(child: CircularProgressIndicator(),):
+             SingleChildScrollView(
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),

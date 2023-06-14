@@ -15,25 +15,7 @@ class ScreenPoints extends StatefulWidget {
 }
 
 class _ScreenPointsState extends State<ScreenPoints> {
-  final List<DateTime> dates = [
-    DateTime(2023, 6, 1),
-    DateTime(2023, 6, 2),
-    DateTime(2023, 6, 3),
-    DateTime(2023, 6, 1),
-    DateTime(2023, 6, 2),
-    DateTime(2023, 6, 3),
-    // Add more dates as needed
-  ];
-
-  final List<List<bool>> foodConsumption = [
-    [true, false, true], // Example consumption data for first date
-    [false, true, false], // Example consumption data for second date
-    [true, true, true],
-    [true, false, true], // Example consumption data for first date
-    [false, true, false], // Example consumption data for second date
-    [true, true, true], // Example consumption data for third date
-    // Add more consumption data as needed
-  ];
+ 
   final Map<String, List<bool>> dateMap = {};
 
   Future<void> getDate(String date, String year, String? uid) async {
@@ -175,7 +157,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
       ),
       body: FutureBuilder(
           future: Future.wait([
-            userDetails(widget.uid),
+            // userDetails(widget.uid),
             getDue(widget.uid, date, year),
             getDate(date, year, widget.uid)
           ]),
