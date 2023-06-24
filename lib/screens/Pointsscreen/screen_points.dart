@@ -15,36 +15,36 @@ class ScreenPoints extends StatefulWidget {
 }
 
 class _ScreenPointsState extends State<ScreenPoints> {
- 
   final Map<String, List<bool>> dateMap = {};
-
   Future<void> getDate(String date, String year, String? uid) async {
     final int selectedYear = int.parse(year);
     final int selectedMonth = int.parse(date);
 
     final eveningFoodResponse = await supabase
         .from('food_evening')
-        .select('mark_date,evening_food')
+        .select('mark_date, evening_food')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
-        .eq("u_id", uid)
+        .eq('u_id', uid)
         .execute();
 
     final morningFoodResponse = await supabase
         .from('food_morning')
-        .select('mark_date,morning_food')
+        .select('mark_date, morning_food')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
-        .eq("u_id", uid)
+        .eq('u_id', uid)
         .execute();
 
     final noonFoodResponse = await supabase
         .from('food_noon')
-        .select('mark_date,noon_food')
+        .select('mark_date, noon_food')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
-        .eq("u_id", uid)
+        .eq('u_id', uid)
         .execute();
+
+    dateMap.clear(); // Clear the existing data in the dateMap
 
     for (final data in eveningFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
@@ -53,14 +53,17 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
     for (final data in morningFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
-      dateMap[date]?[0] = data['morning_food'];
+      dateMap.putIfAbsent(date, () => [false, false, false])[0] =
+          data['morning_food'];
     }
 
     for (final data in noonFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
-      dateMap[date]?[1] = data['noon_food'];
+      dateMap.putIfAbsent(date, () => [false, false, false])[1] =
+          data['noon_food'];
     }
 
+    print('dateMap');
     print(dateMap);
   }
 
@@ -79,10 +82,24 @@ class _ScreenPointsState extends State<ScreenPoints> {
         .eq('month', month)
         .eq('year', year)
         .execute();
-    print(response.data);
+    print("morning" + response.data.toString());
   }
 
   Future<void> getDue(String? uid, String? date, String? year) async {
+    final paid = await supabase
+        .from('user_bill')
+        .select('bill_status')
+        .eq('month', date)
+        .eq('year', year)
+        .eq("u_id", uid)
+        .execute();
+
+    if (paid.error == null) {
+      print(paid.data);
+    } else {
+      print(paid.error);
+    }
+
     final totalv = await supabase
         .from('user_bill')
         .select('total_bill,total_cons')
@@ -93,10 +110,15 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
     if (totalv.error == null && totalv.data.isNotEmpty) {
       print(totalv.data);
-      dueDate = DueDate(
-        points: totalv.data[0]['total_cons'].toString(),
-        amount: totalv.data[0]['total_bill'].toString(),
-      );
+      if (paid.data.isNotEmpty && paid.data[0]['bill_status'] == false) {
+        dueDate = DueDate(
+          points: totalv.data[0]['total_cons'].toString(),
+          amount: totalv.data[0]['total_bill'].toString(),
+        );
+      } else {
+        dueDate = DueDate(
+            points: totalv.data[0]['total_cons'].toString(), amount: "Paid");
+      }
     } else {
       dueDate = DueDate(points: "0", amount: "0");
     }
@@ -363,7 +385,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
                             ],
                           ),
                           Container(
-                            height: 300,
+                            // height: 300,
                             child: SingleChildScrollView(
                               child: ListView.builder(
                                 shrinkWrap: true,
@@ -371,7 +393,6 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final date = dateMap.keys.toList()[index];
                                   final consumption = dateMap[date];
-
                                   return Card(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 15.0, vertical: 4.0),

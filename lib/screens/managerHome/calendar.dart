@@ -1,5 +1,6 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:mini_project/screens/wardenpage/billStatus.dart';
 
 import '../wardenpage/DailyCount.dart';
 import '../wardenpage/monthlyExp.dart';
@@ -71,7 +72,7 @@ class _CalendarState extends State<Calendar> {
                     return MonthlyExp(uid: widget.uid);
                   }));
                 },
-                child: const Text("Monthly Expense"),
+                child: const Text("Add Expense"),
               ),
             ),
             Padding(
@@ -80,25 +81,24 @@ class _CalendarState extends State<Calendar> {
                 onPressed: () {
                   print(widget.uid);
                   Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                    return MonthlyExp(uid: widget.uid);
+                    return MonthlyBill();
                   }));
                 },
-                child: const Text("Generate Bill"),
+                child: const Text("Payment Status"),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  print(widget.uid);
-                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                    return MonthlyExp(uid: widget.uid);
-                  }));
-                },
-                child: const Text("Generate Bill"),
-              ),
-            ),
-            
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //     onPressed: () {
+            //       print(widget.uid);
+            //       Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+            //         return MonthlyExp(uid: widget.uid);
+            //       }));
+            //     },
+            //     child: const Text("Generate Bill"),
+            //   ),
+            // ),
           ],
         )
 

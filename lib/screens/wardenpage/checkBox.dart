@@ -14,20 +14,6 @@ class CheckboxList extends StatefulWidget {
   _CheckboxListState createState() => _CheckboxListState();
 }
 
-Future<void> mtime() async {
-  final mtime = await supabase
-      .from('timer')
-      .select('value')
-      .eq('time', 'morning')
-      .execute();
-
-  if (mtime.error == null) {
-    print(mtime.data[0]["value"]);
-  } else {
-    print(mtime.error);
-  }
-}
-
 Future<bool> getMorningToggleValue(String date, String uid) async {
   DateTime dateTime = DateFormat('yyyy-MM-dd').parse(date);
   String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
@@ -102,15 +88,37 @@ Future<bool> getEveningToggleValue(String date, String uid) async {
   }
 }
 
+
 class _CheckboxListState extends State<CheckboxList> {
   ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(false);
   ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(false);
   ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(false);
+  int? mrngblock;
+  int? evngblock;
+  int? noonblock;
+  String? mrngt;
+
+  Future<String?> blockTime(
+  String ntime,
+) async {
+  final timeblock =
+      await supabase.from("timer").select('value').eq("time", ntime).execute();
+
+  if (timeblock.error == null) {
+    return timeblock.data[0]['value'] ;
+  } else {
+    return null;
+  }
+}
+
+
+
+
 
   @override
   void initState() {
     super.initState();
-    mtime();
+  
     // fetchMrng();
     // Get the current time
     DateTime currentTime = DateTime.now();

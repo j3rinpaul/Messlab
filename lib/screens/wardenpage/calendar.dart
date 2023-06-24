@@ -2,13 +2,10 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mini_project/screens/wardenpage/billStatus.dart';
-import 'package:mini_project/screens/wardenpage/generateBill.dart';
 
 import 'DailyCount.dart';
-import 'Roleassign_warden.dart';
 import 'checkBox.dart';
 import 'monthlyExp.dart';
-import 'verify.dart';
 
 class Calendar extends StatefulWidget {
   final String? uid;
@@ -57,28 +54,28 @@ class _CalendarState extends State<Calendar> {
                   },
                   child: Text("Daily Count")),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) {
-                      return RoleAssign();
-                    }));
-                  },
-                  child: Text("Role Assign")),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) {
-                      return VerifyUser();
-                    }));
-                  },
-                  child: Text("User Verify")),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.of(context)
+            //             .push(MaterialPageRoute(builder: (ctx) {
+            //           return RoleAssign();
+            //         }));
+            //       },
+            //       child: Text("Role Assign")),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.of(context)
+            //             .push(MaterialPageRoute(builder: (ctx) {
+            //           return VerifyUser();
+            //         }));
+            //       },
+            //       child: Text("User Verify")),
+            // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -88,19 +85,20 @@ class _CalendarState extends State<Calendar> {
                       return MonthlyExp(uid: widget.uid);
                     }));
                   },
-                  child: const Text("Monthly Expense")),
+                 
+                  child: const Text("Add Expense")),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () async {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) {
-                      return generateBill();
-                    }));
-                  },
-                  child: const Text("Generate Bill")),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: ElevatedButton(
+            //       onPressed: () async {
+            //         Navigator.of(context)
+            //             .push(MaterialPageRoute(builder: (ctx) {
+            //           return generateBill();
+            //         }));
+            //       },
+            //       child: const Text("Generate Bill")),
+            // ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
