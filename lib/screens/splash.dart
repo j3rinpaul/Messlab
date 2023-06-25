@@ -46,24 +46,23 @@ class _SplashScreenState extends State<SplashScreen> {
     if (islogged == null || islogged == false) {
       gotoLogin();
     } else if (roleuse == "user") {
-      print("user");
-      print(uid);
+      
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (ctx1) => ScreenHome(
                 u_id: uid,
               )));
     } else if (roleuse == "manager") {
-      print("manager--");
-      print(uid);
+      // print("manager--");
+      // print(uid);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (ctx1) => ManagerHome(
                 u_id: uid,
               )));
     }
     else if (roleuse == "warden") {
-      print("warden--");
-      print(uid);
+      // print("warden--");
+      // print(uid);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (ctx1) => wardenPage(
                 u_id: uid,

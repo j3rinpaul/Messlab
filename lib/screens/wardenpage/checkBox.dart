@@ -88,7 +88,6 @@ Future<bool> getEveningToggleValue(String date, String uid) async {
   }
 }
 
-
 class _CheckboxListState extends State<CheckboxList> {
   ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(false);
   ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(false);
@@ -98,121 +97,186 @@ class _CheckboxListState extends State<CheckboxList> {
   int? noonblock;
   String? mrngt;
 
-  Future<String?> blockTime(
-  String ntime,
-) async {
-  final timeblock =
-      await supabase.from("timer").select('value').eq("time", ntime).execute();
+  Future<int?> blockTime(
+    String ntime,
+  ) async {
+    final timeblock = await supabase
+        .from("timer")
+        .select('value')
+        .eq("time", ntime)
+        .execute();
 
-  if (timeblock.error == null) {
-    return timeblock.data[0]['value'] ;
-  } else {
-    return null;
+    if (timeblock.error == null) {
+      String source = timeblock.data[0]['value'];
+      List<String> timeComponents = source.split(':');
+      int hours = int.parse(timeComponents[0]);
+      int minutes = int.parse(timeComponents[1]);
+      int seconds = int.parse(timeComponents[2]);
+
+      int totalHours = hours + (minutes ~/ 60) + (seconds ~/ 3600);
+      // print(totalHours); // Output: 2
+      // print("---------------------------");
+      return totalHours;
+    } else {
+      return null;
+    }
   }
-}
 
+  void fetchMrng() async {
+    final mrng = await blockTime("morning");
+    final noon = await blockTime("noon");
+    final evng = await blockTime("evening");
+    setState(() {
+      mrngblock = mrng;
+      noonblock = noon;
+      evngblock = evng;
+    });
+    // print(mrngblock);
+    // print(noonblock);
+    // print(evngblock);
+  }
 
+  List<bool> prev = [false, false, false];
 
+  Future<void> setSwitch() async {
+    int time = await blockTime("morning") ?? 1;
+    int time1 = await blockTime("noon") ?? 1;
+    int time2 = await blockTime("evening") ?? 1;
 
-
-  @override
-  void initState() {
-    super.initState();
-  
+    prev[0] = currentTime.hour >= time;
+    prev[1] = currentTime.hour >= time1;
+    prev[2] = currentTime.hour >= time2;
     // fetchMrng();
     // Get the current time
-    DateTime currentTime = DateTime.now();
-
+    // print("-------------");
+    // print(time);
+    // print("-------------");
+    // print("-------------");
+    // print(time1);
+    // print("-------------");
+    // print("-------------");
+    // print(time2);
+    // print("-------------");
     // Deactivate Morning toggle button after 11 PM
-    if (currentTime.hour >= 01) {
+
+    if (currentTime.hour >= time) {
       setState(() {
-        morningToggleValue.value = false;
+        mrng = false;
+        // morningToggleValue.value = false;
       });
     }
 
     // Deactivate Noon toggle button after 9 AM
-    if (currentTime.hour >= 9) {
+    if (currentTime.hour >= time1) {
       setState(() {
-        noonToggleValue.value = false;
+        noon = false;
+        // noonToggleValue.value = false;
       });
     }
 
     // Deactivate Evening toggle button after 5 PM
-    if (currentTime.hour >= 17) {
+    if (currentTime.hour >= time2) {
+      print("Eventing ${currentTime.hour} $time2");
+      print(currentTime.hour >= time2);
       setState(() {
-        eveningToggleValue.value = false;
+        evening = false;
+        // eveningToggleValue.value = false;
       });
     }
+  }
+
+  DateTime currentTime = DateTime.now();
+  late int year;
+  late int month;
+  late int day;
+  @override
+  void initState() {
+    super.initState();
+    year = currentTime.year;
+    month = currentTime.month;
+    day = currentTime.day;
+    // setSwitch();
 
     // Reset Morning toggle after 8 AM
-    if (currentTime.hour >= 8) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          morningToggleValue.value = false;
-        });
-      });
-    }
+    // if (currentTime.hour >= 8) {
+    //   Timer(Duration(minutes: 1), () {
+    //     setState(() {
+    //       morningToggleValue.value = false;
+    //     });
+    //   });
+    // }
 
-    // Reset Noon toggle after 2 PM
-    if (currentTime.hour >= 14) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          noonToggleValue.value = false;
-        });
-      });
-    }
+    // // Reset Noon toggle after 2 PM
+    // if (currentTime.hour >= 14) {
+    //   Timer(Duration(minutes: 1), () {
+    //     setState(() {
+    //       noonToggleValue.value = false;
+    //     });
+    //   });
+    // }
 
-    // Reset Evening toggle after 10 PM
-    if (currentTime.hour >= 22) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          eveningToggleValue.value = false;
-        });
-      });
-    }
+    // // Reset Evening toggle after 10 PM
+    // if (currentTime.hour >= 22) {
+    //   Timer(Duration(minutes: 1), () {
+    //     setState(() {
+    //       eveningToggleValue.value = false;
+    //     });
+    //   });
+    // }
 
-    // Schedule timer to reset the toggles at the start of the next day
-    Timer(
-      Duration(
-        hours: 24 - currentTime.hour,
-        minutes: 60 - currentTime.minute,
-        seconds: 60 - currentTime.second,
-      ),
-      () {
-        setState(() {
-          morningToggleValue.value = false;
-          noonToggleValue.value = false;
-          eveningToggleValue.value = false;
-        });
-      },
-    );
+    // // Schedule timer to reset the toggles at the start of the next day
+    // Timer(
+    //   Duration(
+    //     hours: 24 - currentTime.hour,
+    //     minutes: 60 - currentTime.minute,
+    //     seconds: 60 - currentTime.second,
+    //   ),
+    //   () {
+    //     setState(() {
+    //       morningToggleValue.value = false;
+    //       noonToggleValue.value = false;
+    //       eveningToggleValue.value = false;
+    //     });
+    //   },
+    // );
   }
 
   void updateMorningToggleValue(String formattedDate, String userId) async {
     final value = await getMorningToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     morningToggleValue.value = value;
   }
 
   void updateNoonToggleValue(String formattedDate, String userId) async {
     final value = await getNoonToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     noonToggleValue.value = value;
   }
 
   void updateEveningToggleValue(String formattedDate, String userId) async {
     final value = await getEveningToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     eveningToggleValue.value = value;
+    // final block = await blockTime("evening");
+  }
+
+  bool mrng = true;
+  bool noon = true;
+  bool evening = true;
+
+  bool ischanged = false;
+
+  // DateTime currentTime = DateTime.now();
+  @override
+  void setState(VoidCallback fn) {
+    // TODO: implement setState
+    super.setState(fn);
+    
   }
 
   @override
   Widget build(BuildContext context) {
-    DateTime currentTime = DateTime.now();
-    int year = currentTime.year;
-    int month = currentTime.month;
-    int day = currentTime.day;
-
+    // print("buildin....");
     String formattedDate = '$year-$month-$day';
     print(formattedDate);
 
@@ -222,26 +286,27 @@ class _CheckboxListState extends State<CheckboxList> {
     int setday = setDate.day;
 
     String setdDate = '$setyear-$setmonth-$setday';
-    print(setdDate);
+    // print(setdDate);
 
-    bool mrng = canToggleMorning();
-    bool noon = canToggleNoon();
-    bool evening = canToggleEvening();
-    updateMorningToggleValue(setdDate, widget.userId!);
-    updateNoonToggleValue(setdDate, widget.userId!);
-    updateEveningToggleValue(setdDate, widget.userId!);
+    // updateMorningToggleValue(setdDate, widget.userId!);
+    // updateNoonToggleValue(setdDate, widget.userId!);
+    // updateEveningToggleValue(setdDate, widget.userId!);
 
     if (formattedDate != setdDate) {
-      setState(() {
-        mrng = true;
-        noon = true;
-        evening = true;
-      });
       // print("ner"+setdDate);
 
       updateMorningToggleValue(setdDate, widget.userId!);
       updateNoonToggleValue(setdDate, widget.userId!);
       updateEveningToggleValue(setdDate, widget.userId!);
+      // mrng = canToggleMorning();
+      // noon = canToggleNoon();
+      // evening = canToggleEvening();
+
+      setState(() {
+        mrng = true;
+        noon = true;
+        evening = true;
+      });
       // updateNoonToggleValue(setdDate, widget.userId!);
       // updateEveningToggleValue(setdDate, widget.userId!);
       // getMorningToggleValue(formattedDate, widget.userId!).then((value) {
@@ -249,6 +314,10 @@ class _CheckboxListState extends State<CheckboxList> {
       //     isMorningSelected = value;
       //   });
       // });
+    } else {
+      if (!(prev[0] == mrng && prev[1] == noon && prev[2] == evening)) {
+        setSwitch();
+      }
     }
     return Container(
       padding: EdgeInsets.all(20),
@@ -280,7 +349,7 @@ class _CheckboxListState extends State<CheckboxList> {
                             setState(() {
                               morningToggleValue.value = value;
                             });
-                            print("Selected Morning");
+                            // print("Selected Morning");
                             try {
                               final userId = widget.userId;
                               DateTime dateTime =
@@ -376,7 +445,7 @@ class _CheckboxListState extends State<CheckboxList> {
                       setState(() {
                         noonToggleValue.value = value;
                       });
-                      print("Selected Noon");
+                      // print("Selected Noon");
                       try {
                         final userId = widget.userId;
                         DateTime dateTime =
@@ -464,7 +533,7 @@ class _CheckboxListState extends State<CheckboxList> {
                       setState(() {
                         eveningToggleValue.value = value;
                       });
-                      print("Selected Evening");
+                      // print("Selected Evening");
                       try {
                         final userId = widget.userId;
                         DateTime dateTime =
@@ -534,18 +603,20 @@ class _CheckboxListState extends State<CheckboxList> {
     );
   }
 
-  bool canToggleMorning() {
+  bool canToggleMorning(time) {
     DateTime currentTime = DateTime.now();
-    return currentTime.hour < 1; // Allow toggle before 11 PM
+
+    return currentTime.hour < time; // Allow timetoggle before 11 PM
   }
 
-  bool canToggleNoon() {
+  bool canToggleNoon(time) {
     DateTime currentTime = DateTime.now();
-    return currentTime.hour < 9; // Allow toggle before 9 AM
+    return currentTime.hour < time; // Allow toggle before 9 AM
   }
 
-  bool canToggleEvening() {
+  bool canToggleEvening(time) {
     DateTime currentTime = DateTime.now();
-    return currentTime.hour < 17; // Allow toggle before 5 PM
+
+    return currentTime.hour < time; // Allow toggle before 5 PM
   }
 }

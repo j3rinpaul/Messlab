@@ -52,13 +52,13 @@ Future<bool> getNoonToggleValue(String date, String uid) async {
   if (morningVal.error == null && morningVal.data.isNotEmpty) {
     bool morningFoodValue = morningVal.data[0]['noon_food'] as bool;
     if (morningFoodValue == true) {
-      print("noon");
+      // print("noon");
       return true;
     } else {
       return false;
     }
   } else {
-    print("noon not found");
+    // print("noon not found");
     return false;
   }
 }
@@ -77,13 +77,13 @@ Future<bool> getEveningToggleValue(String date, String uid) async {
   if (morningVal.error == null && morningVal.data.isNotEmpty) {
     bool morningFoodValue = morningVal.data[0]['evening_food'] as bool;
     if (morningFoodValue == true) {
-      print("evening");
+      // print("evening");
       return true;
     } else {
       return false;
     }
   } else {
-    print("not found evening" + formattedDate);
+    // print("not found evening" + formattedDate);
     return false;
   }
 }
@@ -167,19 +167,19 @@ class _CheckboxListState extends State<CheckboxList> {
 
   void updateMorningToggleValue(String formattedDate, String userId) async {
     final value = await getMorningToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     morningToggleValue.value = value;
   }
 
   void updateNoonToggleValue(String formattedDate, String userId) async {
     final value = await getNoonToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     noonToggleValue.value = value;
   }
 
   void updateEveningToggleValue(String formattedDate, String userId) async {
     final value = await getEveningToggleValue(formattedDate, userId);
-    print(value);
+    // print(value);
     eveningToggleValue.value = value;
   }
 
@@ -191,7 +191,7 @@ class _CheckboxListState extends State<CheckboxList> {
     int day = currentTime.day;
 
     String formattedDate = '$year-$month-$day';
-    print(formattedDate);
+    // print(formattedDate);
 
     DateTime setDate = widget.date!;
     int setyear = setDate.year;
@@ -199,7 +199,7 @@ class _CheckboxListState extends State<CheckboxList> {
     int setday = setDate.day;
 
     String setdDate = '$setyear-$setmonth-$setday';
-    print(setdDate);
+    // print(setdDate);
 
     bool mrng = canToggleMorning();
     bool noon = canToggleNoon();
@@ -257,7 +257,7 @@ class _CheckboxListState extends State<CheckboxList> {
                             setState(() {
                               morningToggleValue.value = value;
                             });
-                            print("Selected Morning");
+                            // print("Selected Morning");
                             try {
                               final userId = widget.userId;
                               DateTime dateTime =
