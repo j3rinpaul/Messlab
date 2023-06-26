@@ -83,7 +83,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                       showAddAnnouncementDialog(context);
                       
                     },
-                    child: Text("add announcement")),
+                    child: Text("Add announcement")),
               ],
             )),
       ),
@@ -132,9 +132,9 @@ class _ScreenReviewState extends State<ScreenReview> {
                         ),
                       ),
                     ),
-                    ElevatedButton(
+                    TextButton(
                         onPressed: () {
-                          print("view");
+                          print("View");
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (ctx) {
                             return viewReview();

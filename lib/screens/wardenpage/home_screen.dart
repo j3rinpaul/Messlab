@@ -16,7 +16,7 @@ class wardenPage extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar: BottomNav(uid: u_id),
       appBar: AppBar(
-        title: Text("Warden Home"),
+        title: Text("Warden"),
         actions: [
           PopupMenuButton(
             icon: Icon(Icons.more_vert),

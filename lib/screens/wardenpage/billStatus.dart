@@ -27,8 +27,8 @@ class _MonthlyBillState extends State<MonthlyBill> {
   List<int> years =
       List<int>.generate(10, (index) => DateTime.now().year - 5 + index);
 
-  String? selectedMonth;
-  int? selectedYear;
+  String? selectedMonth = DateFormat('MM').format(DateTime.now());
+  int? selectedYear = DateTime.now().year;
   bool isloading = false;
 
   Future<void> userAmount(String? date, String? year) async {
@@ -52,15 +52,22 @@ class _MonthlyBillState extends State<MonthlyBill> {
             .select("first_name,last_name")
             .eq('u_id', userId)
             .execute();
+
         if (userResponse.data != null && userResponse.data.isNotEmpty) {
-          final name = userResponse.data[0]['first_name']+ " " + userResponse.data[0]['last_name'];
+          final name = userResponse.data[0]['first_name'] +
+              " " +
+              userResponse.data[0]['last_name'];
           BillItem item = BillItem(
             realname: name,
             name: itemData['u_id'],
             amount: itemData['total_bill'].toDouble(),
             status: itemData['bill_status'] ? 'Paid' : 'Not Paid',
           );
+
           items.add(item);
+          setState(() {
+            isloading = false;
+          });
         } else {
           print(userResponse.error!.message.toString());
         }
@@ -71,9 +78,6 @@ class _MonthlyBillState extends State<MonthlyBill> {
     } else {
       print(response.error!.message.toString());
     }
-    setState(() {
-      isloading = false;
-    });
   }
 
   Future<void> _selectMonthAndYear() async {
@@ -189,6 +193,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                   print(response.error!.message.toString());
                 } else {
                   print("true");
+                  fetchBillItemsFromDatabase();
                 }
               },
               child: Row(
@@ -204,7 +209,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                 Navigator.pop(context, 'Not Paid');
                 final response = await supabase
                     .from("user_bill")
-                    .update({"bill_status": true})
+                    .update({"bill_status": false})
                     .eq('u_id', item.name)
                     .eq('month', selectedMonth)
                     .eq('year', selectedYear.toString())
@@ -213,6 +218,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                   print(response.error!.message.toString());
                 } else {
                   print("false");
+                  fetchBillItemsFromDatabase();
                 }
               },
               child: Row(
@@ -236,141 +242,143 @@ class _MonthlyBillState extends State<MonthlyBill> {
     super.initState();
     fetchBillItemsFromDatabase(); // Fetch bill items from the database
     userAmount(month, year);
+    // print(selectedMonth);
   }
 
   Future<void> fetchBillItemsFromDatabase() async {
-    
     // Replace with your own database connection and query logic
-    await Future.delayed(Duration(seconds: 2)); // Simulating a delay
+    // await Future.delayed(Duration(seconds: 2)); // Simulating a delay
     await userAmount(selectedMonth, selectedYear.toString());
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    return 
-     Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: Text('Monthly Bill'),
+        title: Text('Payment Status'),
       ),
-      body: isloading ? Center(child: CircularProgressIndicator()) :
-       Column(
-        children: [
-          GestureDetector(
-            onTap: () => _selectMonthAndYear(),
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                padding: EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calendar_today, color: Colors.white),
-                    SizedBox(width: 8.0),
-                    Text(
-                      selectedMonth != null && selectedYear != null
-                          ? '$selectedMonth $selectedYear'
-                          : 'Select Month',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
+      body: isloading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                GestureDetector(
+                  onTap: () => _selectMonthAndYear(),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // SizedBox(height: 5),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                color: const Color.fromARGB(255, 209, 206, 206),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Table(
-                    columnWidths: {
-                      0: FlexColumnWidth(2),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(2),
-                    },
-                    children: [
-                      TableRow(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TableCell(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'NAME',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'AMOUNT',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'STATUS',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
+                          Icon(Icons.calendar_today, color: Colors.white),
+                          SizedBox(width: 8.0),
+                          Text(
+                            selectedMonth != null && selectedYear != null
+                                ? '$selectedMonth $selectedYear'
+                                : 'Select Month',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
                             ),
                           ),
                         ],
                       ),
-                      ...billItems.map((item) {
-                        return TableRow(
-                          children: [
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(item.realname.toString()),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(item.amount.toString()),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: GestureDetector(
-                                  onTap: () => _showEditOptions(item),
-                                  child: Row(
-                                    children: [
-                                      _getStatusIcon(item.status),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                // SizedBox(height: 5),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Card(
+                      color: const Color.fromARGB(255, 209, 206, 206),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Table(
+                          columnWidths: {
+                            0: FlexColumnWidth(2),
+                            1: FlexColumnWidth(2),
+                            2: FlexColumnWidth(2),
+                          },
+                          children: [
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'NAME',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'AMOUNT',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'STATUS',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ...billItems.map((item) {
+                              return TableRow(
+                                children: [
+                                  TableCell(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(item.realname.toString()),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(item.amount.toString()),
+                                    ),
+                                  ),
+                                  TableCell(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: GestureDetector(
+                                        onTap: () => _showEditOptions(item),
+                                        child: Row(
+                                          children: [
+                                            _getStatusIcon(item.status),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

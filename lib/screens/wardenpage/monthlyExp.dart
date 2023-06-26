@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mini_project/supabase_config.dart';
-import 'package:supabase/supabase.dart';
 
 class MonthlyExp extends StatefulWidget {
   final String? uid;
+
   MonthlyExp({Key? key, this.uid}) : super(key: key);
 
   @override
@@ -12,7 +12,7 @@ class MonthlyExp extends StatefulWidget {
 }
 
 class _MonthlyExpState extends State<MonthlyExp> {
-  List<ExpenseItem> expenses = [];
+  final ValueNotifier<List<ExpenseItem>> expenseListNotifier = ValueNotifier([]);
 
   TextEditingController dateController = TextEditingController();
   TextEditingController amountController = TextEditingController();
@@ -58,11 +58,13 @@ class _MonthlyExpState extends State<MonthlyExp> {
       if (response.error == null) {
         // Expense saved successfully
         final insertedExpense = response.data?.first;
-        expenses.add(ExpenseItem(
+        final newExpense = ExpenseItem(
           date: insertedExpense['date'],
           amount: insertedExpense['amount'],
           remark: insertedExpense['remark'],
-        ));
+        );
+
+        expenseListNotifier.value = [...expenseListNotifier.value, newExpense];
 
         // Clear the text fields after adding an expense
         dateController.clear();
@@ -98,51 +100,24 @@ class _MonthlyExpState extends State<MonthlyExp> {
               remark: expense['remark'] as String,
             ));
 
-        setState(() {
-          expenses = List.from(list);
-        });
+        expenseListNotifier.value = List.from(list);
       }
     } else {
       print('Error: ${response.error?.message}');
     }
   }
 
-  void subscribeToRealtimeUpdates() {
-    supabase
-        .from('daily_expense')
-        .on(SupabaseEventTypes.insert,
-            (payload) => handleRealtimeUpdate(payload))
-        .subscribe();
-  }
-
   @override
   void initState() {
     super.initState();
-    subscribeToRealtimeUpdates();
-    // Fetch initial expenses
     fetchExpenses(null, null);
-
-    // Listen for real-time updates on the daily_expense table
-    // supabase.from('daily_expense').on('INSERT', (payload) => handleRealtimeUpdate(payload)).subscribe();
-  }
-
-  void handleRealtimeUpdate(payload) {
-    final insertedExpense = payload.newRecord;
-
-    setState(() {
-      expenses.add(ExpenseItem(
-        date: insertedExpense['date'],
-        amount: insertedExpense['amount'],
-        remark: insertedExpense['remark'],
-      ));
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Monthly Expenses'),
+        title: const Text('Add Expenses'),
       ),
       body: Column(
         children: [
@@ -200,15 +175,15 @@ class _MonthlyExpState extends State<MonthlyExp> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    //check whether the bil is generated or not
                     final response = await supabase
                         .from('bill_generated')
                         .select()
                         .eq('month', DateFormat('MM').format(DateTime.now()))
                         .execute();
-                    final generate = response.data.isNotEmpty?response.data[0]['generate_bill']:false;
+                    final generate = response.data.isNotEmpty
+                        ? response.data[0]['generate_bill']
+                        : false;
                     print(generate);
-                    //if generated then disable the button
 
                     if (generate) {
                       showDialog(
@@ -234,21 +209,30 @@ class _MonthlyExpState extends State<MonthlyExp> {
                     } else {
                       print("bill added");
                       addExpense();
+                      ExpenseItem(
+                        date: dateController.text,
+                        amount: double.parse(amountController.text),
+                        remark: remarkController.text,
+                      );
                     }
                   },
                   child: const Text('Add'),
                 ),
                 TextButton(
-                    onPressed: () {
-                      _selectMonthAndYear();
-                    },
-                    child: Text("View Bill")),
+                  onPressed: _selectMonthAndYear,
+                  child: Text("View Bill"),
+                ),
               ],
             ),
           ),
           Expanded(
-            child: ShowList(
-              expenses: expenses,
+            child: ValueListenableBuilder<List<ExpenseItem>>(
+              valueListenable: expenseListNotifier,
+              builder: (context, expenses, _) {
+                return ShowList(
+                  expenses: expenses,
+                );
+              },
             ),
           ),
         ],
@@ -336,7 +320,6 @@ class _MonthlyExpState extends State<MonthlyExp> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                // Perform actions with selectedMonth and selectedYear
                 if (selectedMonth != null && selectedYear != null) {
                   print(
                       'Selected month and year: $selectedMonth $selectedYear');

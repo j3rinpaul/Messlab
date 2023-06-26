@@ -47,7 +47,7 @@ class _RoleAssignState extends State<RoleAssign> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('Role Assign'),
       ),
       body: ListView.builder(
         itemCount: parsedData.length,
@@ -299,10 +299,3 @@ class _RoleAssignState extends State<RoleAssign> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Role Assignment',
-    home: RoleAssign(),
-  ));
-}

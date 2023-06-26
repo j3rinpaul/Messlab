@@ -165,7 +165,7 @@ class _DailyCountState extends State<DailyCount> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Food Markings'),
+        title: Text('Daily Count'),
       ),
       body:
           // isloading! ? Center(child: CircularProgressIndicator(),) :
@@ -447,6 +447,7 @@ class _DailyCountState extends State<DailyCount> {
 
                     Navigator.pop(context); // Close the dialog
                     _showSuccessDialog();
+                    fetchDataCount();
 
                     print(foodDetails.toString());
                   },

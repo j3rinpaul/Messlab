@@ -82,9 +82,8 @@ class _ScreenReviewState extends State<ScreenReview> {
                 ElevatedButton(
                     onPressed: () {
                       showAddAnnouncementDialog(context);
-                      
                     },
-                    child: Text("add announcement")),
+                    child: Text("Add announcement")),
               ],
             )),
       ),
@@ -133,7 +132,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                         ),
                       ),
                     ),
-                    ElevatedButton(
+                    TextButton(
                         onPressed: () {
                           print("view");
                           Navigator.of(context)
@@ -141,7 +140,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                             return viewReview();
                           }));
                         },
-                        child: Text("view"))
+                        child: Text("View"))
                   ],
                 )
               ],
@@ -171,51 +170,49 @@ class _ScreenReviewState extends State<ScreenReview> {
       },
     );
   }
+
   TextEditingController _announcementCont = TextEditingController();
   String newAnnouncement = "";
   void showAddAnnouncementDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Add Announcement'),
-        content: TextField(
-          controller: _announcementCont,
-          onChanged: (value) {
-            newAnnouncement = value;
-          },
-        ),
-        actions: <Widget>[
-          ElevatedButton(
-            onPressed: ()async {
-              final response = await supabase
-                          .from('announcements')
-                          .insert({
-                        'announcemnts': _announcementCont.text,
-                        "u_id": widget.uid
-                      }).execute();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Announcement'),
+          content: TextField(
+            controller: _announcementCont,
+            onChanged: (value) {
+              newAnnouncement = value;
+            },
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                final response = await supabase.from('announcements').insert({
+                  'announcemnts': _announcementCont.text,
+                  "u_id": widget.uid
+                }).execute();
 
-                      if (response.error == null) {
-                        print("Announcement added");
-                      }
-                      else{
-                        print(response.error);
-                      }
-              Navigator.of(context).pop();
-            },
-            child: Text('Add'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancel'),
-          ),
-        ],
-      );
-    },
-  );
-}
+                if (response.error == null) {
+                  print("Announcement added");
+                } else {
+                  print(response.error);
+                }
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 /*
