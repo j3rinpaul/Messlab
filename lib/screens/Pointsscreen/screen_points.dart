@@ -173,7 +173,6 @@ class _ScreenPointsState extends State<ScreenPoints> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const BottomNav(),
       appBar: AppBar(
         title: const Text('Profile'),
       ),

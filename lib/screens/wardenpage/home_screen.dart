@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_project/screens/managerHome/verify.dart';
+import 'package:mini_project/screens/wardenpage/verify.dart';
 import 'package:mini_project/screens/wardenpage/Roleassign_warden.dart';
 import 'package:mini_project/screens/wardenpage/generateBill.dart';
 import 'package:mini_project/screens/wardenpage/settings.dart';

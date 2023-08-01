@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../supabase_config.dart';
 
 class CheckboxList extends StatefulWidget {
@@ -148,7 +146,6 @@ class _CheckboxListState extends State<CheckboxList> {
       });
     }
 
-    // Schedule timer to reset the toggles at the start of the next day
     Timer(
       Duration(
         hours: 24 - currentTime.hour,
@@ -167,19 +164,19 @@ class _CheckboxListState extends State<CheckboxList> {
 
   void updateMorningToggleValue(String formattedDate, String userId) async {
     final value = await getMorningToggleValue(formattedDate, userId);
-    // print(value);
+
     morningToggleValue.value = value;
   }
 
   void updateNoonToggleValue(String formattedDate, String userId) async {
     final value = await getNoonToggleValue(formattedDate, userId);
-    // print(value);
+
     noonToggleValue.value = value;
   }
 
   void updateEveningToggleValue(String formattedDate, String userId) async {
     final value = await getEveningToggleValue(formattedDate, userId);
-    // print(value);
+
     eveningToggleValue.value = value;
   }
 
@@ -191,7 +188,7 @@ class _CheckboxListState extends State<CheckboxList> {
     int day = currentTime.day;
 
     String formattedDate = '$year-$month-$day';
-    // print(formattedDate);
+
 
     DateTime setDate = widget.date!;
     int setyear = setDate.year;
@@ -199,7 +196,7 @@ class _CheckboxListState extends State<CheckboxList> {
     int setday = setDate.day;
 
     String setdDate = '$setyear-$setmonth-$setday';
-    // print(setdDate);
+
 
     bool mrng = canToggleMorning();
     bool noon = canToggleNoon();
@@ -214,18 +211,12 @@ class _CheckboxListState extends State<CheckboxList> {
         noon = true;
         evening = true;
       });
-      // print("ner"+setdDate);
+
 
       updateMorningToggleValue(setdDate, widget.userId!);
       updateNoonToggleValue(setdDate, widget.userId!);
       updateEveningToggleValue(setdDate, widget.userId!);
-      // updateNoonToggleValue(setdDate, widget.userId!);
-      // updateEveningToggleValue(setdDate, widget.userId!);
-      // getMorningToggleValue(formattedDate, widget.userId!).then((value) {
-      //   setState(() {
-      //     isMorningSelected = value;
-      //   });
-      // });
+      
     }
     return Container(
       padding: EdgeInsets.all(20),
