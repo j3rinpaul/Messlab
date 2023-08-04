@@ -76,6 +76,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
         billItems = items;
       });
     } else {
+      print("error in month");
       print(response.error!.message.toString());
     }
   }
@@ -243,6 +244,11 @@ class _MonthlyBillState extends State<MonthlyBill> {
     fetchBillItemsFromDatabase(); // Fetch bill items from the database
     userAmount(month, year);
     // print(selectedMonth);
+     Future.delayed(Duration(seconds: 5), () {
+    setState(() {
+      isloading = false;
+    });
+  });
   }
 
   Future<void> fetchBillItemsFromDatabase() async {

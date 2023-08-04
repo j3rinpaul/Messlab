@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,219 +12,182 @@ class CheckboxList extends StatefulWidget {
   _CheckboxListState createState() => _CheckboxListState();
 }
 
-Future<bool> getMorningToggleValue(String date, String uid) async {
-  DateTime dateTime = DateFormat('yyyy-MM-dd').parse(date);
-  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+List<bool> dataValues = [];
 
-  final morningVal = await supabase
-      .from('food_morning')
-      .select("morning_food")
-      .eq('mark_date', formattedDate)
-      .eq("u_id", uid)
-      .execute();
-
-  if (morningVal.error == null && morningVal.data.isNotEmpty) {
-    bool morningFoodValue = morningVal.data[0]['morning_food'] as bool;
-    if (morningFoodValue == true) {
-      print(1 + 1 + 1);
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
-Future<bool> getNoonToggleValue(String date, String uid) async {
-  DateTime dateTime = DateFormat('yyyy-MM-dd').parse(date);
-  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
-
-  final morningVal = await supabase
-      .from('food_noon')
-      .select("noon_food")
-      .eq('mark_date', formattedDate)
-      .eq("u_id", uid)
-      .execute();
-
-  if (morningVal.error == null && morningVal.data.isNotEmpty) {
-    bool morningFoodValue = morningVal.data[0]['noon_food'] as bool;
-    if (morningFoodValue == true) {
-      // print("noon");
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    // print("noon not found");
-    return false;
-  }
-}
-
-Future<bool> getEveningToggleValue(String date, String uid) async {
-  DateTime dateTime = DateFormat('yyyy-MM-dd').parse(date);
-  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
-
-  final morningVal = await supabase
-      .from('food_evening')
-      .select("evening_food")
-      .eq('mark_date', formattedDate)
-      .eq("u_id", uid)
-      .execute();
-
-  if (morningVal.error == null && morningVal.data.isNotEmpty) {
-    bool morningFoodValue = morningVal.data[0]['evening_food'] as bool;
-    if (morningFoodValue == true) {
-      // print("evening");
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    // print("not found evening" + formattedDate);
-    return false;
-  }
+String formatDate(DateTime date) {
+  String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+  return formattedDate;
 }
 
 class _CheckboxListState extends State<CheckboxList> {
   ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(false);
   ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(false);
   ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(false);
+  bool mrng = true;
+  bool noon = true;
+  bool evening = true;
+  String? mrngTime;
+  String? noonTime;
+  String? eveningTime;
+  int? parseTimemrng ;
+  int? parseTimenoon ;
+  int? parseTimeevening ;
+
+  DateTime currentTime = DateTime.now();
+
+  Future<List<bool>> getDataToggle(DateTime date) async {
+    String needDate = formatDate(date);
+    final response = await supabase
+        .from('food_marking')
+        .select("morning , noon , evening")
+        .eq("mark_date", needDate)
+        .execute();
+
+    if (response.error != null) {
+      // Handle error
+      throw response.error!;
+    }
+
+    final data = response.data;
+    print(data);
+    List<bool> dataVal = data.isNotEmpty
+        ? [
+            data[0]['morning'] as bool,
+            data[0]['noon'] as bool,
+            data[0]['evening'] as bool,
+          ]
+        : [false, false, false];
+
+    setState(() {
+      dataValues = dataVal;
+      //assign the variables to change here on another date
+      morningToggleValue.value = dataValues[0];
+      noonToggleValue.value = dataValues[1];
+      eveningToggleValue.value = dataValues[2];
+     
+    });
+
+    return dataValues;
+  }
+
+  Future<List<bool>> initToggle(DateTime date) async {
+    String needDate = formatDate(date);
+    final response = await supabase
+        .from('food_marking')
+        .select("morning , noon , evening")
+        .eq("mark_date", needDate)
+        .execute();
+
+    if (response.error != null) {
+      // Handle error
+      throw response.error!;
+    }
+
+    final data = response.data;
+    if (data.isEmpty) {
+      mrng = false;
+      noon = false;
+      evening = false;
+    }
+
+    print(data);
+    List<bool> dataVal = data.isNotEmpty
+        ? [
+            data[0]['morning'] as bool,
+            data[0]['noon'] as bool,
+            data[0]['evening'] as bool,
+          ]
+        : [false, false, false];
+
+    setState(() {
+      dataValues = dataVal;
+      //assign the variables to change here on another date
+      morningToggleValue.value = dataValues[0];
+      noonToggleValue.value = dataValues[1];
+      eveningToggleValue.value = dataValues[2];
+    });
+    return dataValues;
+  }
+
+  Future<void> getActiveTime() async {
+    final timeData = await supabase.from('timer').select().execute();
+
+    Map<String, String> parsedTimeMap = {};
+    for (var item in timeData.data) {
+      parsedTimeMap[item["time"]] = item["value"];
+    }
+
+    setState(() {
+      mrngTime = parsedTimeMap["morning"]!;
+      noonTime = parsedTimeMap["noon"]!;
+      eveningTime = parsedTimeMap["evening"]!;
+    });
+
+    parseTimemrng = int.parse(mrngTime!.split(":")[0]);
+    parseTimenoon = int.parse(noonTime!.split(":")[0]);
+    parseTimeevening = int.parse(eveningTime!.split(":")[0]);
+    print(parseTimemrng);
+    print(parseTimenoon);
+    print(parseTimeevening);
+  }
+
+  Future<void> selectiveToggle() async {
+    await getActiveTime();
+    if (parseTimemrng! < currentTime.hour) {
+      setState(() {
+        mrng = false;
+      });
+    }
+    if (parseTimenoon! < currentTime.hour) {
+      setState(() {
+        noon = false;
+      });
+    }
+    if (parseTimeevening! < currentTime.hour) {
+      setState(() {
+        evening = false;
+      });
+    }
+  }
 
   @override
   void initState() {
+    // TODO: implement initState
+    getActiveTime();
+    initToggle(widget.date!);
+    selectiveToggle();
     super.initState();
-    // fetchMrng();
-    // Get the current time
-    DateTime currentTime = DateTime.now();
-
-    // Deactivate Morning toggle button after 11 PM
-    if (currentTime.hour >= 01) {
-      setState(() {
-        morningToggleValue.value = false;
-      });
-    }
-
-    // Deactivate Noon toggle button after 9 AM
-    if (currentTime.hour >= 9) {
-      setState(() {
-        noonToggleValue.value = false;
-      });
-    }
-
-    // Deactivate Evening toggle button after 5 PM
-    if (currentTime.hour >= 17) {
-      setState(() {
-        eveningToggleValue.value = false;
-      });
-    }
-
-    // Reset Morning toggle after 8 AM
-    if (currentTime.hour >= 8) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          morningToggleValue.value = false;
-        });
-      });
-    }
-
-    // Reset Noon toggle after 2 PM
-    if (currentTime.hour >= 14) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          noonToggleValue.value = false;
-        });
-      });
-    }
-
-    // Reset Evening toggle after 10 PM
-    if (currentTime.hour >= 22) {
-      Timer(Duration(minutes: 1), () {
-        setState(() {
-          eveningToggleValue.value = false;
-        });
-      });
-    }
-
-    // Schedule timer to reset the toggles at the start of the next day
-    Timer(
-      Duration(
-        hours: 24 - currentTime.hour,
-        minutes: 60 - currentTime.minute,
-        seconds: 60 - currentTime.second,
-      ),
-      () {
-        setState(() {
-          morningToggleValue.value = false;
-          noonToggleValue.value = false;
-          eveningToggleValue.value = false;
-        });
-      },
-    );
   }
 
-  void updateMorningToggleValue(String formattedDate, String userId) async {
-    final value = await getMorningToggleValue(formattedDate, userId);
-    // print(value);
-    morningToggleValue.value = value;
-  }
+  @override
+  void didUpdateWidget(covariant CheckboxList oldWidget) {
+    if (widget.date != oldWidget.date) {
+      setState(() {
+        getDataToggle(widget.date!);
+      });
+    }
+    if (currentTime.day == widget.date!.day) {
+      setState(() {
+         print(parseTimemrng);
+          print(parseTimenoon);
+           print(parseTimeevening);
+        mrng = !(parseTimemrng! < currentTime.hour);
+        print("over");
+        noon = !(parseTimenoon! < currentTime.hour);
+        evening = !(parseTimeevening! < currentTime.hour);
 
-  void updateNoonToggleValue(String formattedDate, String userId) async {
-    final value = await getNoonToggleValue(formattedDate, userId);
-    // print(value);
-    noonToggleValue.value = value;
-  }
-
-  void updateEveningToggleValue(String formattedDate, String userId) async {
-    final value = await getEveningToggleValue(formattedDate, userId);
-    // print(value);
-    eveningToggleValue.value = value;
+        // selectiveToggle();
+      });
+    } else {
+      mrng = true;
+      noon = true;
+      evening = true;
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    DateTime currentTime = DateTime.now();
-    int year = currentTime.year;
-    int month = currentTime.month;
-    int day = currentTime.day;
-
-    String formattedDate = '$year-$month-$day';
-    // print(formattedDate);
-
-    DateTime setDate = widget.date!;
-    int setyear = setDate.year;
-    int setmonth = setDate.month;
-    int setday = setDate.day;
-
-    String setdDate = '$setyear-$setmonth-$setday';
-    // print(setdDate);
-
-    bool mrng = canToggleMorning();
-    bool noon = canToggleNoon();
-    bool evening = canToggleEvening();
-    updateMorningToggleValue(setdDate, widget.userId!);
-    updateNoonToggleValue(setdDate, widget.userId!);
-    updateEveningToggleValue(setdDate, widget.userId!);
-
-    if (formattedDate != setdDate) {
-      setState(() {
-        mrng = true;
-        noon = true;
-        evening = true;
-      });
-      // print("ner"+setdDate);
-
-      updateMorningToggleValue(setdDate, widget.userId!);
-      updateNoonToggleValue(setdDate, widget.userId!);
-      updateEveningToggleValue(setdDate, widget.userId!);
-      // updateNoonToggleValue(setdDate, widget.userId!);
-      // updateEveningToggleValue(setdDate, widget.userId!);
-      // getMorningToggleValue(formattedDate, widget.userId!).then((value) {
-      //   setState(() {
-      //     isMorningSelected = value;
-      //   });
-      // });
-    }
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -242,7 +203,7 @@ class _CheckboxListState extends State<CheckboxList> {
             leading: CircleAvatar(
                 backgroundColor: Colors.blue[400],
                 child: Icon(
-                  Icons.wb_sunny,
+                  Icons.sunny_snowing,
                   color: Colors.white,
                 )),
             title: Text('Morning'),
@@ -266,7 +227,7 @@ class _CheckboxListState extends State<CheckboxList> {
                                   DateFormat('yyyy-MM-dd').format(dateTime);
 
                               final existingDataResponse = await supabase
-                                  .from('food_morning')
+                                  .from('food_marking')
                                   .select()
                                   .eq('u_id', userId)
                                   .eq('mark_date', formattedDate)
@@ -283,9 +244,9 @@ class _CheckboxListState extends State<CheckboxList> {
                                   existingData.length == 1) {
                                 // Existing data found, perform update
                                 final updateResponse = await supabase
-                                    .from('food_morning')
+                                    .from('food_marking')
                                     .update({
-                                      'morning_food': value,
+                                      'morning': value,
                                     })
                                     .eq('u_id', userId)
                                     .eq('mark_date', formattedDate)
@@ -303,11 +264,11 @@ class _CheckboxListState extends State<CheckboxList> {
                               } else {
                                 // No existing data, perform insert
                                 final insertResponse =
-                                    await supabase.from('food_morning').insert([
+                                    await supabase.from('food_marking').insert([
                                   {
                                     'u_id': userId,
                                     'mark_date': formattedDate,
-                                    'morning_food': value,
+                                    'morning': value,
                                   }
                                 ]).execute();
 
@@ -363,7 +324,7 @@ class _CheckboxListState extends State<CheckboxList> {
                         //     DateTime.now().toLocal().toString().split(' ')[0];
 
                         final existingDataResponse = await supabase
-                            .from('food_noon')
+                            .from('food_marking')
                             .select()
                             .eq('u_id', userId)
                             .eq('mark_date', date)
@@ -379,9 +340,9 @@ class _CheckboxListState extends State<CheckboxList> {
                         if (existingData != null && existingData.length == 1) {
                           // Existing data found, perform update
                           final updateResponse = await supabase
-                              .from('food_noon')
+                              .from('food_marking')
                               .update({
-                                'noon_food': value,
+                                'noon': value,
                               })
                               .eq('u_id', userId)
                               .eq('mark_date', date)
@@ -396,11 +357,11 @@ class _CheckboxListState extends State<CheckboxList> {
                         } else {
                           // No existing data, perform insert
                           final insertResponse =
-                              await supabase.from('food_noon').insert([
+                              await supabase.from('food_marking').insert([
                             {
                               'u_id': userId,
                               'mark_date': date,
-                              'noon_food': value,
+                              'noon': value,
                             }
                           ]).execute();
 
@@ -451,7 +412,7 @@ class _CheckboxListState extends State<CheckboxList> {
                         //     DateTime.now().toLocal().toString().split(' ')[0];
 
                         final existingDataResponse = await supabase
-                            .from('food_evening')
+                            .from('food_marking')
                             .select()
                             .eq('u_id', userId)
                             .eq('mark_date', date)
@@ -467,9 +428,9 @@ class _CheckboxListState extends State<CheckboxList> {
                         if (existingData != null && existingData.length == 1) {
                           // Existing data found, perform update
                           final updateResponse = await supabase
-                              .from('food_evening')
+                              .from('food_marking')
                               .update({
-                                'evening_food': value,
+                                'evening': value,
                               })
                               .eq('u_id', userId)
                               .eq('mark_date', date)
@@ -484,11 +445,11 @@ class _CheckboxListState extends State<CheckboxList> {
                         } else {
                           // No existing data, perform insert
                           final insertResponse =
-                              await supabase.from('food_evening').insert([
+                              await supabase.from('food_marking').insert([
                             {
                               'u_id': userId,
                               'mark_date': date,
-                              'evening_food': value,
+                              'evening': value,
                             }
                           ]).execute();
 
@@ -509,20 +470,5 @@ class _CheckboxListState extends State<CheckboxList> {
         ],
       ),
     );
-  }
-
-  bool canToggleMorning() {
-    DateTime currentTime = DateTime.now();
-    return currentTime.hour < 1; // Allow toggle before 11 PM
-  }
-
-  bool canToggleNoon() {
-    DateTime currentTime = DateTime.now();
-    return currentTime.hour < 9; // Allow toggle before 9 AM
-  }
-
-  bool canToggleEvening() {
-    DateTime currentTime = DateTime.now();
-    return currentTime.hour < 17; // Allow toggle before 5 PM
   }
 }

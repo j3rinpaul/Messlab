@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mini_project/screens/wardenpage/billStatus.dart';
 
+
 import 'DailyCount.dart';
 import 'checkBox.dart';
 import 'monthlyExp.dart';
@@ -40,6 +41,7 @@ class _CalendarState extends State<Calendar> {
             });
           },
         ),
+       
         CheckboxList(date: selectedValue, userId: widget.uid),
         Wrap(
           children: [
@@ -54,28 +56,8 @@ class _CalendarState extends State<Calendar> {
                   },
                   child: Text("Daily Count")),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.of(context)
-            //             .push(MaterialPageRoute(builder: (ctx) {
-            //           return RoleAssign();
-            //         }));
-            //       },
-            //       child: Text("Role Assign")),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.of(context)
-            //             .push(MaterialPageRoute(builder: (ctx) {
-            //           return VerifyUser();
-            //         }));
-            //       },
-            //       child: Text("User Verify")),
-            // ),
+           
+            
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(

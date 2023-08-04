@@ -9,6 +9,7 @@ class generateBill extends StatefulWidget {
 
 class _generateBillState extends State<generateBill> {
   DateTime? selectedDate;
+  bool isLoading = false;
   List<billTable> expenses = [];
   TextEditingController fixedExpenses = TextEditingController();
   // List<BillItem> billItems = [];
@@ -146,36 +147,39 @@ class _generateBillState extends State<generateBill> {
 
       if (response.data.isEmpty) {
         // print(DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0));
+        setState(() {
+          isLoading = true;
+        });
         final morningFoodResponse = await supabase
-            .from('food_morning')
-            .select('morning_food')
+            .from('food_marking')
+            .select('morning')
             .gte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!), 0))
             .lte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
-            .eq("morning_food", true)
+            .eq("morning", true)
             .execute();
 
         // print(morningFoodResponse.data.length);
         final noonFoodResponse = await supabase
-            .from('food_noon')
-            .select('noon_food')
+            .from('food_marking')
+            .select('noon')
             .gte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!), 0))
             .lte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
-            .eq("noon_food", true)
+            .eq("noon", true)
             .execute();
         // print(noonFoodResponse.data.length);
 
         final eveningFoodResponse = await supabase
-            .from('food_evening')
-            .select('evening_food')
+            .from('food_marking')
+            .select('evening')
             .gte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!), 0))
             .lte('mark_date',
                 DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
-            .eq("evening_food", true)
+            .eq("evening", true)
             .execute();
         // print(eveningFoodResponse.data.length);
         // print(DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0));
@@ -183,13 +187,12 @@ class _generateBillState extends State<generateBill> {
 
         // Calculate the sum of true values in 'morning_food', 'noon_food', 'evening_food'
         int morningFoodCount = morningFoodResponse.data
-            .where((data) => data['morning_food'] == true)
+            .where((data) => data['morning'] == true)
             .length;
-        int noonFoodCount = noonFoodResponse.data
-            .where((data) => data['noon_food'] == true)
-            .length;
+        int noonFoodCount =
+            noonFoodResponse.data.where((data) => data['noon'] == true).length;
         int eveningFoodCount = eveningFoodResponse.data
-            .where((data) => data['evening_food'] == true)
+            .where((data) => data['evening'] == true)
             .length;
         // Calculate the total
         int totalFoodCount =
@@ -202,7 +205,9 @@ class _generateBillState extends State<generateBill> {
             .lte('date',
                 DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
             .execute();
-
+        setState(() {
+          isLoading = false;
+        });
         print(amount.data);
         final List<dynamic> data = amount.data as List<dynamic>;
         final List<double> amounts =
@@ -215,12 +220,12 @@ class _generateBillState extends State<generateBill> {
         double round = sum / totalFoodCount;
         double rate_per_point = double.parse(round.toStringAsFixed(2));
 
-        print(selectedMonth);
-        print(selectedYear);
-        print(fixedExpenses.text);
-        print(totalFoodCount);
-        print(sum);
-        print(rate_per_point);
+        // print(selectedMonth);
+        // print(selectedYear);
+        // print(fixedExpenses.text);
+        // print(totalFoodCount);
+        // print(sum);
+        // print(rate_per_point);
         await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -286,23 +291,6 @@ class _generateBillState extends State<generateBill> {
                             TextButton(
                               onPressed: () async {
                                 Navigator.pop(context);
-                                user_bill();
-                                print("Bill Generation reached");
-                                final response = await supabase
-                                    .from('bill_generated')
-                                    .insert([
-                                  {
-                                    'month': selectedMonth,
-                                    'year': selectedYear,
-                                    'generate_bill': true,
-                                  }
-                                ]).execute();
-                                if (response.error == null) {
-                                  print("Bill generated");
-                                } else {
-                                  print("Error: ${response.error}");
-                                }
-
                                 final monthly =
                                     await supabase.from('monthly_bill').insert([
                                   {
@@ -319,7 +307,27 @@ class _generateBillState extends State<generateBill> {
                                 if (monthly.error == null) {
                                   print("Bill generated successfully");
                                 } else {
-                                  print("Error: ${monthly.error}");
+                                  showAlert("Error","Fixed expense was update but bill was not generated\nGenerating bill.... ");
+                                }
+                                await user_bill();
+
+                                print("Bill Generation reached");
+                                //data
+                                final response = await supabase
+                                    .from('bill_generated')
+                                    .insert([
+                                  {
+                                    'month': selectedMonth,
+                                    'year': selectedYear,
+                                    'generate_bill': true,
+                                  }
+                                ]).execute();
+                                if (response.error == null) {
+                                  showAlert("Bill generated Successfully",
+                                      "Bill of ${selectedMonth} ${selectedYear} has been generated successfully");
+                                } else {
+                                  showAlert("Error",
+                                      "Bill not generated\n please try again ");
                                 }
                               },
                               child: Text('Yes'),
@@ -450,181 +458,66 @@ class _generateBillState extends State<generateBill> {
           //     child: Text("Test")),
           Text('Previous Bills', style: TextStyle(fontWeight: FontWeight.bold)),
           SizedBox(height: 10),
-          Expanded(child: TableView(tableData: expenses)
-
-              // Padding(
-              //   padding: EdgeInsets.all(16.0),
-              //   child: SingleChildScrollView(
-              //     scrollDirection: Axis.vertical,
-              //     child: Container(
-              //       decoration: BoxDecoration(
-              //           color: const Color.fromARGB(255, 206, 202, 202),
-              //           borderRadius: BorderRadius.circular(16)),
-              //       child: Table(
-              //         border:
-              //             TableBorder.all(borderRadius: BorderRadius.circular(16)),
-              //         columnWidths: {
-              //           0: FlexColumnWidth(1),
-              //           1: FlexColumnWidth(1),
-              //           2: FlexColumnWidth(1),
-              //           3: FlexColumnWidth(1),
-              //           4: FlexColumnWidth(1),
-              //           5: FlexColumnWidth(1),
-              //         },
-              //         children: [
-              //           TableRow(
-              //             children: [
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Month',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Year',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Total Points',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Fixed Exp',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Monthly Exp',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text(
-              //                     'Total Exp',
-              //                     style: TextStyle(fontWeight: FontWeight.bold),
-              //                   ),
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //           TableRow(
-              //             children: [
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('January'),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('2023'),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('500'),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('100'),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('400'),
-              //                 ),
-              //               ),
-              //               TableCell(
-              //                 child: Padding(
-              //                   padding: EdgeInsets.all(8.0),
-              //                   child: Text('500'),
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              )
+          Expanded(child: TableView(tableData: expenses))
         ],
       ),
     );
   }
 
-//for diplaying the previous bills
-Future<void> table_data() async {
-  final response = await supabase.from('monthly_bill').select().execute();
-  print(response.data);
-  if (response.error == null) {
-    final data = response.data;
-
-    if (data != null && data.isNotEmpty) {
-      final list = data.map((expense) => billTable(
-        expense['month'],
-        expense['year'],
-        expense['consumption'],
-        expense['fixed'],
-        expense['total_exp'],
-        expense['rate_per_cons'],
-      ));
-
-      setState(() {
-        expenses = List<billTable>.from(list);
-      });
-    }
-  } else {
-    print('Error: ${response.error?.message}');
+  void showAlert(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
-}
 
-  // Future<void> fetchExpenses(String? date, int? year) async {
-  //   if (date == null && year == null) {
-  //     date = DateFormat('MM').format(DateTime.now());
-  //   }
+//for diplaying the previous bills
+  Future<void> table_data() async {
+    final response = await supabase.from('monthly_bill').select().execute();
+    print(response.data);
+    if (response.error == null) {
+      final data = response.data;
 
-  //   final response = await supabase
-  //       .from('daily_expense')
-  //       .select()
-  //       .eq('month', date)
-  //       .eq(year != null ? 'year' : '', year)
-  //       .execute();
+      if (data != null && data.isNotEmpty) {
+        final list = data.map((expense) => billTable(
+              expense['month'],
+              expense['year'],
+              expense['consumption'],
+              expense['fixed'],
+              expense['total_exp'],
+              expense['rate_per_cons'],
+            ));
 
-  // }
+        setState(() {
+          expenses = List<billTable>.from(list);
+        });
+      }
+    } else {
+      print('Error: ${response.error?.message}');
+    }
+  }
 
   Future<void> user_bill() async {
+    setState(() {
+      isLoading = true;
+    });
+    //userdetails are fetched
     final user = await supabase.from("users").select('u_id').execute();
     print(user.data);
-
+//fixed is fetched
     final fixed = await supabase
         .from('monthly_bill')
         .select('fixed')
@@ -632,9 +525,10 @@ Future<void> table_data() async {
         .eq('year', selectedYear)
         .execute();
     int fixed_exp = fixed.data[0]['fixed'];
+    //share of  fixed expenses to each users
     final fixed_per_user = fixed_exp / user.data.length;
     print(fixed_exp / user.data.length);
-
+//fetching the rate per point
     final rate_per_point = await supabase
         .from('monthly_bill')
         .select('rate_per_cons')
@@ -645,11 +539,13 @@ Future<void> table_data() async {
     final List<dynamic> data = user.data as List<dynamic>;
     for (final usd in data) {
       print(usd['u_id']);
+      //fetching the morning noon and evening food count for each users
+
       final fetchmrng = await supabase
-          .from('food_morning')
-          .select('morning_food')
+          .from('food_marking')
+          .select('morning')
           .eq('u_id', usd['u_id'])
-          // .eq("morning_food", true)
+          .eq("morning", true)
           .gte('mark_date',
               DateTime(selectedYear!, int.parse(selectedMonth!), 1))
           .lte('mark_date',
@@ -658,10 +554,10 @@ Future<void> table_data() async {
       print(fetchmrng.data.length);
 
       final fetchnoon = await supabase
-          .from('food_noon')
-          .select('noon_food')
+          .from('food_marking')
+          .select('noon')
           .eq('u_id', usd['u_id'])
-          // .eq("morning_food", true)
+          .eq("noon", true)
           .gte('mark_date',
               DateTime(selectedYear!, int.parse(selectedMonth!), 1))
           .lte('mark_date',
@@ -670,10 +566,10 @@ Future<void> table_data() async {
       print("noon" + fetchnoon.data.length.toString());
 
       final fetchevng = await supabase
-          .from('food_evening')
-          .select('evening_food')
+          .from('food_marking')
+          .select('evening')
           .eq('u_id', usd['u_id'])
-          // .eq("morning_food", true)
+          .eq("evening", true)
           .gte('mark_date',
               DateTime(selectedYear!, int.parse(selectedMonth!), 1))
           .lte('mark_date',
@@ -706,6 +602,9 @@ Future<void> table_data() async {
         print("Error for user_bill: ${response.error}");
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 }
 
@@ -766,15 +665,3 @@ class TableView extends StatelessWidget {
     );
   }
 }
-
-// class BillItem {
-//   final String name;
-//   final double amount;
-//   String status;
-
-//   BillItem({
-//     required this.name,
-//     required this.amount,
-//     this.status = 'Not Paid',
-//   });
-// }

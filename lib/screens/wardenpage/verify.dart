@@ -88,6 +88,7 @@ class _VerifyUserState extends State<VerifyUser> {
                           onPressed: () {
                             verifyData(
                                 context,
+                                item['id'],
                                 item['username'],
                                 item['password'],
                                 item['first_name'],
@@ -123,6 +124,7 @@ class _VerifyUserState extends State<VerifyUser> {
 
   Future<void> verifyData(
       BuildContext context,
+      dynamic id,
       String username,
       dynamic password,
       dynamic first_name,
@@ -130,22 +132,43 @@ class _VerifyUserState extends State<VerifyUser> {
       dynamic designation,
       dynamic deptartment,
       dynamic phone) async {
-    final response = await supabase.from('users').insert([
-      {
-        'email': username,
-        'password': password,
-        'first_name': first_name,
-        'last_name': last_name,
-        'designation': designation,
-        'department': deptartment,
-        'phone': phone,
-      }
-    ]).execute();
-    if (response.error == null) {
-      showVar(context, "User created successfully", "Created");
+//check if user already exists
+    final userfound = await supabase //check if user already exists
+        .from('users')
+        .select()
+        .eq('email', username)
+        .execute();
+    if (userfound.data.isNotEmpty) {
+      showVar(context, "User already exists", "Failed");
+      return;
     } else {
-      showVar(context, "Failed to create user", "Failed");
-      print("error" + response.error.toString());
+      final response = await supabase.from('users').insert([
+        {
+          'email': username,
+          'password': password,
+          'first_name': first_name,
+          'last_name': last_name,
+          'designation': designation,
+          'department': deptartment,
+          'phone': phone,
+        }
+      ]).execute();
+      if (response.error == null) {
+        final response = await supabase
+            .from('signup_details')
+            .delete()
+            .eq('id', id)
+            .execute();
+        print(id);
+        showVar(context, "User created successfully", "Created");
+        if (response.error == null) {
+          print("user deleted after verification");
+        }
+        fetchData();
+      } else {
+        showVar(context, "Failed to create user", "Failed");
+        print("error" + response.error.toString());
+      }
     }
   }
 

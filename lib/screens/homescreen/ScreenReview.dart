@@ -56,11 +56,21 @@ class _ScreenReviewState extends State<ScreenReview> {
           height: 180,
           child: Column(
             children: [
-              Center(
-                  child: Text(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
                     "Announcements",
                     style: TextStyle(fontWeight: FontWeight.bold),
-                  )),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      getAnnounce();
+                    },
+                    icon: const Icon(Icons.refresh),
+                  ),
+                ],
+              ),
               Expanded(
                   child: ListView.builder(
                     itemCount: announcementList.length,

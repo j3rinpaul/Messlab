@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/splash.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,14 +15,45 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// Future<bool> checkConnection() async {
+//   var connectivityResult = await (Connectivity().checkConnectivity());
+//   if (connectivityResult == ConnectivityResult.none) {
+//     return false;
+//   } else {
+//     return true;
+//   }
+// }
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // bool isConnected = true;
+  // late Stream<ConnectivityResult> connectivityStream;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    
+    // checkConnection().then((value) {
+    //   setState(() {
+    //     print(value);
+    //     isConnected = value;
+    //   });
+    // });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primaryColor: Colors.green),
-      home: const SplashScreen(),
+      home: SplashScreen() ,
       debugShowCheckedModeBanner: false,
     );
   }

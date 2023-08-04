@@ -60,45 +60,28 @@ class _DailyCountState extends State<DailyCount> {
           data.map<dynamic>((user) => user['u_id']).toList();
 
       for (final uids in userIds) {
-        final mrng_food = await supabase
-            .from('food_morning')
-            .select('morning_food')
+        final allFood = await supabase
+            .from('food_marking')
+            .select('morning , noon , evening')
             .eq('u_id', uids)
             .eq('mark_date', date)
             .execute();
-        final mrngdata = mrng_food.data;
-        final mrngFoodValue =
-            mrngdata.isNotEmpty ? mrngdata[0]['morning_food'] : false;
-
-        final noon_food = await supabase
-            .from('food_noon')
-            .select('noon_food')
-            .eq('u_id', uids)
-            .eq('mark_date', date)
-            .execute();
-        final noondata = noon_food.data;
-        final noonFoodValue =
-            noondata.isNotEmpty ? noondata[0]['noon_food'] : false;
-
-        final evening_food = await supabase
-            .from('food_evening')
-            .select('evening_food')
-            .eq('u_id', uids)
-            .eq('mark_date', date)
-            .execute();
-        final eveningdata = evening_food.data;
-        final eveningFoodValue =
-            eveningdata.isNotEmpty ? eveningdata[0]['evening_food'] : false;
-
-        final foodList = [mrngFoodValue, noonFoodValue, eveningFoodValue];
-        print(foodList.toString());
-
+      
+        print(uids.toString() +" "+allFood.data.toString());
+        final foodData = allFood.data;
+        final foodList = foodData.isNotEmpty
+            ? [
+                foodData[0]['morning'],
+                foodData[0]['noon'],
+                foodData[0]['evening'],
+              ]
+            : [false, false, false];    
         setState(() {
           foodDetails[uids] = List.from(foodList);
         });
       }
 
-      print(foodDetails.toString());
+      // print(foodDetails.toString());
     } else {
       print("Failed to fetch data: ${respo.error}");
     }
@@ -119,11 +102,11 @@ class _DailyCountState extends State<DailyCount> {
       isuserloading = true;
     });
     final morningFoodCount =
-        await fetchDataWithDateParameter(date, "food_morning", "morning_food");
+        await fetchDataWithDateParameter(date, "food_marking", "morning");
     final noonFoodCount =
-        await fetchDataWithDateParameter(date, "food_noon", "noon_food");
+        await fetchDataWithDateParameter(date, "food_marking", "noon");
     final eveningFoodCount =
-        await fetchDataWithDateParameter(date, "food_evening", "evening_food");
+        await fetchDataWithDateParameter(date, "food_marking", "evening");
 
     setState(() {
       parsedData[0]['date'] = date;
@@ -187,56 +170,60 @@ class _DailyCountState extends State<DailyCount> {
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child:isuserloading! ? Center(child: CircularProgressIndicator(),): Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      SizedBox(height: 10),
-                      Text(
-                        parsedData[0]['morning_food'].toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 40),
-                      ),
-                      Text(
-                        'Morning',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(height: 10),
-                      Text(
-                        parsedData[0]['noon_food'].toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 40),
-                      ),
-                      Text(
-                        'Noon',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(height: 10),
-                      Text(
-                        parsedData[0]['evening_food'].toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 40),
-                      ),
-                      Text(
-                        'Evening',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              child: isuserloading!
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            SizedBox(height: 10),
+                            Text(
+                              parsedData[0]['morning_food'].toString(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 40),
+                            ),
+                            Text(
+                              'Morning',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(height: 10),
+                            Text(
+                              parsedData[0]['noon_food'].toString(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 40),
+                            ),
+                            Text(
+                              'Noon',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(height: 10),
+                            Text(
+                              parsedData[0]['evening_food'].toString(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 40),
+                            ),
+                            Text(
+                              'Evening',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
             ),
           ),
           Row(
@@ -269,8 +256,8 @@ class _DailyCountState extends State<DailyCount> {
           ),
           Expanded(
             child:
-            // isdetail! ? Center(child: CircularProgressIndicator(),):
-             SingleChildScrollView(
+                // isdetail! ? Center(child: CircularProgressIndicator(),):
+                SingleChildScrollView(
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -384,7 +371,7 @@ class _DailyCountState extends State<DailyCount> {
 
                     // Check if the entry already exists in the database
                     final existingDataResponse = await supabase
-                        .from('food_morning')
+                        .from('food_marking')
                         .select()
                         .eq('u_id', uids)
                         .eq('mark_date', date)
@@ -400,9 +387,9 @@ class _DailyCountState extends State<DailyCount> {
                     if (existingData != null && existingData.length == 1) {
                       // Existing data found, perform update
                       final updateResponse = await supabase
-                          .from('food_morning')
+                          .from('food_marking')
                           .update({
-                            'morning_food': mrngFood,
+                            'morning': mrngFood,
                           })
                           .eq('u_id', uids)
                           .eq('mark_date', date)
@@ -417,11 +404,11 @@ class _DailyCountState extends State<DailyCount> {
                     } else {
                       // No existing data, perform insert
                       final insertResponse =
-                          await supabase.from('food_morning').insert([
+                          await supabase.from('food_marking').insert([
                         {
                           'u_id': uids,
                           'mark_date': date,
-                          'morning_food': mrngFood,
+                          'morning': mrngFood,
                         }
                       ]).execute();
 
@@ -433,16 +420,16 @@ class _DailyCountState extends State<DailyCount> {
                       print('Insert operation completed successfully!');
                     }
 
-                    await supabase.from('food_noon').upsert({
+                    await supabase.from('food_marking').upsert({
                       'u_id': uids,
                       'mark_date': date,
-                      'noon_food': noonFood
+                      'noon': noonFood
                     }).execute();
 
-                    await supabase.from('food_evening').upsert({
+                    await supabase.from('food_marking').upsert({
                       'u_id': uids,
                       'mark_date': date,
-                      'evening_food': eveningFood
+                      'evening': eveningFood
                     }).execute();
 
                     Navigator.pop(context); // Close the dialog

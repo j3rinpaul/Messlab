@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mini_project/screens/wardenpage/editAnn.dart';
 import 'package:mini_project/screens/wardenpage/viewReview.dart';
 import 'package:mini_project/supabase_config.dart';
 
@@ -57,20 +58,34 @@ class _ScreenReviewState extends State<ScreenReview> {
             child: Column(
               children: [
                 Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(5),
-                    child: Text(
-                      "Announcements",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(5),
+                        child: Text(
+                          "Announcements",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            getAnnounce();
+                          },
+                          icon: Icon(
+                            Icons.refresh,
+                            size: 15,
+                          ))
+                    ],
                   ),
                 ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: announcementList.length,
                     itemBuilder: (context, index) {
+                      int reverse_index = announcementList.length - index - 1;
                       final adjustedIndex = index + 1;
-                      final announcement = announcementList[index];
+                      final announcement = announcementList[reverse_index];
                       return ListTile(
                         title: Text("$adjustedIndex"),
                         trailing: Text(announcement),
@@ -78,12 +93,27 @@ class _ScreenReviewState extends State<ScreenReview> {
                     },
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      showAddAnnouncementDialog(context);
-                      
-                    },
-                    child: Text("Add announcement")),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          showAddAnnouncementDialog(context);
+                        },
+                        icon: Icon(
+                          Icons.add,
+                          size: 20,
+                        )),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (ctx) {
+                            return EditAnnouncements();
+                          }));
+                        },
+                        icon: Icon(Icons.edit, size: 20))
+                  ],
+                ),
               ],
             )),
       ),
@@ -170,52 +200,53 @@ class _ScreenReviewState extends State<ScreenReview> {
       },
     );
   }
+
   TextEditingController _announcementCont = TextEditingController();
   String newAnnouncement = "";
   void showAddAnnouncementDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Add Announcement'),
-        content: TextField(
-          controller: _announcementCont,
-          onChanged: (value) {
-            newAnnouncement = value;
-          },
-        ),
-        actions: <Widget>[
-          ElevatedButton(
-            onPressed: ()async {
-              final response = await supabase
-                          .from('announcements')
-                          .insert({
-                        'announcemnts': _announcementCont.text,
-                        "u_id": widget.uid
-                      }).execute();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Announcement'),
+          content: TextField(
+            controller: _announcementCont,
+            onChanged: (value) {
+              newAnnouncement = value;
+            },
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                final response = await supabase.from('announcements').insert({
+                  'announcemnts': _announcementCont.text,
+                  "u_id": widget.uid
+                }).execute();
 
-                      if (response.error == null) {
-                        print("Announcement added");
-                      }
-                      else{
-                        print(response.error);
-                      }
-              Navigator.of(context).pop();
-            },
-            child: Text('Add'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancel'),
-          ),
-        ],
-      );
-    },
-  );
+                if (response.error == null) {
+                  print("Announcement added");
+                  _announcementCont.clear();
+                  getAnnounce();
+                } else {
+                  print(response.error);
+                }
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
-}
+
 
 /*
   announcements are saved into the db and fetched and displayed through valuenotifier
