@@ -21,24 +21,24 @@ class _ScreenPointsState extends State<ScreenPoints> {
     final int selectedMonth = int.parse(date);
 
     final eveningFoodResponse = await supabase
-        .from('food_evening')
-        .select('mark_date, evening_food')
+        .from('food_marking')
+        .select('mark_date, evening')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
         .eq('u_id', uid)
         .execute();
 
     final morningFoodResponse = await supabase
-        .from('food_morning')
-        .select('mark_date, morning_food')
+        .from('food_marking')
+        .select('mark_date, morning')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
         .eq('u_id', uid)
         .execute();
 
     final noonFoodResponse = await supabase
-        .from('food_noon')
-        .select('mark_date, noon_food')
+        .from('food_marking')
+        .select('mark_date, noon')
         .gte('mark_date', DateTime(selectedYear, selectedMonth, 1))
         .lte('mark_date', DateTime(selectedYear, selectedMonth + 1, 0))
         .eq('u_id', uid)
@@ -48,19 +48,19 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
     for (final data in eveningFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
-      dateMap[date] = [false, false, data['evening_food']];
+      dateMap[date] = [false, false, data['evening']];
     }
 
     for (final data in morningFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
       dateMap.putIfAbsent(date, () => [false, false, false])[0] =
-          data['morning_food'];
+          data['morning'];
     }
 
     for (final data in noonFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
       dateMap.putIfAbsent(date, () => [false, false, false])[1] =
-          data['noon_food'];
+          data['noon'];
     }
 
     print('dateMap');
@@ -74,16 +74,16 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
 //get the detailed bill of the user of that month
 //get all the data of that user in that month
-  Future<void> detailedB(String month, String year, String? uid) async {
-    final response = await supabase
-        .from('food_morning')
-        .select()
-        .eq('u_id', uid)
-        .eq('month', month)
-        .eq('year', year)
-        .execute();
-    print("morning" + response.data.toString());
-  }
+  // Future<void> detailedB(String month, String year, String? uid) async {
+  //   final response = await supabase
+  //       .from('food_morning')
+  //       .select()
+  //       .eq('u_id', uid)
+  //       .eq('month', month)
+  //       .eq('year', year)
+  //       .execute();
+  //   print("morning" + response.data.toString());
+  // }
 
   Future<void> getDue(String? uid, String? date, String? year) async {
     final paid = await supabase
@@ -166,7 +166,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
   Future<void> initializeData() async {
     await userDetails(widget.uid);
     await getDue(widget.uid, date, year);
-    await detailedB(date, year, widget.uid);
+    // await detailedB(date, year, widget.uid);
     await getDate(date, year, widget.uid);
   }
 
