@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 import '../../supabase_config.dart';
@@ -29,9 +30,9 @@ class _CheckboxListState extends State<CheckboxList> {
   String? mrngTime;
   String? noonTime;
   String? eveningTime;
-  int? parseTimemrng ;
-  int? parseTimenoon ;
-  int? parseTimeevening ;
+  int? parseTimemrng;
+  int? parseTimenoon;
+  int? parseTimeevening;
 
   DateTime currentTime = DateTime.now();
 
@@ -41,6 +42,7 @@ class _CheckboxListState extends State<CheckboxList> {
         .from('food_marking')
         .select("morning , noon , evening")
         .eq("mark_date", needDate)
+        .eq('u_id', widget.userId)
         .execute();
 
     if (response.error != null) {
@@ -49,7 +51,7 @@ class _CheckboxListState extends State<CheckboxList> {
     }
 
     final data = response.data;
-    print(data);
+    print("date" + data.toString());
     List<bool> dataVal = data.isNotEmpty
         ? [
             data[0]['morning'] as bool,
@@ -64,7 +66,6 @@ class _CheckboxListState extends State<CheckboxList> {
       morningToggleValue.value = dataValues[0];
       noonToggleValue.value = dataValues[1];
       eveningToggleValue.value = dataValues[2];
-     
     });
 
     return dataValues;
@@ -76,6 +77,7 @@ class _CheckboxListState extends State<CheckboxList> {
         .from('food_marking')
         .select("morning , noon , evening")
         .eq("mark_date", needDate)
+        .eq("u_id", widget.userId)
         .execute();
 
     if (response.error != null) {
@@ -90,7 +92,7 @@ class _CheckboxListState extends State<CheckboxList> {
       evening = false;
     }
 
-    print(data);
+    print("date" + data.toString());
     List<bool> dataVal = data.isNotEmpty
         ? [
             data[0]['morning'] as bool,
@@ -101,6 +103,7 @@ class _CheckboxListState extends State<CheckboxList> {
 
     setState(() {
       dataValues = dataVal;
+      print(dataValues);
       //assign the variables to change here on another date
       morningToggleValue.value = dataValues[0];
       noonToggleValue.value = dataValues[1];
@@ -168,9 +171,9 @@ class _CheckboxListState extends State<CheckboxList> {
     }
     if (currentTime.day == widget.date!.day) {
       setState(() {
-         print(parseTimemrng);
-          print(parseTimenoon);
-           print(parseTimeevening);
+        print(parseTimemrng);
+        print(parseTimenoon);
+        print(parseTimeevening);
         mrng = !(parseTimemrng! < currentTime.hour);
         print("over");
         noon = !(parseTimenoon! < currentTime.hour);
@@ -258,7 +261,7 @@ class _CheckboxListState extends State<CheckboxList> {
                                 } else {
                                   print(formattedDate);
                                 }
-
+                                toastBar("Updated Morning");
                                 print(
                                     'Update operation completed successfully!');
                               } else {
@@ -276,11 +279,12 @@ class _CheckboxListState extends State<CheckboxList> {
                                   // Handle error
                                   throw insertResponse.error!;
                                 }
-
+                                toastBar("Updated Morning");
                                 print(
                                     'Insert operation completed successfully!');
                               }
                             } catch (e) {
+                              toastBar("Error");
                               print('An error occurred: $e');
                             }
                           }
@@ -352,7 +356,7 @@ class _CheckboxListState extends State<CheckboxList> {
                             // Handle error
                             throw updateResponse.error!;
                           }
-
+                          toastBar("Updated Noon");
                           print('Update operation completed successfully!');
                         } else {
                           // No existing data, perform insert
@@ -369,10 +373,11 @@ class _CheckboxListState extends State<CheckboxList> {
                             // Handle error
                             throw insertResponse.error!;
                           }
-
+                          toastBar("Updated Noon");
                           print('Insert operation completed successfully!');
                         }
                       } catch (e) {
+                        toastBar("Error");
                         print('An error occurred: $e');
                       }
                     }
@@ -440,7 +445,7 @@ class _CheckboxListState extends State<CheckboxList> {
                             // Handle error
                             throw updateResponse.error!;
                           }
-
+                          toastBar("Updated Evening");
                           print('Update operation completed successfully!');
                         } else {
                           // No existing data, perform insert
@@ -457,7 +462,7 @@ class _CheckboxListState extends State<CheckboxList> {
                             // Handle error
                             throw insertResponse.error!;
                           }
-
+                          toastBar("Updated Evening");
                           print('Insert operation completed successfully!');
                         }
                       } catch (e) {
@@ -470,5 +475,14 @@ class _CheckboxListState extends State<CheckboxList> {
         ],
       ),
     );
+  }
+
+  void toastBar(String msgs) {
+ Fluttertoast.showToast(
+        msg: msgs,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 20
+        );
   }
 }
