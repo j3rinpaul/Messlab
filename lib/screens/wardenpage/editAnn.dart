@@ -68,13 +68,13 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Announcements"),
+        title: const Text("Edit Announcements"),
         actions: [
           IconButton(
             onPressed: () {
               getAnnounce();
             },
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
           )
         ],
       ),
@@ -82,10 +82,10 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
         child: ListView.builder(
           itemCount: announcementList.length,
           itemBuilder: (BuildContext context, int index) {
-            int reverse_index = announcementList.length - index - 1;
-            String updatedAt = announcementList.keys.elementAt(reverse_index);
+            int reverseIndex = announcementList.length - index - 1;
+            String updatedAt = announcementList.keys.elementAt(reverseIndex);
             String announcement =
-                announcementList.values.elementAt(reverse_index);
+                announcementList.values.elementAt(reverseIndex);
             print(updatedAt);
             print(announcement);
 
@@ -97,7 +97,7 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
                   deleteAnnouncement(updatedAt2!);
                   print("delete announcement");
                 },
-                icon: Icon(Icons.delete),
+                icon: const Icon(Icons.delete),
               ),
             );
           },

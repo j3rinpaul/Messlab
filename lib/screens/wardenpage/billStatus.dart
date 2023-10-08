@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:mini_project/supabase_config.dart';
 
 class MonthlyBill extends StatefulWidget {
+  const MonthlyBill({super.key});
+
   @override
   _MonthlyBillState createState() => _MonthlyBillState();
 }
@@ -86,7 +88,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Month and Year'),
+          title: const Text('Select Month and Year'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -103,11 +105,11 @@ class _MonthlyBillState extends State<MonthlyBill> {
                     child: Text(month),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Month',
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownButtonFormField<int>(
                 value: selectedYear,
                 onChanged: (int? newValue) {
@@ -121,7 +123,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                     child: Text(year.toString()),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Year',
                 ),
               ),
@@ -136,7 +138,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                   selectedYear = null;
                 });
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -148,7 +150,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
                       'Selected month and year: $selectedMonth $selectedYear');
                 }
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -159,11 +161,11 @@ class _MonthlyBillState extends State<MonthlyBill> {
   Widget _getStatusIcon(String status) {
     switch (status) {
       case 'Paid':
-        return Icon(Icons.check_circle, color: Colors.green);
+        return const Icon(Icons.check_circle, color: Colors.green);
       case 'Not Paid':
-        return Icon(Icons.cancel, color: Colors.red);
+        return const Icon(Icons.cancel, color: Colors.red);
       default:
-        return Icon(Icons.error);
+        return const Icon(Icons.error);
     }
   }
 
@@ -172,7 +174,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: Text('Select Status'),
+          title: const Text('Select Status'),
           children: [
             SimpleDialogOption(
               onPressed: () async {
@@ -200,8 +202,8 @@ class _MonthlyBillState extends State<MonthlyBill> {
               child: Row(
                 children: [
                   _getStatusIcon('Paid'),
-                  SizedBox(width: 8.0),
-                  Text('Paid'),
+                  const SizedBox(width: 8.0),
+                  const Text('Paid'),
                 ],
               ),
             ),
@@ -225,8 +227,8 @@ class _MonthlyBillState extends State<MonthlyBill> {
               child: Row(
                 children: [
                   _getStatusIcon('Not Paid'),
-                  SizedBox(width: 8.0),
-                  Text('Not Paid'),
+                  const SizedBox(width: 8.0),
+                  const Text('Not Paid'),
                 ],
               ),
             ),
@@ -244,7 +246,7 @@ class _MonthlyBillState extends State<MonthlyBill> {
     fetchBillItemsFromDatabase(); // Fetch bill items from the database
     userAmount(month, year);
     // print(selectedMonth);
-     Future.delayed(Duration(seconds: 5), () {
+     Future.delayed(const Duration(seconds: 5), () {
     setState(() {
       isloading = false;
     });
@@ -261,32 +263,32 @@ class _MonthlyBillState extends State<MonthlyBill> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment Status'),
+        title: const Text('Payment Status'),
       ),
       body: isloading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 GestureDetector(
                   onTap: () => _selectMonthAndYear(),
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.calendar_today, color: Colors.white),
-                          SizedBox(width: 8.0),
+                          const Icon(Icons.calendar_today, color: Colors.white),
+                          const SizedBox(width: 8.0),
                           Text(
                             selectedMonth != null && selectedYear != null
                                 ? '$selectedMonth $selectedYear'
                                 : 'Select Month',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 18.0,
@@ -300,19 +302,19 @@ class _MonthlyBillState extends State<MonthlyBill> {
                 // SizedBox(height: 5),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Card(
                       color: const Color.fromARGB(255, 209, 206, 206),
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Table(
-                          columnWidths: {
+                          columnWidths: const {
                             0: FlexColumnWidth(2),
                             1: FlexColumnWidth(2),
                             2: FlexColumnWidth(2),
                           },
                           children: [
-                            TableRow(
+                            const TableRow(
                               children: [
                                 TableCell(
                                   child: Padding(
@@ -351,19 +353,19 @@ class _MonthlyBillState extends State<MonthlyBill> {
                                 children: [
                                   TableCell(
                                     child: Padding(
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Text(item.realname.toString()),
                                     ),
                                   ),
                                   TableCell(
                                     child: Padding(
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Text(item.amount.toString()),
                                     ),
                                   ),
                                   TableCell(
                                     child: Padding(
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: GestureDetector(
                                         onTap: () => _showEditOptions(item),
                                         child: Row(

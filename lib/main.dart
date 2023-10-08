@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mini_project/screens/splash.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primaryColor: Colors.green),
-      home: SplashScreen() ,
+      home: const SplashScreen() ,
       debugShowCheckedModeBanner: false,
     );
   }

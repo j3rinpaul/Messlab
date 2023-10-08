@@ -14,7 +14,7 @@ class CalendarPage extends StatelessWidget {
     return SingleChildScrollView(
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.only(bottom: 10,top: 10),
+          padding: const EdgeInsets.only(bottom: 10,top: 10),
           child: Column(
             children: [Calendar(uid: uid,), ScreenReview(uid: uid,)],
           ),

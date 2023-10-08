@@ -26,9 +26,9 @@ class _SettingsState extends State<Settings> {
     setState(() {
       isLoading = true;
     });
-    mrngTime = await setTime("morning") as TimeOfDay?;
-    noonTime = await setTime("noon") as TimeOfDay?;
-    evngTime = await setTime("evening") as TimeOfDay?;
+    mrngTime = await setTime("morning");
+    noonTime = await setTime("noon");
+    evngTime = await setTime("evening");
     setState(() {
       isLoading = false;
     });
@@ -77,8 +77,8 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Update'),
-          content: Text('Are you sure you want to update?'),
+          title: const Text('Confirm Update'),
+          content: const Text('Are you sure you want to update?'),
           actions: [
             ElevatedButton(
               onPressed: () {
@@ -89,13 +89,13 @@ class _SettingsState extends State<Settings> {
 
                 _showSuccessMessage(context);
               },
-              child: Text('Confirm'),
+              child: const Text('Confirm'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -108,14 +108,14 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Success'),
-          content: Text('Updated successfully.'),
+          title: const Text('Success'),
+          content: const Text('Updated successfully.'),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -141,14 +141,14 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: const Text('Change Timings'),
       ),
-      body:isLoading ? Center(child: CircularProgressIndicator()): Column(
+      body:isLoading ? const Center(child: CircularProgressIndicator()): Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 216, 208, 208),
+                color: const Color.fromARGB(255, 216, 208, 208),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -156,7 +156,7 @@ class _SettingsState extends State<Settings> {
                 children: [
                   Text(
                     formattedDate,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -165,7 +165,7 @@ class _SettingsState extends State<Settings> {
               ),
             ),
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -178,7 +178,7 @@ class _SettingsState extends State<Settings> {
                     controller: TextEditingController(
                       text: mrngTime!.format(context),
                     ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Morning',
                     ),
@@ -193,12 +193,12 @@ class _SettingsState extends State<Settings> {
                     });
                     // print("selected"+selectedTime1.toString());
                   },
-                  icon: Icon(Icons.access_time),
+                  icon: const Icon(Icons.access_time),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -211,7 +211,7 @@ class _SettingsState extends State<Settings> {
                     controller: TextEditingController(
                       text: noonTime!.format(context),
                     ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Noon',
                     ),
@@ -225,12 +225,12 @@ class _SettingsState extends State<Settings> {
                       });
                     });
                   },
-                  icon: Icon(Icons.access_time),
+                  icon: const Icon(Icons.access_time),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -243,7 +243,7 @@ class _SettingsState extends State<Settings> {
                     controller: TextEditingController(
                       text: evngTime!.format(context),
                     ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Evening',
                     ),
@@ -257,7 +257,7 @@ class _SettingsState extends State<Settings> {
                       });
                     });
                   },
-                  icon: Icon(Icons.access_time),
+                  icon: const Icon(Icons.access_time),
                 ),
               ],
             ),
@@ -268,7 +268,7 @@ class _SettingsState extends State<Settings> {
               // print(formattedTime);
              
             },
-            child: Text('Update'),
+            child: const Text('Update'),
           ),
         ],
       ),

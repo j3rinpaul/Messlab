@@ -12,6 +12,8 @@ class DailyCount extends StatefulWidget {
 class _DailyCountState extends State<DailyCount> {
   bool? isuserloading = false;
   bool? isdetail = false;
+  String currentDate = DateTime.now().toString().substring(0, 10);
+
   Future<dynamic> fetchDataWithDateParameter(
       String date, String db, String pref) async {
     final response = await supabase
@@ -29,7 +31,7 @@ class _DailyCountState extends State<DailyCount> {
     }
   }
 
-  final date = DateTime.now().toLocal().toString().split(' ')[0];
+  String date = DateTime.now().toLocal().toString().split(' ')[0];
   Map<dynamic, List<bool>> foodDetails = {};
   List<bool> foodList = [];
   Map<dynamic, String> userNames = {};
@@ -66,8 +68,8 @@ class _DailyCountState extends State<DailyCount> {
             .eq('u_id', uids)
             .eq('mark_date', date)
             .execute();
-      
-        print(uids.toString() +" "+allFood.data.toString());
+
+        print("$uids ${allFood.data}");
         final foodData = allFood.data;
         final foodList = foodData.isNotEmpty
             ? [
@@ -75,7 +77,7 @@ class _DailyCountState extends State<DailyCount> {
                 foodData[0]['noon'],
                 foodData[0]['evening'],
               ]
-            : [false, false, false];    
+            : [false, false, false];
         setState(() {
           foodDetails[uids] = List.from(foodList);
         });
@@ -115,7 +117,7 @@ class _DailyCountState extends State<DailyCount> {
       parsedData[0]['evening_food'] = eveningFoodCount;
       isuserloading = false;
     });
-    print("parse:" + parsedData.toString());
+    print("parse:$parsedData");
   }
 
   List<Map<String, dynamic>> parsedData = [
@@ -127,14 +129,14 @@ class _DailyCountState extends State<DailyCount> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Success'),
-          content: Text('Food consumption updated successfully.'),
+          title: const Text('Success'),
+          content: const Text('Food consumption updated successfully.'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -142,23 +144,48 @@ class _DailyCountState extends State<DailyCount> {
     );
   }
 
+  DateTime passDate = DateTime.now();
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: passDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != passDate) {
+      setState(() {
+        passDate = picked;
+        print(passDate);
+        date = passDate.toString().substring(0, 10);
+        fetchDataCount();
+        Userdetails();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentDate = DateTime.now().toString().substring(0, 10);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daily Count'),
+        title: const Text('Daily Count'),
       ),
       body:
           // isloading! ? Center(child: CircularProgressIndicator(),) :
           Column(
         children: [
           Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+                onPressed: () {
+                  _selectDate(context);
+                },
+                child: const Text("Select Date")),
+          ),
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Total Count : $currentDate',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              'Total Count : $date',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
           Padding(
@@ -166,12 +193,12 @@ class _DailyCountState extends State<DailyCount> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Color.fromARGB(255, 213, 209, 209),
+                color: const Color.fromARGB(255, 213, 209, 209),
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: isuserloading!
-                  ? Center(
+                  ? const Center(
                       child: CircularProgressIndicator(),
                     )
                   : Row(
@@ -179,13 +206,13 @@ class _DailyCountState extends State<DailyCount> {
                       children: [
                         Column(
                           children: [
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               parsedData[0]['morning_food'].toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 40),
                             ),
-                            Text(
+                            const Text(
                               'Morning',
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
@@ -194,13 +221,13 @@ class _DailyCountState extends State<DailyCount> {
                         ),
                         Column(
                           children: [
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               parsedData[0]['noon_food'].toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 40),
                             ),
-                            Text(
+                            const Text(
                               'Noon',
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
@@ -209,13 +236,13 @@ class _DailyCountState extends State<DailyCount> {
                         ),
                         Column(
                           children: [
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
                               parsedData[0]['evening_food'].toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 40),
                             ),
-                            Text(
+                            const Text(
                               'Evening',
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
@@ -226,7 +253,7 @@ class _DailyCountState extends State<DailyCount> {
                     ),
             ),
           ),
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: Align(
@@ -260,7 +287,7 @@ class _DailyCountState extends State<DailyCount> {
                 SingleChildScrollView(
               child: ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: foodDetails.length,
                 itemBuilder: (BuildContext context, int index) {
                   final uids = foodDetails.keys.elementAt(index);
@@ -268,14 +295,14 @@ class _DailyCountState extends State<DailyCount> {
                   // final foodList = repons[uids];
 
                   final morningFood = foodList![0];
-                  final noonFood = foodList![1];
-                  final eveningFood = foodList![2];
+                  final noonFood = foodList[1];
+                  final eveningFood = foodList[2];
 
                   return Card(
                     margin:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
+                        const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -284,7 +311,7 @@ class _DailyCountState extends State<DailyCount> {
                             child: Text(
                               // '$uids',
                               userNames[uids]!,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           Row(
@@ -293,16 +320,16 @@ class _DailyCountState extends State<DailyCount> {
                                 Container(
                                   width: 10,
                                   height: 10,
-                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: foodList![i]
+                                    color: foodList[i]
                                         ? Colors.green
                                         : Colors.red,
                                   ),
                                 ),
                               IconButton(
-                                icon: Icon(Icons.edit),
+                                icon: const Icon(Icons.edit),
                                 onPressed: () {
                                   _showEditDialog(index);
                                 },
@@ -334,7 +361,7 @@ class _DailyCountState extends State<DailyCount> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text('Edit Food Consumption'),
+              title: const Text('Edit Food Consumption'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -356,7 +383,7 @@ class _DailyCountState extends State<DailyCount> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -438,7 +465,7 @@ class _DailyCountState extends State<DailyCount> {
 
                     print(foodDetails.toString());
                   },
-                  child: Text('Save'),
+                  child: const Text('Save'),
                 ),
               ],
             );

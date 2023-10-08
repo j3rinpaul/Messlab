@@ -59,7 +59,7 @@ class _ScreenReviewState extends State<ScreenReview> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     "Announcements",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),

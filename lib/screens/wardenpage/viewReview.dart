@@ -36,7 +36,7 @@ class _viewReviewState extends State<viewReview> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Reviews"),
+          title: const Text("Reviews"),
         ),
         body: ListView.builder(
           itemCount: reviews.length,

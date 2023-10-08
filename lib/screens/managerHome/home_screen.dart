@@ -22,7 +22,7 @@ class ManagerHome extends StatelessWidget {
         title: const Text("Manager Home"),
         actions: [
           PopupMenuButton(
-            icon: Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem(
@@ -56,12 +56,12 @@ class ManagerHome extends StatelessWidget {
                       //   },
                       // ),
                       ListTile(
-                        leading: Icon(Icons.bookmark_outline_outlined),
-                        title: Text('Generate Bill'),
+                        leading: const Icon(Icons.bookmark_outline_outlined),
+                        title: const Text('Generate Bill'),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (ctx1) => generateBill()),
+                                builder: (ctx1) => const generateBill()),
                           );
                         },
                       ),

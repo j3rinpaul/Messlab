@@ -39,7 +39,7 @@ class _RoleAssignState extends State<RoleAssign> {
       showVar(context, "User deleted successfully", "Deleted");
     } else {
       showVar(context, "Failed to delete user", "Failed");
-      print("error" + response.error.toString());
+      print("error${response.error}");
     }
   }
 
@@ -47,7 +47,7 @@ class _RoleAssignState extends State<RoleAssign> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Role Assign'),
+        title: const Text('Role Assign'),
       ),
       body: ListView.builder(
         itemCount: parsedData.length,
@@ -72,18 +72,18 @@ class _RoleAssignState extends State<RoleAssign> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: Text('Warning'),
-                                content: Text('Do you want to delete user?'),
+                                title: const Text('Warning'),
+                                content: const Text('Do you want to delete user?'),
                                 actions: [
                                   TextButton(
-                                    child: Text('Confirm'),
+                                    child: const Text('Confirm'),
                                     onPressed: () {
                                       deletePerson(item['u_id']);
                                       Navigator.of(context).pop();
                                     },
                                   ),
                                   TextButton(
-                                    child: Text('Cancel'),
+                                    child: const Text('Cancel'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                     },
@@ -93,19 +93,19 @@ class _RoleAssignState extends State<RoleAssign> {
                             },
                           );
                         },
-                        child: Text("Delete"),
+                        child: const Text("Delete"),
                       ),
                       TextButton(
                         onPressed: () {
                           showChangePasswordDialog(item['u_id']);
                         },
-                        child: Text("Change Password"),
+                        child: const Text("Change Password"),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           showRoleSelectionDialog(item['u_id'], item['role']);
                         },
-                        child: Text("Role Assign"),
+                        child: const Text("Role Assign"),
                       ),
                     ],
                   ),
@@ -122,8 +122,8 @@ class _RoleAssignState extends State<RoleAssign> {
     BuildContext context,
     String username,
     dynamic password,
-    dynamic first_name,
-    dynamic last_name,
+    dynamic firstName,
+    dynamic lastName,
     dynamic designation,
     dynamic department,
     dynamic phone,
@@ -133,8 +133,8 @@ class _RoleAssignState extends State<RoleAssign> {
       {
         'email': username,
         'password': password,
-        'first_name': first_name,
-        'last_name': last_name,
+        'first_name': firstName,
+        'last_name': lastName,
         'designation': designation,
         'department': department,
         'phone': phone,
@@ -145,7 +145,7 @@ class _RoleAssignState extends State<RoleAssign> {
       showVar(context, "User created successfully", "Created");
     } else {
       showVar(context, "Failed to create user", "Failed");
-      print("error" + response.error.toString());
+      print("error${response.error}");
     }
   }
 
@@ -158,7 +158,7 @@ class _RoleAssignState extends State<RoleAssign> {
           content: Text('$content'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -176,25 +176,25 @@ class _RoleAssignState extends State<RoleAssign> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Change Password'),
+          title: const Text('Change Password'),
           content: TextField(
             onChanged: (value) {
               newPassword = value;
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'New Password',
             ),
           ),
           actions: [
             TextButton(
-              child: Text('Confirm'),
+              child: const Text('Confirm'),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await changePassword(id, newPassword);
               },
             ),
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -216,7 +216,7 @@ class _RoleAssignState extends State<RoleAssign> {
       showVar(context, "Password changed successfully", "Success");
     } else {
       showVar(context, "Failed to change password", "Failed");
-      print("error" + response.error.toString());
+      print("error${response.error}");
     }
   }
 
@@ -229,7 +229,7 @@ class _RoleAssignState extends State<RoleAssign> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text('Assign Role'),
+              title: const Text('Assign Role'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -240,7 +240,7 @@ class _RoleAssignState extends State<RoleAssign> {
                         selectedRole = value;
                       });
                     },
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: 'manager',
                         child: Text('Manager'),
@@ -255,14 +255,14 @@ class _RoleAssignState extends State<RoleAssign> {
               ),
               actions: [
                 TextButton(
-                  child: Text('Confirm'),
+                  child: const Text('Confirm'),
                   onPressed: () async {
                     Navigator.of(context).pop();
                     await assignRole(id, selectedRole);
                   },
                 ),
                 TextButton(
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -293,7 +293,7 @@ class _RoleAssignState extends State<RoleAssign> {
         showVar(context, "Role assigned successfully", "Success");
       } else {
         showVar(context, "Failed to assign role", "Failed");
-        print("error" + response.error.toString());
+        print("error${response.error}");
       }
     }
   }

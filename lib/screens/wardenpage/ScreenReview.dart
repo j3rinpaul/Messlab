@@ -12,7 +12,7 @@ class ScreenReview extends StatefulWidget {
 }
 
 class _ScreenReviewState extends State<ScreenReview> {
-  TextEditingController _reviewCont = TextEditingController();
+  final TextEditingController _reviewCont = TextEditingController();
 
   List<String> announcementList = [];
   Future<void> getAnnounce() async {
@@ -51,7 +51,7 @@ class _ScreenReviewState extends State<ScreenReview> {
       Container(
         decoration: BoxDecoration(
             border: Border.all(),
-            borderRadius: BorderRadius.all(Radius.circular(20))),
+            borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.87,
             height: MediaQuery.of(context).size.height * 0.25,
@@ -61,7 +61,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
+                      const Padding(
                         padding: EdgeInsets.all(5),
                         child: Text(
                           "Announcements",
@@ -72,7 +72,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                           onPressed: () {
                             getAnnounce();
                           },
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.refresh,
                             size: 15,
                           ))
@@ -83,9 +83,9 @@ class _ScreenReviewState extends State<ScreenReview> {
                   child: ListView.builder(
                     itemCount: announcementList.length,
                     itemBuilder: (context, index) {
-                      int reverse_index = announcementList.length - index - 1;
+                      int reverseIndex = announcementList.length - index - 1;
                       final adjustedIndex = index + 1;
-                      final announcement = announcementList[reverse_index];
+                      final announcement = announcementList[reverseIndex];
                       return ListTile(
                         title: Text("$adjustedIndex"),
                         trailing: Text(announcement),
@@ -100,7 +100,7 @@ class _ScreenReviewState extends State<ScreenReview> {
                         onPressed: () {
                           showAddAnnouncementDialog(context);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.add,
                           size: 20,
                         )),
@@ -108,10 +108,10 @@ class _ScreenReviewState extends State<ScreenReview> {
                         onPressed: () {
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (ctx) {
-                            return EditAnnouncements();
+                            return const EditAnnouncements();
                           }));
                         },
-                        icon: Icon(Icons.edit, size: 20))
+                        icon: const Icon(Icons.edit, size: 20))
                   ],
                 ),
               ],
@@ -122,19 +122,19 @@ class _ScreenReviewState extends State<ScreenReview> {
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(),
-              borderRadius: BorderRadius.all(Radius.circular(20))),
+              borderRadius: const BorderRadius.all(Radius.circular(20))),
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.87,
             height: MediaQuery.of(context).size.height * 0.2,
             child: Column(
               children: [
-                Center(
+                const Center(
                     child: Padding(
                         padding: EdgeInsets.all(5), child: Text("Reviews"))),
                 Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(right: 10, left: 10, top: 15),
+                      padding: const EdgeInsets.only(right: 10, left: 10, top: 15),
                       child: TextField(
                         controller: _reviewCont,
                         decoration: InputDecoration(
@@ -154,9 +154,9 @@ class _ScreenReviewState extends State<ScreenReview> {
                                 }
                                 _reviewCont.clear();
                               },
-                              icon: Icon(Icons.send)),
+                              icon: const Icon(Icons.send)),
                           hintText: "Review",
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(20))),
                         ),
@@ -167,10 +167,10 @@ class _ScreenReviewState extends State<ScreenReview> {
                           print("View");
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (ctx) {
-                            return viewReview();
+                            return const viewReview();
                           }));
                         },
-                        child: Text("view"))
+                        child: const Text("view"))
                   ],
                 )
               ],
@@ -186,11 +186,11 @@ class _ScreenReviewState extends State<ScreenReview> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Review'),
-          content: Text("Review successfully submitted"),
+          title: const Text('Review'),
+          content: const Text("Review successfully submitted"),
           actions: <Widget>[
             TextButton(
-              child: Text('Ok'),
+              child: const Text('Ok'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -201,14 +201,14 @@ class _ScreenReviewState extends State<ScreenReview> {
     );
   }
 
-  TextEditingController _announcementCont = TextEditingController();
+  final TextEditingController _announcementCont = TextEditingController();
   String newAnnouncement = "";
   void showAddAnnouncementDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Announcement'),
+          title: const Text('Add Announcement'),
           content: TextField(
             controller: _announcementCont,
             onChanged: (value) {
@@ -232,13 +232,13 @@ class _ScreenReviewState extends State<ScreenReview> {
                 }
                 Navigator.of(context).pop();
               },
-              child: Text('Add'),
+              child: const Text('Add'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );

@@ -10,7 +10,7 @@ import 'monthlyExp.dart';
 
 class Calendar extends StatefulWidget {
   final String? uid;
-  Calendar({Key? key, this.uid}) : super(key: key);
+  const Calendar({Key? key, this.uid}) : super(key: key);
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -51,10 +51,10 @@ class _CalendarState extends State<Calendar> {
                   onPressed: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
-                      return DailyCount();
+                      return const DailyCount();
                     }));
                   },
-                  child: Text("Daily Count")),
+                  child: const Text("Daily Count")),
             ),
            
             
@@ -87,7 +87,7 @@ class _CalendarState extends State<Calendar> {
                   onPressed: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
-                      return MonthlyBill();
+                      return const MonthlyBill();
                     }));
                   },
                   child: const Text("Payment Status")),

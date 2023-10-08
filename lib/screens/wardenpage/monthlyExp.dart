@@ -5,7 +5,7 @@ import 'package:mini_project/supabase_config.dart';
 class MonthlyExp extends StatefulWidget {
   final String? uid;
 
-  MonthlyExp({Key? key, this.uid}) : super(key: key);
+  const MonthlyExp({Key? key, this.uid}) : super(key: key);
 
   @override
   _MonthlyExpState createState() => _MonthlyExpState();
@@ -190,12 +190,12 @@ class _MonthlyExpState extends State<MonthlyExp> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Bill Not Added'),
-                            content: Text(
+                            title: const Text('Bill Not Added'),
+                            content: const Text(
                                 'The bill has already been generated for this month.'),
                             actions: <Widget>[
                               TextButton(
-                                child: Text('OK'),
+                                child: const Text('OK'),
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
@@ -205,7 +205,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                         },
                       );
                       print("bill not added");
-                      return null;
+                      return;
                     } else {
                       print("bill added");
                       addExpense();
@@ -220,7 +220,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                 ),
                 TextButton(
                   onPressed: _selectMonthAndYear,
-                  child: Text("View Bill"),
+                  child: const Text("View Bill"),
                 ),
               ],
             ),
@@ -265,7 +265,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Month and Year'),
+          title: const Text('Select Month and Year'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -282,11 +282,11 @@ class _MonthlyExpState extends State<MonthlyExp> {
                     child: Text(month),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Month',
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownButtonFormField<int>(
                 value: selectedYear,
                 onChanged: (int? newValue) {
@@ -300,7 +300,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                     child: Text(year.toString()),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Year',
                 ),
               ),
@@ -315,7 +315,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                   selectedYear = null;
                 });
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -326,7 +326,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                 }
                 fetchExpenses(selectedMonth, selectedYear);
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -349,7 +349,7 @@ class ExpenseItem {
 
 class ShowList extends StatelessWidget {
   final List<ExpenseItem> expenses;
-  ShowList({Key? key, required this.expenses}) : super(key: key);
+  const ShowList({Key? key, required this.expenses}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +359,7 @@ class ShowList extends StatelessWidget {
         child: Column(
           children: [
             DataTable(
-              columns: [
+              columns: const [
                 DataColumn(label: Text('Date')),
                 DataColumn(label: Text('Amount')),
                 DataColumn(label: Text('Remark')),

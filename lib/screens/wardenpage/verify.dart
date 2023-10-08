@@ -33,7 +33,7 @@ class _VerifyUserState extends State<VerifyUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Verification'),
+        title: const Text('Verification'),
       ),
       body: ListView.builder(
         itemCount: parsedData.length,
@@ -60,11 +60,11 @@ class _VerifyUserState extends State<VerifyUser> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text('Warning'),
-                                  content: Text('Do you want to delete user?'),
+                                  title: const Text('Warning'),
+                                  content: const Text('Do you want to delete user?'),
                                   actions: [
                                     TextButton(
-                                      child: Text('Confirm'),
+                                      child: const Text('Confirm'),
                                       onPressed: () {
                                         // Do something
                                         DeleteData(item['id']);
@@ -72,7 +72,7 @@ class _VerifyUserState extends State<VerifyUser> {
                                       },
                                     ),
                                     TextButton(
-                                      child: Text('Cancel'),
+                                      child: const Text('Cancel'),
                                       onPressed: () {
                                         // Do something
                                         Navigator.of(context).pop();
@@ -83,7 +83,7 @@ class _VerifyUserState extends State<VerifyUser> {
                               },
                             );
                           },
-                          child: Text("Delete")),
+                          child: const Text("Delete")),
                       ElevatedButton(
                           onPressed: () {
                             verifyData(
@@ -98,7 +98,7 @@ class _VerifyUserState extends State<VerifyUser> {
                                 item['phone']);
                             print(item['username'] + item['password']);
                           },
-                          child: Text("Verify")),
+                          child: const Text("Verify")),
                     ],
                   )
                 ],
@@ -118,7 +118,7 @@ class _VerifyUserState extends State<VerifyUser> {
       fetchData();
     } else {
       showVar(context, "Failed to delete user", "Failed");
-      print("error" + response.error.toString());
+      print("error${response.error}");
     }
   }
 
@@ -127,8 +127,8 @@ class _VerifyUserState extends State<VerifyUser> {
       dynamic id,
       String username,
       dynamic password,
-      dynamic first_name,
-      dynamic last_name,
+      dynamic firstName,
+      dynamic lastName,
       dynamic designation,
       dynamic deptartment,
       dynamic phone) async {
@@ -146,8 +146,8 @@ class _VerifyUserState extends State<VerifyUser> {
         {
           'email': username,
           'password': password,
-          'first_name': first_name,
-          'last_name': last_name,
+          'first_name': firstName,
+          'last_name': lastName,
           'designation': designation,
           'department': deptartment,
           'phone': phone,
@@ -167,7 +167,7 @@ class _VerifyUserState extends State<VerifyUser> {
         fetchData();
       } else {
         showVar(context, "Failed to create user", "Failed");
-        print("error" + response.error.toString());
+        print("error${response.error}");
       }
     }
   }
@@ -181,7 +181,7 @@ class _VerifyUserState extends State<VerifyUser> {
           content: Text('$content'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 // Do something
                 Navigator.of(context).pop();

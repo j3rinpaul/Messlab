@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           .eq('password', password)
                           .execute();
                       final roles = role.data[0]['role'];
-                      final u_ids = response.data[0]['u_id'];
+                      final uIds = response.data[0]['u_id'];
                       if (roles == "user") {
                         final sharedprefs =
                             await SharedPreferences.getInstance();

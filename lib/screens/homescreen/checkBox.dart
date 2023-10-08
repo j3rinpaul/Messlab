@@ -51,7 +51,7 @@ class _CheckboxListState extends State<CheckboxList> {
     }
 
     final data = response.data;
-    print("date" + data.toString());
+    print("date$data");
     List<bool> dataVal = data.isNotEmpty
         ? [
             data[0]['morning'] as bool,
@@ -92,7 +92,7 @@ class _CheckboxListState extends State<CheckboxList> {
       evening = false;
     }
 
-    print("date" + data.toString());
+    print("date$data");
     List<bool> dataVal = data.isNotEmpty
         ? [
             data[0]['morning'] as bool,
@@ -192,24 +192,24 @@ class _CheckboxListState extends State<CheckboxList> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
                 backgroundColor: Colors.blue[400],
-                child: Icon(
+                child: const Icon(
                   Icons.sunny_snowing,
                   color: Colors.white,
                 )),
-            title: Text('Morning'),
+            title: const Text('Morning'),
             trailing: ValueListenableBuilder(
                 valueListenable: morningToggleValue,
                 builder: (context, value, child) {
@@ -292,22 +292,22 @@ class _CheckboxListState extends State<CheckboxList> {
                   );
                 }),
           ),
-          Padding(padding: EdgeInsets.only(bottom: 5)),
+          const Padding(padding: EdgeInsets.only(bottom: 5)),
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
               backgroundColor: Colors.blue[400],
-              child: Icon(
+              child: const Icon(
                 Icons.sunny,
                 color: Colors.white,
               ),
             ),
-            title: Text(
+            title: const Text(
               'Noon',
             ),
             trailing: Switch(
@@ -384,21 +384,21 @@ class _CheckboxListState extends State<CheckboxList> {
                   : null,
             ),
           ),
-          Padding(padding: EdgeInsets.only(bottom: 5)),
+          const Padding(padding: EdgeInsets.only(bottom: 5)),
           ListTile(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
+                side: const BorderSide(
                   color: Colors.grey,
                   width: 1.0,
                 )),
             leading: CircleAvatar(
                 backgroundColor: Colors.blue[400],
-                child: Icon(
+                child: const Icon(
                   Icons.nightlight_round,
                   color: Colors.white,
                 )),
-            title: Text('Evening'),
+            title: const Text('Evening'),
             trailing: Switch(
               value: eveningToggleValue.value,
               activeColor: Colors.green,

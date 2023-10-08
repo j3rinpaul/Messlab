@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart'; 
+import 'dart:io';
+import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:permission_handler/permission_handler.dart';
 import '../../supabase_config.dart';
+// import 'package:path_provider/path_provider.dart';
 
 class generateBill extends StatefulWidget {
+  const generateBill({super.key});
+
   @override
   _generateBillState createState() => _generateBillState();
 }
@@ -38,7 +46,7 @@ class _generateBillState extends State<generateBill> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Month and Year'),
+          title: const Text('Select Month and Year'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -55,11 +63,11 @@ class _generateBillState extends State<generateBill> {
                     child: Text(month),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Month',
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               DropdownButtonFormField<int>(
                 value: selectedYear,
                 onChanged: (int? newValue) {
@@ -73,7 +81,7 @@ class _generateBillState extends State<generateBill> {
                     child: Text(year.toString()),
                   );
                 }).toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Year',
                 ),
               ),
@@ -88,7 +96,7 @@ class _generateBillState extends State<generateBill> {
                   selectedYear = null;
                 });
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -99,7 +107,7 @@ class _generateBillState extends State<generateBill> {
                       'Selected month and year: $selectedMonth $selectedYear');
                 }
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -114,21 +122,23 @@ class _generateBillState extends State<generateBill> {
     // Fetch bill items from the database
   }
 
+  String? lastBill;
+
   Future<void> _billg() async {
     if (selectedMonth == null || selectedYear == null || selectedMonth == 00) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Select Month and Year'),
-            content:
-                Text('Please select a month and year to generate the bill for'),
+            title: const Text('Select Month and Year'),
+            content: const Text(
+                'Please select a month and year to generate the bill for'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           );
@@ -146,17 +156,15 @@ class _generateBillState extends State<generateBill> {
       // print(response.data);
 
       if (response.data.isEmpty) {
-        // print(DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0));
+        // print(endDate);
         setState(() {
           isLoading = true;
         });
         final morningFoodResponse = await supabase
             .from('food_marking')
             .select('morning')
-            .gte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!), 0))
-            .lte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+            .gte('mark_date', startDate)
+            .lte('mark_date', endDate)
             .eq("morning", true)
             .execute();
 
@@ -164,10 +172,8 @@ class _generateBillState extends State<generateBill> {
         final noonFoodResponse = await supabase
             .from('food_marking')
             .select('noon')
-            .gte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!), 0))
-            .lte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+            .gte('mark_date', startDate)
+            .lte('mark_date', endDate)
             .eq("noon", true)
             .execute();
         // print(noonFoodResponse.data.length);
@@ -175,15 +181,13 @@ class _generateBillState extends State<generateBill> {
         final eveningFoodResponse = await supabase
             .from('food_marking')
             .select('evening')
-            .gte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!), 0))
-            .lte('mark_date',
-                DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+            .gte('mark_date', startDate)
+            .lte('mark_date', endDate)
             .eq("evening", true)
             .execute();
         // print(eveningFoodResponse.data.length);
-        // print(DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0));
-        // print(DateTime(selectedYear!, int.parse(selectedMonth!), 0));
+        // print(endDate);
+        // print(startDate);
 
         // Calculate the sum of true values in 'morning_food', 'noon_food', 'evening_food'
         int morningFoodCount = morningFoodResponse.data
@@ -201,9 +205,8 @@ class _generateBillState extends State<generateBill> {
         final amount = await supabase
             .from('daily_expense')
             .select('amount')
-            .gte('date', DateTime(selectedYear!, int.parse(selectedMonth!), 1))
-            .lte('date',
-                DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+            .gte('date', startDate)
+            .lte('date', endDate)
             .execute();
         setState(() {
           isLoading = false;
@@ -218,7 +221,7 @@ class _generateBillState extends State<generateBill> {
           sum += amount;
         }
         double round = sum / totalFoodCount;
-        double rate_per_point = double.parse(round.toStringAsFixed(2));
+        double ratePerPoint = double.parse(round.toStringAsFixed(2));
 
         // print(selectedMonth);
         // print(selectedYear);
@@ -230,11 +233,11 @@ class _generateBillState extends State<generateBill> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: Container(
+              content: SizedBox(
                 width: MediaQuery.of(context).size.width *
                     0.9, // Adjust the width as needed
                 child: DataTable(
-                  columns: [
+                  columns: const [
                     DataColumn(
                       label: Text(
                         'Billing Details ',
@@ -251,19 +254,19 @@ class _generateBillState extends State<generateBill> {
                   rows: [
                     DataRow(
                       cells: [
-                        DataCell(Text('Total Points')),
+                        const DataCell(Text('Total Points')),
                         DataCell(Text(totalFoodCount.toString())),
                       ],
                     ),
                     DataRow(
                       cells: [
-                        DataCell(Text('Rate per Point')),
-                        DataCell(Text(rate_per_point.toString())),
+                        const DataCell(Text('Rate per Point')),
+                        DataCell(Text(ratePerPoint.toString())),
                       ],
                     ),
                     DataRow(
                       cells: [
-                        DataCell(Text('Fixed Expenses')),
+                        const DataCell(Text('Fixed Expenses')),
                         DataCell(Text(fixedExpenses.text)),
                       ],
                     ),
@@ -275,7 +278,7 @@ class _generateBillState extends State<generateBill> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('Close'),
+                  child: const Text('Close'),
                 ),
                 TextButton(
                   onPressed: () {
@@ -284,8 +287,8 @@ class _generateBillState extends State<generateBill> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Confirmation'),
-                          content: Text(
+                          title: const Text('Confirmation'),
+                          content: const Text(
                               'Are you sure you want to generate the bill of the current mess cycle?'),
                           actions: [
                             TextButton(
@@ -297,17 +300,19 @@ class _generateBillState extends State<generateBill> {
                                     'month': selectedMonth,
                                     'year': selectedYear,
                                     'fixed': int.parse(fixedExpenses.text),
-                                    'rate_per_cons': rate_per_point,
+                                    'rate_per_cons': ratePerPoint,
                                     // Convert to decimal
                                     'total_exp': sum,
                                     'consumption': totalFoodCount,
+                                    'generated_on': endDate,
                                   }
                                 ]).execute();
 
                                 if (monthly.error == null) {
                                   print("Bill generated successfully");
                                 } else {
-                                  showAlert("Error","Fixed expense was update but bill was not generated\nGenerating bill.... ");
+                                  showAlert("Error",
+                                      "Fixed expense was update but bill was not generated\nGenerating bill.... ");
                                 }
                                 await user_bill();
 
@@ -324,26 +329,26 @@ class _generateBillState extends State<generateBill> {
                                 ]).execute();
                                 if (response.error == null) {
                                   showAlert("Bill generated Successfully",
-                                      "Bill of ${selectedMonth} ${selectedYear} has been generated successfully");
+                                      "Bill of $selectedMonth $selectedYear has been generated successfully");
                                 } else {
                                   showAlert("Error",
                                       "Bill not generated\n please try again ");
                                 }
                               },
-                              child: Text('Yes'),
+                              child: const Text('Yes'),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: Text('No'),
+                              child: const Text('No'),
                             ),
                           ],
                         );
                       },
                     );
                   },
-                  child: Text('Confirm'),
+                  child: const Text('Confirm'),
                 ),
               ],
             );
@@ -355,15 +360,15 @@ class _generateBillState extends State<generateBill> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Bill Already Generated'),
-              content: Text(
+              title: const Text('Bill Already Generated'),
+              content: const Text(
                   'Bill for the selected month and year has already been generated'),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -377,30 +382,38 @@ class _generateBillState extends State<generateBill> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generete Bill'),
+        title: const Text('Generete Bill'),
       ),
       body: Column(
         children: [
+          const SizedBox(
+            height: 10,
+          ),
+          ElevatedButton(
+              onPressed: () {
+                return _selectDateRange(context);
+              },
+              child: const Text("Select Start and End date")),
           GestureDetector(
             onTap: () => _selectMonthAndYear(),
             child: Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.calendar_today, color: Colors.white),
-                    SizedBox(width: 8.0),
+                    const Icon(Icons.calendar_today, color: Colors.white),
+                    const SizedBox(width: 8.0),
                     Text(
                       selectedMonth != null && selectedYear != null
                           ? '$selectedMonth $selectedYear'
                           : 'Select Month',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 18.0,
@@ -411,19 +424,19 @@ class _generateBillState extends State<generateBill> {
               ),
             ),
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           TextField(
             controller: fixedExpenses,
             maxLines: null,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
               labelText: 'Fixed Expenses',
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           ElevatedButton(
               onPressed: () async {
                 if (fixedExpenses.text.isEmpty) {
@@ -431,14 +444,34 @@ class _generateBillState extends State<generateBill> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text('Fixed Expenses'),
-                        content: Text('Please enter the fixed expenses'),
+                        title: const Text('Fixed Expenses'),
+                        content: const Text('Please enter the fixed expenses'),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text('OK'),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  return;
+                } else if (startDate.isEmpty || endDate.isEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Select Start and End date'),
+                        content:
+                            const Text('Please select the start and end date'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('OK'),
                           ),
                         ],
                       );
@@ -450,18 +483,55 @@ class _generateBillState extends State<generateBill> {
                 }
               },
               child: const Text("Generate Bill")),
-          SizedBox(height: 15),
-          // ElevatedButton(
-          //     onPressed: () {
-          //       user_bill();
-          //     },
-          //     child: Text("Test")),
-          Text('Previous Bills', style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 10),
+          const SizedBox(height: 15),
+          Text("Last bill was on $lastBill"),
+          const SizedBox(height: 15),
+          ElevatedButton(
+              onPressed: () async {
+                await savePdf();
+              },
+              child: Text("View Pdf")),
+          const Text('Previous Bills',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
           Expanded(child: TableView(tableData: expenses))
         ],
       ),
     );
+  }
+
+  Future<Uint8List> generatePdf() async {
+    // Create a PDF document
+
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Text("Hello World"),
+          ); // Center
+        })); // Page
+    return pdf.save();
+  }
+
+  Future<void> savePdf() async {
+    final pdfBytes = await generatePdf(); // Wait for the PDF to be generated
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    if (statuses[Permission.storage]!.isGranted) {
+      String? downloadsDirectoryPath =
+          (await DownloadsPath.downloadsDirectory())?.path;
+      print(downloadsDirectoryPath);
+      if (downloadsDirectoryPath != null) {
+        final file = File('$downloadsDirectoryPath/bill.pdf');
+        await file.writeAsBytes(pdfBytes);
+        print("File saved");
+        print(" File saved to $downloadsDirectoryPath/bill.pdf");
+      }
+    }
   }
 
   void showAlert(String title, String content) {
@@ -476,12 +546,34 @@ class _generateBillState extends State<generateBill> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
       },
     );
+  }
+
+  String startDate = "";
+  String endDate = "";
+  DateTimeRange? selectedDateRange;
+  void _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      initialDateRange: selectedDateRange,
+    );
+    if (picked != null && picked != selectedDateRange) {
+      setState(() {
+        selectedDateRange = picked;
+        startDate =
+            selectedDateRange!.start.toLocal().toString().substring(0, 10);
+        endDate = selectedDateRange!.end.toLocal().toString().substring(0, 10);
+        print(selectedDateRange!.start.toLocal().toString().substring(0, 10));
+        print(selectedDateRange!.end.toLocal().toString().substring(0, 10));
+      });
+    }
   }
 
 //for diplaying the previous bills
@@ -503,6 +595,7 @@ class _generateBillState extends State<generateBill> {
 
         setState(() {
           expenses = List<billTable>.from(list);
+          lastBill = data.isEmpty ? "Not" : data[0]['generated_on'];
         });
       }
     } else {
@@ -524,18 +617,18 @@ class _generateBillState extends State<generateBill> {
         .eq('month', selectedMonth)
         .eq('year', selectedYear)
         .execute();
-    int fixed_exp = fixed.data[0]['fixed'];
+    int fixedExp = fixed.data[0]['fixed'];
     //share of  fixed expenses to each users
-    final fixed_per_user = fixed_exp / user.data.length;
-    print(fixed_exp / user.data.length);
+    final fixedPerUser = fixedExp / user.data.length;
+    print(fixedExp / user.data.length);
 //fetching the rate per point
-    final rate_per_point = await supabase
+    final ratePerPoint = await supabase
         .from('monthly_bill')
         .select('rate_per_cons')
         .eq('month', selectedMonth)
         .eq('year', selectedYear)
         .execute();
-    print(rate_per_point.data[0]['rate_per_cons'].toString());
+    print(ratePerPoint.data[0]['rate_per_cons'].toString());
     final List<dynamic> data = user.data as List<dynamic>;
     for (final usd in data) {
       print(usd['u_id']);
@@ -546,10 +639,8 @@ class _generateBillState extends State<generateBill> {
           .select('morning')
           .eq('u_id', usd['u_id'])
           .eq("morning", true)
-          .gte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!), 1))
-          .lte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+          .gte('mark_date', startDate)
+          .lte('mark_date', endDate)
           .execute();
       print(fetchmrng.data.length);
 
@@ -558,33 +649,29 @@ class _generateBillState extends State<generateBill> {
           .select('noon')
           .eq('u_id', usd['u_id'])
           .eq("noon", true)
-          .gte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!), 1))
-          .lte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+          .gte('mark_date', startDate)
+          .lte('mark_date', endDate)
           .execute();
-      print("noon" + fetchnoon.data.length.toString());
+      print("noon${fetchnoon.data.length}");
 
       final fetchevng = await supabase
           .from('food_marking')
           .select('evening')
           .eq('u_id', usd['u_id'])
           .eq("evening", true)
-          .gte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!), 1))
-          .lte('mark_date',
-              DateTime(selectedYear!, int.parse(selectedMonth!) + 1, 0))
+          .gte('mark_date', startDate)
+          .lte('mark_date', endDate)
           .execute();
-      print("evng" + fetchevng.data.length.toString());
+      print("evng${fetchevng.data.length}");
       int total =
           fetchmrng.data.length + fetchnoon.data.length + fetchevng.data.length;
-      print("total" + total.toString());
+      print("total$total");
 
-      int bill = (fixed_per_user +
-              total * rate_per_point.data[0]['rate_per_cons'].toDouble())
+      int bill = (fixedPerUser +
+              total * ratePerPoint.data[0]['rate_per_cons'].toDouble())
           .ceil();
 
-      print(rate_per_point.data[0]['rate_per_cons'].toDouble().ceil());
+      print(ratePerPoint.data[0]['rate_per_cons'].toDouble().ceil());
       print(bill);
 
       final response = await supabase.from('user_bill').insert([
@@ -638,7 +725,7 @@ class TableView extends StatelessWidget {
         child: Column(
           children: [
             DataTable(
-              columns: [
+              columns: const [
                 DataColumn(label: Text('Month')),
                 DataColumn(label: Text('Year')),
                 DataColumn(label: Text('Total Points')),
