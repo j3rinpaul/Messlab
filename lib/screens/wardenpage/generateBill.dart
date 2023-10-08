@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
 import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
+
 import '../../supabase_config.dart';
 // import 'package:path_provider/path_provider.dart';
 
@@ -501,18 +503,85 @@ class _generateBillState extends State<generateBill> {
   }
 
   Future<Uint8List> generatePdf() async {
-    // Create a PDF document
+    // Fetch data from Supabase
+    final response = await supabase
+        .from('user_bill')
+        .select()
+        .eq("month", selectedMonth)
+        .eq("year", selectedYear)
+        .execute();
 
+    final List<dynamic> name = [];
+    Map<String, dynamic> nameEntry = {};
+
+
+    for (final record in response.data) {
+      print(record['u_id']);
+
+      final sup = await supabase
+          .from('users')
+          .select('first_name,last_name')
+          .eq("u_id", record['u_id'])
+          .execute();
+
+      final String names =
+          sup.data[0]['first_name'] + " " + sup.data[0]['last_name'];
+      nameEntry = {
+        'name': names,
+      };
+      
+    }
+
+    print(nameEntry);
+
+
+
+    List<Map<String, dynamic>> data =
+        (response.data as List<dynamic>).cast<Map<String, dynamic>>();
+
+    // Create a PDF document
     final pdf = pw.Document();
 
-    pdf.addPage(pw.Page(
+    // Add a page with A4 page format
+    pdf.addPage(
+      pw.Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
+          // Create a list to hold the table data
+          final tableData = <List<String>>[];
+
+          // Add a header row
+          tableData.add(['Name', 'Total Cons', 'Total Bill']);
+
+          // Add data from the response
+          for (final record in data) {
+            final name = record['name'].toString();
+            final totalCons = record['total_cons'].toString();
+            final totalBill = record['total_bill'].toString();
+
+            tableData.add([name, totalCons, totalBill]);
+          }
+
+          // Create a table from the data
+          final table = pw.Table.fromTextArray(
+            context: context,
+            data: tableData,
+            border: pw.TableBorder.all(),
+            headerAlignment: pw.Alignment.centerLeft,
+            cellAlignment: pw.Alignment.centerLeft,
+          );
+
           return pw.Center(
-            child: pw.Text("Hello World"),
-          ); // Center
-        })); // Page
-    return pdf.save();
+            child: table,
+          );
+        },
+      ),
+    );
+
+    // Save the PDF as bytes
+    final Uint8List pdfBytes = await pdf.save();
+
+    return pdfBytes;
   }
 
   Future<void> savePdf() async {
