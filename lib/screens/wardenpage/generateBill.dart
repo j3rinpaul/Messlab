@@ -395,7 +395,7 @@ class _generateBillState extends State<generateBill> {
               onPressed: () {
                 return _selectDateRange(context);
               },
-              child: const Text("Select Start and End date")),
+              child: const Text("Select Range ")),
           GestureDetector(
             onTap: () => _selectMonthAndYear(),
             child: Padding(
@@ -465,7 +465,7 @@ class _generateBillState extends State<generateBill> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Select Start and End date'),
+                        title: const Text('Select Start and End date '),
                         content:
                             const Text('Please select the start and end date'),
                         actions: [
@@ -486,13 +486,26 @@ class _generateBillState extends State<generateBill> {
               },
               child: const Text("Generate Bill")),
           const SizedBox(height: 15),
-          Text("Last bill was on $lastBill"),
-          const SizedBox(height: 15),
           ElevatedButton(
               onPressed: () async {
+                setState(() {
+                  isSaveLoad = true;
+                });
+
                 await savePdf();
+                setState(() {
+                  isSaveLoad = false;
+                });
               },
-              child: Text("View Pdf")),
+              child: Text("Download Bill")),
+
+          SizedBox(height: 5),
+          // Display a circular loading indicator based on the isSavingPdf flag
+          isSaveLoad ? CircularProgressIndicator() : Container(),
+          SizedBox(height: 5),
+          Text("Last bill was on $lastBill"),
+          SizedBox(height: 5),
+
           const Text('Previous Bills',
               style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
@@ -501,6 +514,8 @@ class _generateBillState extends State<generateBill> {
       ),
     );
   }
+
+  bool isSaveLoad = false;
 
   Future<Uint8List> generatePdf() async {
     // Fetch data from Supabase
@@ -511,33 +526,37 @@ class _generateBillState extends State<generateBill> {
         .eq("year", selectedYear)
         .execute();
 
-    final List<dynamic> name = [];
-    Map<String, dynamic> nameEntry = {};
+        if(response.data.isEmpty){
+          showAlert("No data", "No data found for the selected month and year");
+          return Uint8List(0);
+        }
 
+    Map<String, String> nameMap = {}; // Create a HashMap to store the names
 
     for (final record in response.data) {
-      print(record['u_id']);
-
       final sup = await supabase
           .from('users')
           .select('first_name,last_name')
           .eq("u_id", record['u_id'])
           .execute();
 
-      final String names =
-          sup.data[0]['first_name'] + " " + sup.data[0]['last_name'];
-      nameEntry = {
-        'name': names,
-      };
-      
+      // Check if the query returned data
+      if (sup.data.isNotEmpty) {
+        final String firstName = sup.data[0]['first_name'];
+        final String lastName = sup.data[0]['last_name'];
+
+        // Concatenate first name and last name
+        final String fullName = '$firstName $lastName';
+
+        // Save the full name to the HashMap
+        nameMap[record['u_id']] = fullName;
+      }
     }
-
-    print(nameEntry);
-
-
 
     List<Map<String, dynamic>> data =
         (response.data as List<dynamic>).cast<Map<String, dynamic>>();
+
+    // print(data);
 
     // Create a PDF document
     final pdf = pw.Document();
@@ -555,16 +574,20 @@ class _generateBillState extends State<generateBill> {
 
           // Add data from the response
           for (final record in data) {
-            final name = record['name'].toString();
+            // final name = nameEntry.keys;
+            final name = nameMap[record['u_id']];
             final totalCons = record['total_cons'].toString();
             final totalBill = record['total_bill'].toString();
 
-            tableData.add([name, totalCons, totalBill]);
+            tableData.add([name!, totalCons, totalBill]);
           }
 
           // Create a table from the data
           final table = pw.Table.fromTextArray(
             context: context,
+            headers: selectedMonth!.length == 1
+                ? ['Mess Bill for 0$selectedMonth/$selectedYear']
+                : ['Mess Bill for $selectedMonth/$selectedYear'],
             data: tableData,
             border: pw.TableBorder.all(),
             headerAlignment: pw.Alignment.centerLeft,
@@ -585,21 +608,32 @@ class _generateBillState extends State<generateBill> {
   }
 
   Future<void> savePdf() async {
-    final pdfBytes = await generatePdf(); // Wait for the PDF to be generated
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
+    if (selectedMonth == null || selectedYear == null) {
+      showAlert("Date not selected", "Please select the Month and Year");
+    } else {
+      setState(() {
+        isSaveLoad = true;
+      });
 
-    if (statuses[Permission.storage]!.isGranted) {
-      String? downloadsDirectoryPath =
-          (await DownloadsPath.downloadsDirectory())?.path;
-      print(downloadsDirectoryPath);
-      if (downloadsDirectoryPath != null) {
-        final file = File('$downloadsDirectoryPath/bill.pdf');
-        await file.writeAsBytes(pdfBytes);
-        print("File saved");
-        print(" File saved to $downloadsDirectoryPath/bill.pdf");
+      final pdfBytes = await generatePdf(); // Wait for the PDF to be generated
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.storage,
+      ].request();
+
+      if (statuses[Permission.storage]!.isGranted) {
+        String? downloadsDirectoryPath =
+            (await DownloadsPath.downloadsDirectory())?.path;
+        print(downloadsDirectoryPath);
+        if (downloadsDirectoryPath != null) {
+          final file = File('$downloadsDirectoryPath/bill.pdf');
+          await file.writeAsBytes(pdfBytes);
+          print(" File saved to $downloadsDirectoryPath/bill.pdf");
+        }
       }
+      setState(() {
+        isSaveLoad = false;
+      });
+      // showAlert("Saved", "Success");
     }
   }
 

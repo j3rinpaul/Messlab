@@ -193,274 +193,267 @@ class _ScreenPointsState extends State<ScreenPoints> {
                 );
               } else {
                 return SafeArea(
-                  /*child: ValueListenableBuilder(valueListenable: ScreenPoints.selectedIndexNotifier,
-                builder: (BuildContext context,int updatedIndex,_){
-                return _pages[updatedIndex];
-                }),*/
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Container(
-                                height: 100,
-                                width: 350,
-                                //width: 600,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: const Color.fromARGB(
-                                      255,
-                                      209,
-                                      204,
-                                      203,
-                                    )),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      //SizedBox(height: 30,),
-                                
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
+                  child: SingleChildScrollView(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Container(
+                              height: 100,
+                              width: 350,
+                              //width: 600,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: const Color.fromARGB(
+                                    255,
+                                    209,
+                                    204,
+                                    203,
+                                  )),
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    //SizedBox(height: 30,),
+                              
+                                    Column(
+                                      
+                                      children: [
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          currentUser!.name!,
+                                          // "Rajesh",
+                                          style: const TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          Text(
-                                            currentUser!.name!,
-                                            // "Rajesh",
-                                            style: const TextStyle(
-                                              fontSize: 15.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        Text(
+                                          currentUser!.role!,
+                                          // "User",
+                                          style: const TextStyle(
+                                            fontSize: 16.0,
                                           ),
-                                          const SizedBox(height: 8.0),
-                                          Text(
-                                            currentUser!.role!,
-                                            // "User",
-                                            style: const TextStyle(
-                                              fontSize: 16.0,
-                                            ),
+                                        ),
+                                        const SizedBox(height: 4.0),
+                                        Text(
+                                          currentUser!.designation!,
+                                          // "Student",
+                                          style: const TextStyle(
+                                            fontSize: 16.0,
                                           ),
-                                          const SizedBox(height: 4.0),
-                                          Text(
-                                            currentUser!.designation!,
-                                            // "Student",
-                                            style: const TextStyle(
-                                              fontSize: 16.0,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                      // Text('Rs.7200',style: TextStyle(fontSize: 40),)
-                                    ],
-                                  ),
+                                        ),
+                                      ],
+                                    )
+                                    // Text('Rs.7200',style: TextStyle(fontSize: 40),)
+                                  ],
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                  height: 75,
-                                  width: 800,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: const Color.fromARGB(255, 209, 204, 203)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Column(
-                                                children: [
-                                                  const Row(
-                                                    children: [
-                                                      Text(
-                                                        'Total Points',
-                                                        style: TextStyle(
-                                                            fontSize: 15),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        dueDate!.points!,
-                                                        style: const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                                height: 75,
+                                width: 800,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color.fromARGB(255, 209, 204, 203)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            Column(
+                                              children: [
+                                                const Row(
+                                                  children: [
+                                                    Text(
+                                                      'Total Points',
+                                                      style: TextStyle(
+                                                          fontSize: 15),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      dueDate!.points!,
+                                                      style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            )
+                                          ],
                                         ),
-                                        const VerticalDivider(
-                                            color: Colors.black, width: 5),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Column(
-                                                children: [
-                                                  const Text(
-                                                    'Due Amount',
-                                                    style:
-                                                        TextStyle(fontSize: 15),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  Text(
-                                                    dueDate!.amount!,
-                                                    style: const TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  )),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            const Text(
-                              'Detailed Bill',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 10),
-                            const Row(
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(left: 20.0),
-                                      child: Text(
-                                        'Date',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
                                       ),
+                                      const VerticalDivider(
+                                          color: Colors.black, width: 5),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            Column(
+                                              children: [
+                                                const Text(
+                                                  'Due Amount',
+                                                  style:
+                                                      TextStyle(fontSize: 15),
+                                                ),
+                                                const SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Text(
+                                                  dueDate!.amount!,
+                                                  style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          const Text(
+                            'Detailed Bill',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          const Row(
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 20.0),
+                                    child: Text(
+                                      'Date',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 20.0),
-                                      child: Text(
-                                        'Consumption',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(right: 20.0),
+                                    child: Text(
+                                      'Consumption',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                           
-                              // height: 300,
-                               SizedBox(
-                                 child: SingleChildScrollView(
-                                   child: ListView.builder(
-                                       shrinkWrap: true,
-                                       itemCount: dateMap.length,
-                                       itemBuilder: (BuildContext context, int index) {
-                                         final date = dateMap.keys.toList()[index];
-                                         final consumption = dateMap[date];
-                                         return Card(
-                                           margin: const EdgeInsets.symmetric(
-                                               horizontal: 15.0, vertical: 4.0),
-                                           child: Padding(
-                                             padding: const EdgeInsets.all(16.0),
-                                             child: Row(
-                                               mainAxisAlignment:
-                                                   MainAxisAlignment.spaceBetween,
-                                               children: [
-                                                 Text(
-                                                   date,
-                                                   style: const TextStyle(
-                                                       fontWeight: FontWeight.bold),
-                                                 ),
-                                                 Row(
-                                                   children: [
-                                                     Container(
-                                                       width: 10,
-                                                       height: 10,
-                                                       margin:
-                                                           const EdgeInsets.symmetric(
-                                                               horizontal: 5.0),
-                                                       decoration: BoxDecoration(
-                                                         shape: BoxShape.circle,
-                                                         color: consumption![0]
-                                                             ? Colors.green
-                                                             : Colors.red,
-                                                       ),
+                              ),
+                            ],
+                          ),
+                         
+                            // height: 300,
+                             SizedBox(
+                               child: SingleChildScrollView(
+                                 child: ListView.builder(
+                                     shrinkWrap: true,
+                                     itemCount: dateMap.length,
+                                     itemBuilder: (BuildContext context, int index) {
+                                       final date = dateMap.keys.toList()[index];
+                                       final consumption = dateMap[date];
+                                       return Card(
+                                         margin: const EdgeInsets.symmetric(
+                                             horizontal: 15.0, vertical: 4.0),
+                                         child: Padding(
+                                           padding: const EdgeInsets.all(16.0),
+                                           child: Row(
+                                             mainAxisAlignment:
+                                                 MainAxisAlignment.spaceBetween,
+                                             children: [
+                                               Text(
+                                                 date,
+                                                 style: const TextStyle(
+                                                     fontWeight: FontWeight.bold),
+                                               ),
+                                               Row(
+                                                 children: [
+                                                   Container(
+                                                     width: 10,
+                                                     height: 10,
+                                                     margin:
+                                                         const EdgeInsets.symmetric(
+                                                             horizontal: 5.0),
+                                                     decoration: BoxDecoration(
+                                                       shape: BoxShape.circle,
+                                                       color: consumption![0]
+                                                           ? Colors.green
+                                                           : Colors.red,
                                                      ),
-                                                     Container(
-                                                       width: 10,
-                                                       height: 10,
-                                                       margin:
-                                                           const EdgeInsets.symmetric(
-                                                               horizontal: 5.0),
-                                                       decoration: BoxDecoration(
-                                                         shape: BoxShape.circle,
-                                                         color: consumption[1]
-                                                             ? Colors.green
-                                                             : Colors.red,
-                                                       ),
+                                                   ),
+                                                   Container(
+                                                     width: 10,
+                                                     height: 10,
+                                                     margin:
+                                                         const EdgeInsets.symmetric(
+                                                             horizontal: 5.0),
+                                                     decoration: BoxDecoration(
+                                                       shape: BoxShape.circle,
+                                                       color: consumption[1]
+                                                           ? Colors.green
+                                                           : Colors.red,
                                                      ),
-                                                     Container(
-                                                       width: 10,
-                                                       height: 10,
-                                                       margin:
-                                                           const EdgeInsets.symmetric(
-                                                               horizontal: 5.0),
-                                                       decoration: BoxDecoration(
-                                                         shape: BoxShape.circle,
-                                                         color: consumption[2]
-                                                             ? Colors.green
-                                                             : Colors.red,
-                                                       ),
+                                                   ),
+                                                   Container(
+                                                     width: 10,
+                                                     height: 10,
+                                                     margin:
+                                                         const EdgeInsets.symmetric(
+                                                             horizontal: 5.0),
+                                                     decoration: BoxDecoration(
+                                                       shape: BoxShape.circle,
+                                                       color: consumption[2]
+                                                           ? Colors.green
+                                                           : Colors.red,
                                                      ),
-                                                   ],
-                                                 ),
-                                               ],
-                                             ),
+                                                   ),
+                                                 ],
+                                               ),
+                                             ],
                                            ),
-                                         );
-                                       },
-                                     ),
-                                 ),
+                                         ),
+                                       );
+                                     },
+                                   ),
                                ),
-                             
-                            
-                          ]),
-                    ),
+                             ),
+                           
+                          
+                        ]),
                   ),
                 );
               }
