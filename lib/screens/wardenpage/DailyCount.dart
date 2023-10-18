@@ -263,14 +263,7 @@ class _DailyCountState extends State<DailyCount> {
                 },
                 child: const Text("Select Date")),
           ),
-          Padding(
-            padding: EdgeInsets.all(10.0),
-            child: ElevatedButton(
-                onPressed: () {
-                  savePdf();
-                },
-                child: Text("Download Count")),
-          ),
+        
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -342,6 +335,14 @@ class _DailyCountState extends State<DailyCount> {
                       ],
                     ),
             ),
+          ),
+            Padding(
+            padding: EdgeInsets.all(10.0),
+            child: ElevatedButton(
+                onPressed: () {
+                  savePdf();
+                },
+                child: Text("Download Daily Count")),
           ),
           const Row(
             children: [
