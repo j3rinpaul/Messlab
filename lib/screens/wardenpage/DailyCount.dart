@@ -1,4 +1,11 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../supabase_config.dart';
 
@@ -53,11 +60,11 @@ class _DailyCountState extends State<DailyCount> {
       final fullName = '$firstName $lastName';
 
       userNames[uId] = fullName;
-      print(userNames.toString());
     }
     if (respo.error == null) {
-      print(respo.data);
+    
       final data = respo.data;
+    
       final List<dynamic> userIds =
           data.map<dynamic>((user) => user['u_id']).toList();
 
@@ -69,7 +76,7 @@ class _DailyCountState extends State<DailyCount> {
             .eq('mark_date', date)
             .execute();
 
-        print("$uids ${allFood.data}");
+      
         final foodData = allFood.data;
         final foodList = foodData.isNotEmpty
             ? [
@@ -117,7 +124,7 @@ class _DailyCountState extends State<DailyCount> {
       parsedData[0]['evening_food'] = eveningFoodCount;
       isuserloading = false;
     });
-    print("parse:$parsedData");
+
   }
 
   List<Map<String, dynamic>> parsedData = [
@@ -155,12 +162,87 @@ class _DailyCountState extends State<DailyCount> {
     if (picked != null && picked != passDate) {
       setState(() {
         passDate = picked;
-        print(passDate);
+
         date = passDate.toString().substring(0, 10);
         fetchDataCount();
         Userdetails();
       });
     }
+  }
+
+  Map<String, List<dynamic>> downloadList = {};
+
+  void fetchDownload() {
+    for (final value in userNames.keys) {
+      final key = userNames[value];
+      final List<dynamic> foodValues =
+          foodDetails[value] ?? List.filled(3, false);
+      downloadList[key!] = foodValues;
+   
+    }
+  }
+
+  Future<Uint8List> generatePdfFun() async {
+    fetchDownload();
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          // Create a list to hold the table data
+          final tableData = <List<String>>[];
+
+          // Add a header row
+          tableData.add(['Name', 'Morning', 'Noon', 'Evening']);
+
+          for (var key in downloadList.keys) {
+            final value = downloadList[key];
+            final mrng = value![0] ? "Yes" : "No";
+            final noon = value[1] ? "Yes" : "No";
+            final evening = value[2] ? "Yes" : "No";
+  
+            tableData.add([key, mrng, noon, evening]);
+          }
+
+          // Create a table from the data
+          final table = pw.Table.fromTextArray(
+            context: context,
+            headers: ["Daily Count"],
+            data: tableData,
+            border: pw.TableBorder.all(),
+            headerAlignment: pw.Alignment.centerLeft,
+            cellAlignment: pw.Alignment.centerLeft,
+          );
+
+          return pw.Center(
+            child: table,
+          );
+        },
+      ),
+    );
+
+    final Uint8List pdfBytes = await pdf.save();
+
+    return pdfBytes;
+  }
+
+  Future<void> savePdf() async {
+    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    if (statuses[Permission.storage]!.isGranted) {
+      String? downloadsDirectoryPath =
+          (await DownloadsPath.downloadsDirectory())?.path;
+  
+      if (downloadsDirectoryPath != null) {
+        final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
+        await file.writeAsBytes(pdfBytes);
+      }
+    }
+
+    // showAlert("Saved", "Success");
   }
 
   @override
@@ -180,6 +262,14 @@ class _DailyCountState extends State<DailyCount> {
                   _selectDate(context);
                 },
                 child: const Text("Select Date")),
+          ),
+          Padding(
+            padding: EdgeInsets.all(10.0),
+            child: ElevatedButton(
+                onPressed: () {
+                  savePdf();
+                },
+                child: Text("Download Count")),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -299,8 +389,8 @@ class _DailyCountState extends State<DailyCount> {
                   final eveningFood = foodList[2];
 
                   return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 15.0, vertical: 4.0),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
@@ -311,7 +401,8 @@ class _DailyCountState extends State<DailyCount> {
                             child: Text(
                               // '$uids',
                               userNames[uids]!,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           Row(
@@ -320,12 +411,12 @@ class _DailyCountState extends State<DailyCount> {
                                 Container(
                                   width: 10,
                                   height: 10,
-                                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 5.0),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: foodList[i]
-                                        ? Colors.green
-                                        : Colors.red,
+                                    color:
+                                        foodList[i] ? Colors.green : Colors.red,
                                   ),
                                 ),
                               IconButton(
