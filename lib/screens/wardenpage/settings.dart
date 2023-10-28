@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mini_project/screens/login.dart';
+import 'package:mini_project/screens/wardenpage/home_screen.dart';
 
 import '../../supabase_config.dart'; // Import the intl package for date formatting
 
 class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+  void Function(bool value)? setHoliday;
+  Settings({Key? key, this.setHoliday}) : super(key: key);
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -21,6 +24,7 @@ class _SettingsState extends State<Settings> {
   TimeOfDay? noonTime;
   TimeOfDay? evngTime;
   bool isLoading = false;
+  bool switchValue = false;
 
   Future<void> _initTime() async {
     setState(() {
@@ -32,6 +36,20 @@ class _SettingsState extends State<Settings> {
     setState(() {
       isLoading = false;
     });
+
+    final response =
+        await supabase.from('mess_holiday').select().eq('id', 1).execute();
+    print(response.data);
+    if (response.data != null) {
+      final List<dynamic> data = response.data as List<dynamic>;
+      if (data.isNotEmpty) {
+        final bool value = data[0]['holiday'] as bool;
+        setState(() {
+          switchValue = value;
+          // widget.setHoliday!(value);
+        });
+      }
+    }
   }
 
   Future<TimeOfDay?> setTime(String time) async {
@@ -83,9 +101,9 @@ class _SettingsState extends State<Settings> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                 updateDataInSupabase(mrngTime!, "morning");
-              updateDataInSupabase(noonTime!, "noon");
-              updateDataInSupabase(evngTime!, "evening");
+                updateDataInSupabase(mrngTime!, "morning");
+                updateDataInSupabase(noonTime!, "noon");
+                updateDataInSupabase(evngTime!, "evening");
 
                 _showSuccessMessage(context);
               },
@@ -141,137 +159,184 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: const Text('Change Timings'),
       ),
-      body:isLoading ? const Center(child: CircularProgressIndicator()): Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 216, 208, 208),
-                borderRadius: BorderRadius.circular(8),
-              ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : WillPopScope(
+              onWillPop: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => wardenPage()),
+                );
+                return Future.value(switchValue);
+              },
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 216, 208, 208),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.local_cafe),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            readOnly: true,
+                            controller: TextEditingController(
+                              text: mrngTime!.format(context),
+                            ),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Morning',
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _selectTime(context, mrngTime!, (TimeOfDay? time) {
+                              setState(() {
+                                mrngTime = time ?? selectedTime1;
+                              });
+                            });
+                            // print("selected"+selectedTime1.toString());
+                          },
+                          icon: const Icon(Icons.access_time),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.wb_sunny),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            readOnly: true,
+                            controller: TextEditingController(
+                              text: noonTime!.format(context),
+                            ),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Noon',
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _selectTime(context, noonTime!, (TimeOfDay? time) {
+                              setState(() {
+                                noonTime = time ?? selectedTime2;
+                              });
+                            });
+                          },
+                          icon: const Icon(Icons.access_time),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.nightlight_round),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            readOnly: true,
+                            controller: TextEditingController(
+                              text: evngTime!.format(context),
+                            ),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Evening',
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _selectTime(context, evngTime!, (TimeOfDay? time) {
+                              setState(() {
+                                evngTime = time ?? selectedTime3;
+                              });
+                            });
+                          },
+                          icon: const Icon(Icons.access_time),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _showConfirmationDialog(context);
+                      // print(formattedTime);
+                    },
+                    child: const Text('Update'),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          "Mess Holiday",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w400),
+                        ),
+                        Switch(
+                            value: switchValue,
+                            activeColor: Colors.green,
+                            onChanged: (bool newValue) async {
+                              print("Selected Morning");
+
+                              final response = await supabase
+                                  .from('mess_holiday')
+                                  .update({'holiday': newValue})
+                                  .eq("id", 1)
+                                  .execute();
+                              print(response.data);
+                              setState(() {
+                                switchValue = newValue;
+                              });
+
+                              // final existingDataResponse = await supabase
+                              //     .from('food_marking')
+                              //     .select()
+                              //     .eq('u_id', userId)
+                              //     .eq('mark_date', formattedDate)
+                              //     .execute();
+                            }),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 15),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.local_cafe),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    readOnly: true,
-                    controller: TextEditingController(
-                      text: mrngTime!.format(context),
-                    ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Morning',
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    _selectTime(context, mrngTime!, (TimeOfDay? time) {
-                      setState(() {
-                        mrngTime = time ?? selectedTime1;
-                      });
-                    });
-                    // print("selected"+selectedTime1.toString());
-                  },
-                  icon: const Icon(Icons.access_time),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.wb_sunny),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    readOnly: true,
-                    controller: TextEditingController(
-                      text: noonTime!.format(context),
-                    ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Noon',
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    _selectTime(context, noonTime!, (TimeOfDay? time) {
-                      setState(() {
-                        noonTime = time ?? selectedTime2;
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.access_time),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.nightlight_round),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    readOnly: true,
-                    controller: TextEditingController(
-                      text: evngTime!.format(context),
-                    ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Evening',
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    _selectTime(context, evngTime!, (TimeOfDay? time) {
-                      setState(() {
-                        evngTime = time ?? selectedTime3;
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.access_time),
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _showConfirmationDialog(context);
-              // print(formattedTime);
-             
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      ),
     );
   }
 
