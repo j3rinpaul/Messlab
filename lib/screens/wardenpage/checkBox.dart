@@ -21,9 +21,9 @@ String formatDate(DateTime date) {
 }
 
 class _CheckboxListState extends State<CheckboxList> {
-  ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(false);
-  ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(false);
-  ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(false);
+  ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(true);
+  ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(true);
+  ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(true);
   bool mrng = true;
   bool noon = true;
   bool evening = true;
@@ -58,7 +58,7 @@ class _CheckboxListState extends State<CheckboxList> {
             data[0]['noon'] as bool,
             data[0]['evening'] as bool,
           ]
-        : [false, false, false];
+        : [true, true, true];
 
     setState(() {
       dataValues = dataVal;
@@ -478,11 +478,10 @@ class _CheckboxListState extends State<CheckboxList> {
   }
 
   void toastBar(String msgs) {
- Fluttertoast.showToast(
+    Fluttertoast.showToast(
         msg: msgs,
         backgroundColor: Colors.blue,
         textColor: Colors.white,
-        fontSize: 20
-        );
+        fontSize: 20);
   }
 }

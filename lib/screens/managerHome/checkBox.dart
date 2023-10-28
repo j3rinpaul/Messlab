@@ -21,9 +21,9 @@ String formatDate(DateTime date) {
 }
 
 class _CheckboxListState extends State<CheckboxList> {
-  ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(false);
-  ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(false);
-  ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(false);
+  ValueNotifier<bool> morningToggleValue = ValueNotifier<bool>(true);
+  ValueNotifier<bool> noonToggleValue = ValueNotifier<bool>(true);
+  ValueNotifier<bool> eveningToggleValue = ValueNotifier<bool>(true);
   bool mrng = true;
   bool noon = true;
   bool evening = true;
