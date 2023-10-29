@@ -175,6 +175,14 @@ class _PopulateDbState extends State<PopulateDb> {
     );
   }
 
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,7 +204,10 @@ class _PopulateDbState extends State<PopulateDb> {
                 ElevatedButton(
                   onPressed: () {
                     if (selectedMonth != null && selectedYear != null) {
+                    
                       makeMarkings(selectedMonth!, selectedYear.toString());
+                    }else{
+                      showSnackBar("Please select a month and year");
                     }
                   },
                   child: const Text('Populate DB'),
