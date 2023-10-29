@@ -19,7 +19,7 @@ class ManagerHome extends StatelessWidget {
         uid: u_id,
       ),
       appBar: AppBar(
-        title: const Text("Manager Home"),
+        title: const Text("messLab - Manager"),
         actions: [
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),

@@ -217,7 +217,7 @@ class _CheckboxListState extends State<CheckboxList> {
   }
 
   Future<void> selectiveToggle() async {
-    print("Is not holiday");
+    await getActiveTime();
     if (parseTimemrng! < currentTime.hour) {
       setState(() {
         mrng = false;
@@ -239,7 +239,6 @@ class _CheckboxListState extends State<CheckboxList> {
   void initState() {
     // TODO: implement initState
     getActiveTime();
-    makeMarkings(month, year);
     getMessHoliday();
     initToggle(widget.date!);
     selectiveToggle();
