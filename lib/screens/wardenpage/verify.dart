@@ -29,6 +29,38 @@ class _VerifyUserState extends State<VerifyUser> {
     }
   }
 
+  Future<void> userMarkings(String email) async {
+    DateTime now = DateTime.now();
+    print(now);
+    DateTime month_end = DateTime(now.year, now.month + 1, 0);
+    final response = await supabase
+        .from('users')
+        .select("u_id")
+        .eq("email", email)
+        .execute();
+    print(response.data[0]["u_id"]);
+    final u_id = response.data[0]["u_id"];
+    for (DateTime time = now;
+        time.isBefore(month_end);
+        time = time.add(const Duration(days: 1))) {
+      String date = time.toLocal().toString().split(' ')[0];
+      final response = await supabase.from('food_marking').insert([
+        {
+          'u_id': u_id,
+          'mark_date': date,
+          'morning': true,
+          'noon': true,
+          'evening': true,
+        }
+      ]).execute();
+      if (response.error == null) {
+        print("user markings created successfully");
+      } else {
+        print("error${response.error}");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +93,8 @@ class _VerifyUserState extends State<VerifyUser> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text('Warning'),
-                                  content: const Text('Do you want to delete user?'),
+                                  content:
+                                      const Text('Do you want to delete user?'),
                                   actions: [
                                     TextButton(
                                       child: const Text('Confirm'),
@@ -159,6 +192,7 @@ class _VerifyUserState extends State<VerifyUser> {
             .delete()
             .eq('id', id)
             .execute();
+        userMarkings(username);
         print(id);
         showVar(context, "User created successfully", "Created");
         if (response.error == null) {

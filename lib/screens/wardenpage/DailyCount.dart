@@ -84,7 +84,7 @@ class _DailyCountState extends State<DailyCount> {
                 foodData[0]['noon'],
                 foodData[0]['evening'],
               ]
-            : [false, false, false];
+            : [true, true, true];
         setState(() {
           foodDetails[uids] = List.from(foodList);
         });
