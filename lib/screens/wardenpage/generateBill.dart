@@ -563,7 +563,7 @@ class _generateBillState extends State<generateBill> {
 
     // Add a page with A4 page format
     pdf.addPage(
-      pw.Page(
+      pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
           // Create a list to hold the table data
@@ -594,9 +594,7 @@ class _generateBillState extends State<generateBill> {
             cellAlignment: pw.Alignment.centerLeft,
           );
 
-          return pw.Center(
-            child: table,
-          );
+          return [pw.Center(child: table)];
         },
       ),
     );

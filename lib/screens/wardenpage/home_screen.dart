@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mini_project/screens/wardenpage/populate.dart';
-import 'package:mini_project/screens/wardenpage/verify.dart';
-
 import 'package:mini_project/screens/wardenpage/Roleassign_warden.dart';
+import 'package:mini_project/screens/wardenpage/changePass.dart';
 import 'package:mini_project/screens/wardenpage/generateBill.dart';
+import 'package:mini_project/screens/wardenpage/populate.dart';
 import 'package:mini_project/screens/wardenpage/settings.dart';
+import 'package:mini_project/screens/wardenpage/verify.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 
 import 'ScreenHome.dart';
@@ -59,12 +59,24 @@ class wardenPage extends StatelessWidget {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.bookmark_outline_outlined),
+                        leading: const Icon(Icons.add_box_outlined),
                         title: const Text('Populate db'),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (ctx1) => const PopulateDb()),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.password),
+                        title: const Text('Change Password'),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (ctx1) => ChangePass(
+                                      id: u_id,
+                                    )),
                           );
                         },
                       ),

@@ -177,40 +177,65 @@ class _DailyCountState extends State<DailyCount> {
       downloadList[key!] = foodValues;
     }
   }
-
   Future<Uint8List> generatePdfFun() async {
-    fetchDownload();
-    final pdf = pw.Document();
+  fetchDownload();
+  final pdf = pw.Document();
+
+  // Define a custom page format for multiple pages
+  final pageFormat = PdfPageFormat.a4.copyWith(
+    marginTop: 10.0, // Adjust the margins as needed
+  );
+
+  // Create a list of table data for each page
+  final List<List<List<String>>> pages = [];
+
+  // Initialize the current page data
+  List<List<String>> currentPageData = [];
+
+  // Helper function to add a new page and reset current page data
+  void addPage() {
+    final tableData = [
+      ['Name', 'Morning', 'Noon', 'Evening'],
+      ...currentPageData, // Add rows for the current page here
+    ];
+    tableData.add([
+      'Total',
+      parsedData[0]['morning_food'].toString(),
+      parsedData[0]['noon_food'].toString(),
+      parsedData[0]['evening_food'].toString(),
+    ]);
+
+    pages.add(tableData);
+    currentPageData = [];
+  }
+
+  for (var key in downloadList.keys) {
+    final value = downloadList[key];
+    final mrng = value![0] ? "Yes" : "No";
+    final noon = value[1] ? "Yes" : "No";
+    final evening = value[2] ? "Yes" : "No";
+
+    currentPageData.add([key, mrng, noon, evening]);
+
+    // Check if the current page is getting too long, and if so, add a new page
+    if (currentPageData.length > 20) {
+      addPage();
+    }
+  }
+
+  addPage(); // Add the last page
+
+  // Create a PDF with multiple pages
+  for (final pageData in pages) {
     pdf.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.a4,
+        pageFormat: pageFormat,
         build: (pw.Context context) {
-          // Create a list to hold the table data
-          final tableData = <List<String>>[];
-
-          // Add a header row
-          tableData.add(['Name', 'Morning', 'Noon', 'Evening']);
-
-          for (var key in downloadList.keys) {
-            final value = downloadList[key];
-            final mrng = value![0] ? "Yes" : "No";
-            final noon = value[1] ? "Yes" : "No";
-            final evening = value[2] ? "Yes" : "No";
-
-            tableData.add([key, mrng, noon, evening]);
-          }
-          tableData.add([
-            'Total',
-            parsedData[0]['morning_food'].toString(),
-            parsedData[0]['noon_food'].toString(),
-            parsedData[0]['evening_food'].toString()
-          ]);
-
-          // Create a table from the data
+          // Create a table from the page data
           final table = pw.Table.fromTextArray(
             context: context,
             headers: ["Daily Count"],
-            data: tableData,
+            data: pageData,
             border: pw.TableBorder.all(),
             headerAlignment: pw.Alignment.centerLeft,
             cellAlignment: pw.Alignment.centerLeft,
@@ -222,11 +247,12 @@ class _DailyCountState extends State<DailyCount> {
         },
       ),
     );
-
-    final Uint8List pdfBytes = await pdf.save();
-
-    return pdfBytes;
   }
+
+  final Uint8List pdfBytes = await pdf.save();
+
+  return pdfBytes;
+}
 
   Future<void> savePdf() async {
     final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
@@ -241,6 +267,7 @@ class _DailyCountState extends State<DailyCount> {
       if (downloadsDirectoryPath != null) {
         final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
         await file.writeAsBytes(pdfBytes);
+        print("file saved: " + file.path);
       }
     }
     showAlert("Saved", "PDF saved successfully");
