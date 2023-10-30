@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mini_project/screens/wardenpage/populate.dart';
 import 'package:mini_project/screens/wardenpage/verify.dart';
 
 import 'package:mini_project/screens/wardenpage/Roleassign_warden.dart';
@@ -17,7 +18,7 @@ class wardenPage extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar: BottomNav(uid: u_id),
       appBar: AppBar(
-        title: const Text("Warden"),
+        title: const Text("messLab - Warden"),
         actions: [
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
@@ -54,6 +55,16 @@ class wardenPage extends StatelessWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (ctx1) => const generateBill()),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.bookmark_outline_outlined),
+                        title: const Text('Populate db'),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (ctx1) => const PopulateDb()),
                           );
                         },
                       ),

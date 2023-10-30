@@ -17,7 +17,7 @@ class ScreenHome extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar:BottomNav(uid: u_id,),
       appBar: AppBar(
-        title: const Text("Home"),
+        title: const Text("messLab"),
       ),
       body: CalendarPage(u_id: u_id,),
     );
