@@ -243,8 +243,27 @@ class _DailyCountState extends State<DailyCount> {
         await file.writeAsBytes(pdfBytes);
       }
     }
+    showAlert("Saved", "PDF saved successfully");
+  }
 
-    // showAlert("Saved", "Success");
+  void showAlert(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
