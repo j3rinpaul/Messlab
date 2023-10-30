@@ -151,7 +151,7 @@ class _CheckboxListState extends State<CheckboxList> {
   }
 
   Future<void> selectiveToggle() async {
-    print("Is not holiday");
+    await getActiveTime();
     if (parseTimemrng! < currentTime.hour) {
       setState(() {
         mrng = false;

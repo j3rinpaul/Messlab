@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 
+import '../wardenpage/changePass.dart';
 import '../wardenpage/generateBill.dart';
 import 'ScreenHome.dart';
 //import 'package:intl/intl.dart';
@@ -28,33 +29,18 @@ class ManagerHome extends StatelessWidget {
                 PopupMenuItem(
                   child: Column(
                     children: [
-                      // ListTile(
-                      //   leading: Icon(Icons.settings),
-                      //   title: Text('Settings'),
-                      //   onTap: () {
-                      //     Navigator.of(context).push(
-                      //       MaterialPageRoute(builder: (ctx1) => Settings()),
-                      //     );
-                      //   },
-                      // ),
-                      // ListTile(
-                      //   leading: Icon(Icons.person_add),
-                      //   title: Text('User Verification'),
-                      //   onTap: () {
-                      //     Navigator.of(context).push(
-                      //       MaterialPageRoute(builder: (ctx1) => VerifyUser()),
-                      //     );
-                      //   },
-                      // ),
-                      // ListTile(
-                      //   leading: Icon(Icons.report_gmailerrorred_outlined),
-                      //   title: Text('Role Assign'),
-                      //   onTap: () {
-                      //     Navigator.of(context).push(
-                      //       MaterialPageRoute(builder: (ctx1) => RoleAssign()),
-                      //     );
-                      //   },
-                      // ),
+                      ListTile(
+                        leading: const Icon(Icons.person_add),
+                        title: const Text('Change Password'),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (ctx1) => ChangePass(
+                                      id: u_id,
+                                    )),
+                          );
+                        },
+                      ),
                       ListTile(
                         leading: const Icon(Icons.bookmark_outline_outlined),
                         title: const Text('Generate Bill'),
