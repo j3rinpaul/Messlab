@@ -526,10 +526,10 @@ class _generateBillState extends State<generateBill> {
         .eq("year", selectedYear)
         .execute();
 
-        if(response.data.isEmpty){
-          showAlert("No data", "No data found for the selected month and year");
-          return Uint8List(0);
-        }
+    if (response.data.isEmpty) {
+      showAlert("No data", "No data found for the selected month and year");
+      return Uint8List(0);
+    }
 
     Map<String, String> nameMap = {}; // Create a HashMap to store the names
 
@@ -614,20 +614,23 @@ class _generateBillState extends State<generateBill> {
       setState(() {
         isSaveLoad = true;
       });
-
-      final pdfBytes = await generatePdf(); // Wait for the PDF to be generated
       Map<Permission, PermissionStatus> statuses = await [
         Permission.storage,
       ].request();
+
+      // Wait for the PDF to be generated
 
       if (statuses[Permission.storage]!.isGranted) {
         String? downloadsDirectoryPath =
             (await DownloadsPath.downloadsDirectory())?.path;
         print(downloadsDirectoryPath);
         if (downloadsDirectoryPath != null) {
-          final file = File('$downloadsDirectoryPath/bill.pdf');
-          await file.writeAsBytes(pdfBytes);
-          print(" File saved to $downloadsDirectoryPath/bill.pdf");
+          final pdfBytes = await generatePdf();
+          if (pdfBytes.lengthInBytes != 0) {
+            final file = File('$downloadsDirectoryPath/bill.pdf');
+            await file.writeAsBytes(pdfBytes);
+            print(" File saved to $downloadsDirectoryPath/bill.pdf");
+          }
         }
       }
       setState(() {
