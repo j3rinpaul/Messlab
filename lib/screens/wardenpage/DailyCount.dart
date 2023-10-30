@@ -62,9 +62,8 @@ class _DailyCountState extends State<DailyCount> {
       userNames[uId] = fullName;
     }
     if (respo.error == null) {
-    
       final data = respo.data;
-    
+
       final List<dynamic> userIds =
           data.map<dynamic>((user) => user['u_id']).toList();
 
@@ -76,7 +75,6 @@ class _DailyCountState extends State<DailyCount> {
             .eq('mark_date', date)
             .execute();
 
-      
         final foodData = allFood.data;
         final foodList = foodData.isNotEmpty
             ? [
@@ -124,7 +122,6 @@ class _DailyCountState extends State<DailyCount> {
       parsedData[0]['evening_food'] = eveningFoodCount;
       isuserloading = false;
     });
-
   }
 
   List<Map<String, dynamic>> parsedData = [
@@ -178,7 +175,6 @@ class _DailyCountState extends State<DailyCount> {
       final List<dynamic> foodValues =
           foodDetails[value] ?? List.filled(3, false);
       downloadList[key!] = foodValues;
-   
     }
   }
 
@@ -200,9 +196,15 @@ class _DailyCountState extends State<DailyCount> {
             final mrng = value![0] ? "Yes" : "No";
             final noon = value[1] ? "Yes" : "No";
             final evening = value[2] ? "Yes" : "No";
-  
+
             tableData.add([key, mrng, noon, evening]);
           }
+          tableData.add([
+            'Total',
+            parsedData[0]['morning_food'].toString(),
+            parsedData[0]['noon_food'].toString(),
+            parsedData[0]['evening_food'].toString()
+          ]);
 
           // Create a table from the data
           final table = pw.Table.fromTextArray(
@@ -235,7 +237,7 @@ class _DailyCountState extends State<DailyCount> {
     if (statuses[Permission.storage]!.isGranted) {
       String? downloadsDirectoryPath =
           (await DownloadsPath.downloadsDirectory())?.path;
-  
+
       if (downloadsDirectoryPath != null) {
         final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
         await file.writeAsBytes(pdfBytes);
@@ -263,7 +265,6 @@ class _DailyCountState extends State<DailyCount> {
                 },
                 child: const Text("Select Date")),
           ),
-        
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -336,7 +337,7 @@ class _DailyCountState extends State<DailyCount> {
                     ),
             ),
           ),
-            Padding(
+          Padding(
             padding: EdgeInsets.all(10.0),
             child: ElevatedButton(
                 onPressed: () {
