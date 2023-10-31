@@ -175,7 +175,6 @@ class _ScreenPointsState extends State<ScreenPoints> {
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
-          
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) {
@@ -189,7 +188,9 @@ class _ScreenPointsState extends State<ScreenPoints> {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (ctx1) => EditProfile(id:widget.uid!,)),
+                                builder: (ctx1) => EditProfile(
+                                      id: widget.uid!,
+                                    )),
                           );
                         },
                       ),
@@ -206,7 +207,6 @@ class _ScreenPointsState extends State<ScreenPoints> {
             elevation: 4, // Set the elevation
           ),
         ],
-        
       ),
       body: FutureBuilder(
           future: Future.wait([
@@ -222,7 +222,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: Text('Error: ${snapshot.error}'),
+                child: Text('Reload '),
               );
             } else {
               return SafeArea(
@@ -249,7 +249,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   //SizedBox(height: 30,),
-                
+
                                   Column(
                                     children: [
                                       const SizedBox(
@@ -265,16 +265,16 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                       ),
                                       const SizedBox(height: 8.0),
                                       Text(
-                                        currentUser!.role!,
-                                        // "User",
+                                        currentUser!.designation!,
+                                        // "Student",
                                         style: const TextStyle(
                                           fontSize: 16.0,
                                         ),
                                       ),
                                       const SizedBox(height: 4.0),
                                       Text(
-                                        currentUser!.designation!,
-                                        // "Student",
+                                        currentUser!.role!,
+                                        // "User",
                                         style: const TextStyle(
                                           fontSize: 16.0,
                                         ),
@@ -358,7 +358,8 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                                 dueDate!.amount!,
                                                 style: const TextStyle(
                                                     fontSize: 15,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           )
@@ -386,7 +387,8 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                   padding: EdgeInsets.only(left: 20.0),
                                   child: Text(
                                     'Date',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
@@ -398,14 +400,15 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                   padding: EdgeInsets.only(right: 20.0),
                                   child: Text(
                                     'Consumption',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-                
+
                         // height: 300,
                         SizedBox(
                           height: MediaQuery.of(context).size.height - 400,

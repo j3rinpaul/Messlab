@@ -95,12 +95,12 @@ class _RoleAssignState extends State<RoleAssign> {
                         },
                         child: const Text("Delete"),
                       ),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     showChangePasswordDialog(item['u_id']);
-                      //   },
-                      //   child: const Text("Change Password"),
-                      // ),
+                      TextButton(
+                        onPressed: () {
+                          showChangePasswordDialog(item['u_id']);
+                        },
+                        child: const Text("Change Password"),
+                      ),
                       ElevatedButton(
                         onPressed: () {
                           showRoleSelectionDialog(item['u_id'], item['role']);
