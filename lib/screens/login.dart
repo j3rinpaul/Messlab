@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  hintText: 'Email',
+                  hintText: 'Email/Username',
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10.0, vertical: 18.0),
                   border: OutlineInputBorder(

@@ -17,9 +17,11 @@ class ScreenPoints extends StatefulWidget {
 class _ScreenPointsState extends State<ScreenPoints> {
   final Map<String, List<bool>> dateMap = {};
   Future<void> getDate(String date, String year, String? uid) async {
+    dateMap.clear();
     final int selectedYear = int.parse(year);
     final int selectedMonth = int.parse(date);
-
+    print(selectedYear);
+    print(selectedMonth);
     final eveningFoodResponse = await supabase
         .from('food_marking')
         .select('mark_date, evening')
@@ -44,7 +46,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
         .eq('u_id', uid)
         .execute();
 
-    dateMap.clear(); // Clear the existing data in the dateMap
+    // dateMap.clear(); // Clear the existing data in the dateMap
 
     for (final data in eveningFoodResponse.data) {
       final date = data['mark_date'].toString().split(' ')[0];
@@ -61,6 +63,12 @@ class _ScreenPointsState extends State<ScreenPoints> {
       final date = data['mark_date'].toString().split(' ')[0];
       dateMap.putIfAbsent(date, () => [false, false, false])[1] = data['noon'];
     }
+    List<MapEntry<String, List<bool>>> entries = dateMap.entries.toList();
+    entries.sort((a, b) => a.key.compareTo(b.key));
+    dateMap.clear();
+    for (final entry in entries) {
+      dateMap[entry.key] = entry.value;
+    }
 
     print('dateMap');
     print(dateMap);
@@ -68,21 +76,8 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
   Username? currentUser;
   DueDate? dueDate;
-  final date = DateTime.now().month.toString();
-  final year = DateTime.now().year.toString();
-
-//get the detailed bill of the user of that month
-//get all the data of that user in that month
-  // Future<void> detailedB(String month, String year, String? uid) async {
-  //   final response = await supabase
-  //       .from('food_morning')
-  //       .select()
-  //       .eq('u_id', uid)
-  //       .eq('month', month)
-  //       .eq('year', year)
-  //       .execute();
-  //   print("morning" + response.data.toString());
-  // }
+  String date = DateTime.now().month.toString();
+  String year = DateTime.now().year.toString();
 
   Future<void> getDue(String? uid, String? date, String? year) async {
     final paid = await supabase
@@ -167,6 +162,43 @@ class _ScreenPointsState extends State<ScreenPoints> {
     await getDue(widget.uid, date, year);
     // await detailedB(date, year, widget.uid);
     await getDate(date, year, widget.uid);
+  }
+
+  Future<void> _selectMonthAndYear(BuildContext context) async {
+    DateTime selectedDate = DateTime.now();
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(selectedDate.year - 1),
+      lastDate: DateTime(selectedDate.year + 1),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue, // Set your preferred color
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final selectedMonth = picked.month;
+      final selectedYear = picked.year;
+      final formattedDate =
+          '$selectedMonth/$selectedYear'; // Customize the format as needed
+      print('Selected Month and Year: $formattedDate');
+      setState(() {
+        year = selectedYear.toString();
+        date = selectedMonth.toString();
+        dateMap.clear();
+        print("datemap" + dateMap.toString());
+        getDate(date, year, widget.uid);
+      });
+      // You can return or use the selected month and year as needed.
+    }
   }
 
   @override
@@ -373,6 +405,11 @@ class _ScreenPointsState extends State<ScreenPoints> {
                         const SizedBox(
                           height: 15,
                         ),
+                        ElevatedButton(
+                            onPressed: () {
+                              _selectMonthAndYear(context);
+                            },
+                            child: Text("Select Month")),
                         const Text(
                           'Detailed Bill',
                           style: TextStyle(fontWeight: FontWeight.bold),
@@ -411,74 +448,86 @@ class _ScreenPointsState extends State<ScreenPoints> {
 
                         // height: 300,
                         SizedBox(
-                          height: MediaQuery.of(context).size.height - 400,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: dateMap.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final date = dateMap.keys.toList()[index];
-                              final consumption = dateMap[date];
-                              return Card(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 15.0, vertical: 4.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        date,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                            height: MediaQuery.of(context).size.height - 450,
+                            child: ListView.builder(
+                              itemCount: dateMap.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final date = dateMap.keys.toList()[index];
+                                final consumption = dateMap[date];
+
+                                // Wrap each item in a `Column` to avoid clipping issues
+                                return Column(
+                                  children: [
+                                    Card(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 15.0, vertical: 4.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              date,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  margin: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 5.0),
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: consumption![0]
+                                                        ? Colors.green
+                                                        : Colors.red,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  margin: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 5.0),
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: consumption[1]
+                                                        ? Colors.green
+                                                        : Colors.red,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  margin: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 5.0),
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: consumption[2]
+                                                        ? Colors.green
+                                                        : Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            margin: const EdgeInsets.symmetric(
-                                                horizontal: 5.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: consumption![0]
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            margin: const EdgeInsets.symmetric(
-                                                horizontal: 5.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: consumption[1]
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            margin: const EdgeInsets.symmetric(
-                                                horizontal: 5.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: consumption[2]
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                                    ),
+                                    // Add a divider to separate each item
+                                    Divider(
+                                      height: 0.5,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                );
+                              },
+                            )),
                       ]),
                 ),
               );

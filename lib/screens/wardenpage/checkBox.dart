@@ -178,22 +178,6 @@ class _CheckboxListState extends State<CheckboxList> {
     return dataValues;
   }
 
-  bool isHoliday = false;
-  Future<void> getMessHoliday() async {
-    final response =
-        await supabase.from('mess_holiday').select().eq('id', 1).execute();
-    print(response.data);
-    if (response.data != null) {
-      final List<dynamic> data = response.data as List<dynamic>;
-      if (data.isNotEmpty) {
-        final bool value = data[0]['holiday'] as bool;
-        setState(() {
-          isHoliday = value;
-        });
-      }
-    }
-  }
-
   Future<void> getActiveTime() async {
     final timeData = await supabase.from('timer').select().execute();
 
@@ -239,7 +223,6 @@ class _CheckboxListState extends State<CheckboxList> {
   void initState() {
     // TODO: implement initState
     getActiveTime();
-    getMessHoliday();
     initToggle(widget.date!);
     selectiveToggle();
     super.initState();
@@ -252,7 +235,9 @@ class _CheckboxListState extends State<CheckboxList> {
         getDataToggle(widget.date!);
       });
     }
-    if (currentTime.day == widget.date!.day) {
+    if (currentTime.day == widget.date!.day &&
+        currentTime.month == widget.date!.month &&
+        currentTime.year == widget.date!.year) {
       setState(() {
         print(parseTimemrng);
         print(parseTimenoon);
@@ -272,11 +257,7 @@ class _CheckboxListState extends State<CheckboxList> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void setHoliday(bool value) {
-    setState(() {
-      isHoliday = value;
-    });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +288,7 @@ class _CheckboxListState extends State<CheckboxList> {
                         return Switch(
                           value: morningToggleValue.value,
                           activeColor: Colors.green,
-                          onChanged: !isHoliday && mrng
+                          onChanged:  mrng
                               ? (value) async {
                                   setState(() {
                                     morningToggleValue.value = value;
@@ -407,7 +388,7 @@ class _CheckboxListState extends State<CheckboxList> {
                   trailing: Switch(
                     value: noonToggleValue.value,
                     activeColor: Colors.green,
-                    onChanged: !isHoliday && noon
+                    onChanged:  noon
                         ? (value) async {
                             setState(() {
                               noonToggleValue.value = value;
@@ -500,7 +481,7 @@ class _CheckboxListState extends State<CheckboxList> {
                   trailing: Switch(
                     value: eveningToggleValue.value,
                     activeColor: Colors.green,
-                    onChanged: !isHoliday && evening
+                    onChanged: evening
                         ? (value) async {
                             setState(() {
                               eveningToggleValue.value = value;

@@ -55,6 +55,7 @@ class _VerifyUserState extends State<VerifyUser> {
       ]).execute();
       if (response.error == null) {
         print("user markings created successfully");
+        showVar(context, "Successfully populated", "Success");
       } else {
         print("error${response.error}");
       }

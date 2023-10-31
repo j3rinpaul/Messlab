@@ -298,42 +298,7 @@ class _SettingsState extends State<Settings> {
                     },
                     child: const Text('Update'),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          "Mess Holiday",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w400),
-                        ),
-                        Switch(
-                            value: switchValue,
-                            activeColor: Colors.green,
-                            onChanged: (bool newValue) async {
-                              print("Selected Morning");
-
-                              final response = await supabase
-                                  .from('mess_holiday')
-                                  .update({'holiday': newValue})
-                                  .eq("id", 1)
-                                  .execute();
-                              print(response.data);
-                              setState(() {
-                                switchValue = newValue;
-                              });
-
-                              // final existingDataResponse = await supabase
-                              //     .from('food_marking')
-                              //     .select()
-                              //     .eq('u_id', userId)
-                              //     .eq('mark_date', formattedDate)
-                              //     .execute();
-                            }),
-                      ],
-                    ),
-                  )
+                  
                 ],
               ),
             ),

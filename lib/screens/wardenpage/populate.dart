@@ -39,7 +39,8 @@ class _PopulateDbState extends State<PopulateDb> {
         String date = time.toLocal().toString().split(' ')[0];
         for (var item in response.data) {
           final userId = item['u_id'];
-          final insertResponse = await supabase.from('food_marking').insert([
+
+          final insertResponse = await supabase.from('food_marking').upsert([
             {
               'u_id': userId,
               'mark_date': date,
@@ -58,7 +59,7 @@ class _PopulateDbState extends State<PopulateDb> {
       }
       final dataEntry = await supabase
           .from("food_marked") //inserting into food_marked table
-          .insert([
+          .upsert([
         {
           'month': month,
           'year': year,
