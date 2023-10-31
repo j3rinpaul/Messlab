@@ -44,7 +44,7 @@ class _DailyCountState extends State<DailyCount> {
   Map<dynamic, String> userNames = {};
   bool isLoading = false;
 
-  Future<dynamic> Userdetails() async {
+  Future<dynamic> userdetails() async {
     setState(() {
       isdetail = true;
     });
@@ -100,7 +100,7 @@ class _DailyCountState extends State<DailyCount> {
   @override
   void initState() {
     super.initState();
-    Userdetails();
+    userdetails();
     fetchDataCount();
   }
 
@@ -162,7 +162,7 @@ class _DailyCountState extends State<DailyCount> {
 
         date = passDate.toString().substring(0, 10);
         fetchDataCount();
-        Userdetails();
+        userdetails();
       });
     }
   }
