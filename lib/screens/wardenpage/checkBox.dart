@@ -240,10 +240,10 @@ class _CheckboxListState extends State<CheckboxList> {
         currentTime.month == widget.date!.month &&
         currentTime.year == widget.date!.year) {
       setState(() {
-        mrng = !(parseTimemrng! < currentTime.hour || 00 < currentTime.hour);
-        noon = !(parseTimenoon! < currentTime.hour || 00 < currentTime.hour);
+        mrng = !(parseTimemrng! < currentTime.hour || 00 <= currentTime.hour);
+        noon = !(parseTimenoon! < currentTime.hour || 00 <= currentTime.hour);
         evening =
-            !(parseTimeevening! < currentTime.hour || 00 < currentTime.hour);
+            !(parseTimeevening! < currentTime.hour || 00 <= currentTime.hour);
       });
     } else {
       final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
