@@ -251,9 +251,9 @@ class _CheckboxListState extends State<CheckboxList> {
           widget.date!.year == tomorrow.year) {
         print(currentTime.hour);
         setState(() {
-          mrng = !(19 <= currentTime.hour);
-          noon = !(19 <= currentTime.hour);
-          evening = !(19 <= currentTime.hour);
+          mrng = !(13 <= currentTime.hour);
+          noon = !(13 <= currentTime.hour);
+          evening = !(13 <= currentTime.hour);
         });
       } else {
         mrng = true;
