@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -187,13 +188,16 @@ class _DailyCountState extends State<DailyCount> {
   }
 
   Map<String, List<dynamic>> downloadList = {};
-
   void fetchDownload() {
-    for (final value in userNames.keys) {
-      final key = userNames[value];
+    final sortedUserNames = Map.fromEntries(userNames.entries.toList()
+      ..sort((a, b) => a.value!.compareTo(b.value)));
+
+    for (final entry in sortedUserNames.entries) {
+      final key = entry.key;
+      final name = entry.value;
       final List<dynamic> foodValues =
-          foodDetails[value] ?? List.filled(3, false);
-      downloadList[key!] = foodValues;
+          foodDetails[key] ?? List.filled(3, false);
+      downloadList[name] = foodValues;
     }
   }
 
@@ -206,26 +210,23 @@ class _DailyCountState extends State<DailyCount> {
       marginTop: 10.0, // Adjust the margins as needed
     );
 
+    List<List<String>> currentPageData = [];
     // Create a list of table data for each page
     final List<List<List<String>>> pages = [];
 
     // Initialize the current page data
-    List<List<String>> currentPageData = [];
 
     // Helper function to add a new page and reset current page data
     void addPage() {
       final tableData = [
-        ['Name', 'Morning', 'Noon', 'Evening'],
+        ['Name', 'Morning', 'Noon', 'Evening', 'Daily'],
         ...currentPageData, // Add rows for the current page here
       ];
-      tableData.add([
-        'Total',
-        parsedData[0]['morning_food'].toString(),
-        parsedData[0]['noon_food'].toString(),
-        parsedData[0]['evening_food'].toString(),
-      ]);
 
-      pages.add(tableData);
+      if (downloadList.keys.isNotEmpty) {
+        pages.add(tableData);
+      }
+
       currentPageData = [];
     }
 
@@ -235,7 +236,13 @@ class _DailyCountState extends State<DailyCount> {
       final noon = value[1] ? "Yes" : "No";
       final evening = value[2] ? "Yes" : "No";
 
-      currentPageData.add([key, mrng, noon, evening]);
+      // Calculate the Daily Cumulative (sum of Yes values)
+      final dailyCumulative = (mrng == "Yes" ? 1 : 0) +
+          (noon == "Yes" ? 1 : 0) +
+          (evening == "Yes" ? 1 : 0);
+
+      currentPageData
+          .add([key, mrng, noon, evening, dailyCumulative.toString()]);
 
       // Check if the current page is getting too long, and if so, add a new page
       if (currentPageData.length > 20) {
@@ -243,7 +250,19 @@ class _DailyCountState extends State<DailyCount> {
       }
     }
 
-    addPage(); // Add the last page
+// Calculate the "Total" values and add them to the last page
+    final total = [
+      'Total',
+      parsedData[0]['morning_food'].toString(),
+      parsedData[0]['noon_food'].toString(),
+      parsedData[0]['evening_food'].toString(),
+    ];
+    currentPageData.add(total);
+
+// If the last page isn't empty, add it to the pages list without headings
+    if (currentPageData.isNotEmpty) {
+      addPage();
+    }
 
     // Create a PDF with multiple pages
     for (final pageData in pages) {
@@ -254,7 +273,7 @@ class _DailyCountState extends State<DailyCount> {
             // Create a table from the page data
             final table = pw.Table.fromTextArray(
               context: context,
-              headers: ["Daily Count"],
+              headers: ["Staff Hostel Daily Count $date"],
               data: pageData,
               border: pw.TableBorder.all(),
               headerAlignment: pw.Alignment.centerLeft,
@@ -273,24 +292,37 @@ class _DailyCountState extends State<DailyCount> {
 
     return pdfBytes;
   }
+// Import the 'html' package for web platform
 
   Future<void> savePdf() async {
     final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
 
-    if (statuses[Permission.storage]!.isGranted) {
-      String? downloadsDirectoryPath =
-          (await DownloadsPath.downloadsDirectory())?.path;
+    if (html.window.navigator.userAgent.contains("Android")) {
+      // For Android platform, use the existing code to save the PDF
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.storage,
+      ].request();
 
-      if (downloadsDirectoryPath != null) {
-        final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
-        await file.writeAsBytes(pdfBytes);
-        print("file saved: " + file.path);
+      if (statuses[Permission.storage]!.isGranted) {
+        String? downloadsDirectoryPath =
+            (await DownloadsPath.downloadsDirectory())?.path;
+
+        if (downloadsDirectoryPath != null) {
+          final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
+          await file.writeAsBytes(pdfBytes);
+          print("file saved: " + file.path);
+        }
+        showAlert("Saved", "PDF saved successfully");
       }
+    } else {
+      // For non-Android platforms (web), initiate the PDF download using an anchor element
+      final blob = html.Blob([Uint8List.fromList(pdfBytes)]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute("download", "dailyCount_$date.pdf")
+        ..click();
+      html.Url.revokeObjectUrl(url);
     }
-    showAlert("Saved", "PDF saved successfully");
   }
 
   void showAlert(String title, String content) {
