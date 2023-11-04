@@ -17,7 +17,6 @@ class DailyCount extends StatefulWidget {
 }
 
 class _DailyCountState extends State<DailyCount> {
-  bool? isuserloading = false;
   bool? isdetail = false;
   String currentDate = DateTime.now().toString().substring(0, 10);
 
@@ -43,6 +42,7 @@ class _DailyCountState extends State<DailyCount> {
   List<bool> foodList = [];
   Map<dynamic, String> userNames = {};
   bool isLoading = false;
+  bool isuserloading = false;
 
   Future<dynamic> userdetails() async {
     setState(() {
@@ -97,11 +97,30 @@ class _DailyCountState extends State<DailyCount> {
     });
   }
 
+  Future<void> Sort() async {
+    setState(() {
+      isuserloading = true;
+      isLoading = true;
+    });
+    await userdetails();
+    await fetchDataCount();
+    var l1 = foodDetails.entries.toList();
+    l1.sort((a, b) {
+      String nameA = userNames[a.key]!;
+      String nameB = userNames[b.key]!;
+      return nameA.compareTo(nameB);
+    });
+    foodDetails = Map.fromEntries(l1);
+    setState(() {
+      isLoading = false;
+      isuserloading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    userdetails();
-    fetchDataCount();
+    Sort();
   }
 
   Future<void> fetchDataCount() async {
@@ -177,82 +196,83 @@ class _DailyCountState extends State<DailyCount> {
       downloadList[key!] = foodValues;
     }
   }
+
   Future<Uint8List> generatePdfFun() async {
-  fetchDownload();
-  final pdf = pw.Document();
+    fetchDownload();
+    final pdf = pw.Document();
 
-  // Define a custom page format for multiple pages
-  final pageFormat = PdfPageFormat.a4.copyWith(
-    marginTop: 10.0, // Adjust the margins as needed
-  );
-
-  // Create a list of table data for each page
-  final List<List<List<String>>> pages = [];
-
-  // Initialize the current page data
-  List<List<String>> currentPageData = [];
-
-  // Helper function to add a new page and reset current page data
-  void addPage() {
-    final tableData = [
-      ['Name', 'Morning', 'Noon', 'Evening'],
-      ...currentPageData, // Add rows for the current page here
-    ];
-    tableData.add([
-      'Total',
-      parsedData[0]['morning_food'].toString(),
-      parsedData[0]['noon_food'].toString(),
-      parsedData[0]['evening_food'].toString(),
-    ]);
-
-    pages.add(tableData);
-    currentPageData = [];
-  }
-
-  for (var key in downloadList.keys) {
-    final value = downloadList[key];
-    final mrng = value![0] ? "Yes" : "No";
-    final noon = value[1] ? "Yes" : "No";
-    final evening = value[2] ? "Yes" : "No";
-
-    currentPageData.add([key, mrng, noon, evening]);
-
-    // Check if the current page is getting too long, and if so, add a new page
-    if (currentPageData.length > 20) {
-      addPage();
-    }
-  }
-
-  addPage(); // Add the last page
-
-  // Create a PDF with multiple pages
-  for (final pageData in pages) {
-    pdf.addPage(
-      pw.Page(
-        pageFormat: pageFormat,
-        build: (pw.Context context) {
-          // Create a table from the page data
-          final table = pw.Table.fromTextArray(
-            context: context,
-            headers: ["Daily Count"],
-            data: pageData,
-            border: pw.TableBorder.all(),
-            headerAlignment: pw.Alignment.centerLeft,
-            cellAlignment: pw.Alignment.centerLeft,
-          );
-
-          return pw.Center(
-            child: table,
-          );
-        },
-      ),
+    // Define a custom page format for multiple pages
+    final pageFormat = PdfPageFormat.a4.copyWith(
+      marginTop: 10.0, // Adjust the margins as needed
     );
+
+    // Create a list of table data for each page
+    final List<List<List<String>>> pages = [];
+
+    // Initialize the current page data
+    List<List<String>> currentPageData = [];
+
+    // Helper function to add a new page and reset current page data
+    void addPage() {
+      final tableData = [
+        ['Name', 'Morning', 'Noon', 'Evening'],
+        ...currentPageData, // Add rows for the current page here
+      ];
+      tableData.add([
+        'Total',
+        parsedData[0]['morning_food'].toString(),
+        parsedData[0]['noon_food'].toString(),
+        parsedData[0]['evening_food'].toString(),
+      ]);
+
+      pages.add(tableData);
+      currentPageData = [];
+    }
+
+    for (var key in downloadList.keys) {
+      final value = downloadList[key];
+      final mrng = value![0] ? "Yes" : "No";
+      final noon = value[1] ? "Yes" : "No";
+      final evening = value[2] ? "Yes" : "No";
+
+      currentPageData.add([key, mrng, noon, evening]);
+
+      // Check if the current page is getting too long, and if so, add a new page
+      if (currentPageData.length > 20) {
+        addPage();
+      }
+    }
+
+    addPage(); // Add the last page
+
+    // Create a PDF with multiple pages
+    for (final pageData in pages) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: pageFormat,
+          build: (pw.Context context) {
+            // Create a table from the page data
+            final table = pw.Table.fromTextArray(
+              context: context,
+              headers: ["Daily Count"],
+              data: pageData,
+              border: pw.TableBorder.all(),
+              headerAlignment: pw.Alignment.centerLeft,
+              cellAlignment: pw.Alignment.centerLeft,
+            );
+
+            return pw.Center(
+              child: table,
+            );
+          },
+        ),
+      );
+    }
+
+    final Uint8List pdfBytes = await pdf.save();
+
+    return pdfBytes;
   }
-
-  final Uint8List pdfBytes = await pdf.save();
-
-  return pdfBytes;
-}
 
   Future<void> savePdf() async {
     final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
@@ -327,7 +347,7 @@ class _DailyCountState extends State<DailyCount> {
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: isuserloading!
+              child: isuserloading
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -423,64 +443,67 @@ class _DailyCountState extends State<DailyCount> {
             child:
                 // isdetail! ? Center(child: CircularProgressIndicator(),):
                 SingleChildScrollView(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: foodDetails.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final uids = foodDetails.keys.elementAt(index);
-                  final foodList = foodDetails[uids];
-                  // final foodList = repons[uids];
+              child: isLoading
+                  ? CircularProgressIndicator()
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: foodDetails.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final uids = foodDetails.keys.elementAt(index);
+                        final foodList = foodDetails[uids];
+                        // final foodList = repons[uids];
 
-                  final morningFood = foodList![0];
-                  final noonFood = foodList[1];
-                  final eveningFood = foodList[2];
+                        final morningFood = foodList![0];
+                        final noonFood = foodList[1];
+                        final eveningFood = foodList[2];
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 4.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 100,
-                            child: Text(
-                              // '$uids',
-                              userNames[uids]!,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              for (int i = 0; i < 3; i++)
-                                Container(
-                                  width: 10,
-                                  height: 10,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color:
-                                        foodList[i] ? Colors.green : Colors.red,
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 15.0, vertical: 4.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    // '$uids',
+                                    userNames[uids]!,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  _showEditDialog(index);
-                                },
-                              ),
-                            ],
+                                Row(
+                                  children: [
+                                    for (int i = 0; i < 3; i++)
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: foodList[i]
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                        _showEditDialog(index);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ],
