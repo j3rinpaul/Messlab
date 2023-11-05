@@ -26,9 +26,11 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
         .execute();
     if (response.error == null) {
       var data = response.data as List<dynamic>;
+      print(data);
       for (var item in data) {
-        updatedAt2 = item['updated_at'];
-        String updatedAt = formatDateTime(updatedAt2!);
+        // updatedAt2 = ;
+        String updatedAt = item['updated_at'];
+        // formatDateTime(updatedAt2!);
         String announcement = item['announcemnts'];
         setState(() {
           announcementList[updatedAt] = announcement;
@@ -41,20 +43,87 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
     }
   }
 
+  final TextEditingController _announcementCont = TextEditingController();
+
+  void showAddAnnouncementDialog(BuildContext context, String updated_at) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Announcement'),
+          content: TextField(
+            controller: _announcementCont,
+            // onChanged: (value) {
+            //   _announcementCont. = value;
+            // },
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                print(updated_at);
+                final response = await supabase
+                    .from('announcements')
+                    .update({'announcemnts': _announcementCont.text})
+                    .eq('updated_at', updated_at)
+                    .execute();
+
+                // insert({
+                //   'announcemnts': _announcementCont.text,
+                //   "u_id": widget.uid
+                // }).execute();
+
+                if (response.error == null) {
+                  print("Announcement updated");
+                  _announcementCont.clear();
+                  getAnnounce();
+                } else {
+                  print(response.error);
+                }
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> deleteAnnouncement(String date) async {
-    final response = await supabase
-        .from('announcements')
-        .delete()
-        .eq('updated_at', date)
-        .execute();
-    if (response.error == null) {
-      print("deleted");
-      setState(() {
-        announcementList.remove(date);
-      });
-    } else {
-      print(response.error);
-    }
+    var dialog =
+        AlertDialog(title: Text("Delete this announcement ?"), actions: [
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("Cancel")),
+      TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            final response = await supabase
+                .from('announcements')
+                .delete()
+                .eq('updated_at', date)
+                .execute();
+            if (response.error == null) {
+              print("deleted");
+              setState(() {
+                announcementList.remove(date);
+              });
+            } else {
+              print(response.error);
+            }
+          },
+          child: Text("Delete"))
+    ]);
+
+    showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
   @override
@@ -90,14 +159,27 @@ class EditAnnouncementsState extends State<EditAnnouncements> {
             print(announcement);
 
             return ListTile(
-              subtitle: Text("Updated At: $updatedAt"),
+              subtitle: Text("Updated At: ${formatDateTime(updatedAt)}"),
               title: Text('Announcement: $announcement'),
-              trailing: IconButton(
-                onPressed: () {
-                  deleteAnnouncement(updatedAt2!);
-                  print("delete announcement");
-                },
-                icon: const Icon(Icons.delete),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      _announcementCont.text = announcement;
+                      showAddAnnouncementDialog(context, updatedAt);
+                      print("edit announcement");
+                    },
+                    icon: const Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      deleteAnnouncement(updatedAt);
+                      print("delete announcement");
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
               ),
             );
           },

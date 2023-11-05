@@ -1,4 +1,4 @@
-import 'dart:html' as html;
+// import 'dart:html' as html;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -369,7 +369,9 @@ class _DailyCountState extends State<DailyCount> {
 // Import the 'html' package for web platform
 
   Future<void> savePdf() async {
-    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
+/* 
+//
+//    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
 
     if (html.window.navigator.userAgent.contains("Android")) {
       // For Android platform, use the existing code to save the PDF
@@ -397,6 +399,8 @@ class _DailyCountState extends State<DailyCount> {
         ..click();
       html.Url.revokeObjectUrl(url);
     }
+
+    */
   }
 
   void showAlert(String title, String content) {
@@ -412,7 +416,7 @@ class _DailyCountState extends State<DailyCount> {
                 Navigator.pop(context);
               },
               child: const Text('OK'),
-            ),
+            )
           ],
         );
       },

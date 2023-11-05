@@ -43,7 +43,6 @@ dependencies:
   shared_preferences: ^2.1.1
   supabase_flutter: ^0.1.0
   table_calendar: ^3.0.9
-
 #flutter:
 #   sdk: flutter
 # calendar_strip: ^1.0.6
