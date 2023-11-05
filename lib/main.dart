@@ -1,6 +1,6 @@
+
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/splash.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -33,26 +33,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // bool isConnected = true;
   // late Stream<ConnectivityResult> connectivityStream;
+  
 
   @override
   void initState() {
-    // TODO: implement initState
-    
-    // checkConnection().then((value) {
-    //   setState(() {
-    //     print(value);
-    //     isConnected = value;
-    //   });
-    // });
-
     super.initState();
+    
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primaryColor: Colors.green),
-      home: const SplashScreen() ,
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

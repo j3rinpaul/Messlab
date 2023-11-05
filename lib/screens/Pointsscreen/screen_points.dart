@@ -74,6 +74,48 @@ class _ScreenPointsState extends State<ScreenPoints> {
     print(dateMap);
   }
 
+  bool isLoad = false;
+  int monthly = 0;
+  Future<void> monthlyC(String u_id) async {
+    setState(() {
+      isLoad = true;
+      monthly = 0;
+    });
+
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final cumulative = await supabase
+        .from("food_marking")
+        .select("morning, noon, evening")
+        .eq("u_id", u_id)
+        .gte("mark_date", startOfMonth.toString().substring(0, 10))
+        .lte("mark_date", now.toString().substring(0, 10))
+        .execute();
+
+    int morningCumulative = 0;
+    int noonCumulative = 0;
+    int eveningCumulative = 0;
+
+    for (var cum in cumulative.data) {
+      if (cum['morning'] == true) {
+        morningCumulative++;
+      }
+      if (cum['noon'] == true) {
+        noonCumulative++;
+      }
+      if (cum['evening'] == true) {
+        eveningCumulative++;
+      }
+    }
+     monthly = morningCumulative + noonCumulative + eveningCumulative;
+
+    setState(() {
+      isLoad = false;
+    
+    });
+    
+  }
+
   Username? currentUser;
   DueDate? dueDate;
   String date = DateTime.now().month.toString();
@@ -114,8 +156,9 @@ class _ScreenPointsState extends State<ScreenPoints> {
             points: totalv.data[0]['total_cons'].toString(), amount: "Paid");
       }
     } else {
-      dueDate = DueDate(points: "0", amount: "0");
+      dueDate = DueDate(points: monthly.toString(), amount: "0");
     }
+
   }
 
   Future<void> userDetails(String? uid) async {
@@ -155,6 +198,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
   void initState() {
     super.initState();
     initializeData();
+    
   }
 
   Future<void> initializeData() async {
@@ -162,6 +206,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
     await getDue(widget.uid, date, year);
     // await detailedB(date, year, widget.uid);
     await getDate(date, year, widget.uid);
+    await monthlyC(widget.uid!);
   }
 
   Future<void> _selectMonthAndYear(BuildContext context) async {
@@ -346,7 +391,7 @@ class _ScreenPointsState extends State<ScreenPoints> {
                                               const Row(
                                                 children: [
                                                   Text(
-                                                    'Total Points',
+                                                    'Monthly Points',
                                                     style:
                                                         TextStyle(fontSize: 15),
                                                   ),

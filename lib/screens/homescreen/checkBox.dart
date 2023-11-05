@@ -1,3 +1,5 @@
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -293,79 +295,95 @@ class _CheckboxListState extends State<CheckboxList> {
                         return Switch(
                           value: morningToggleValue.value,
                           activeColor: Colors.green,
-                          onChanged: mrng
+                          onChanged: mrng 
                               ? (value) async {
-                                  setState(() {
-                                    morningToggleValue.value = value;
-                                  });
-                                  // print("Selected Morning");
-                                  try {
-                                    final userId = widget.userId;
-                                    DateTime dateTime =
-                                        DateTime.parse(widget.date.toString());
-                                    String formattedDate =
-                                        DateFormat('yyyy-MM-dd')
-                                            .format(dateTime);
+                                  DateTime now = DateTime.now();
+                                  DateTime tomorrow = DateTime.now()
+                                      .add(const Duration(days: 1));
+                                  DateTime markingDate = widget.date!;
+                                  if (now.hour < 13 ||
+                                      (markingDate.day != tomorrow.day)) {
+                                    // (markingDate.day > tommorrow.day &&
+                                    // markingDate.month >
+                                    //     tommorrow.month &&
+                                    // markingDate.year != tommorrow.year)
+                                    //markingDate.difference(tomorrow)>Duration(days: 1)
 
-                                    final existingDataResponse = await supabase
-                                        .from('food_marking')
-                                        .select()
-                                        .eq('u_id', userId)
-                                        .eq('mark_date', formattedDate)
-                                        .execute();
+                                    setState(() {
+                                      morningToggleValue.value = value;
+                                    });
+                                    // print("Selected Morning");
+                                    try {
+                                      final userId = widget.userId;
+                                      DateTime dateTime = DateTime.parse(
+                                          widget.date.toString());
+                                      String formattedDate =
+                                          DateFormat('yyyy-MM-dd')
+                                              .format(dateTime);
 
-                                    if (existingDataResponse.error != null) {
-                                      // Handle error
-                                      throw existingDataResponse.error!;
-                                    }
+                                      final existingDataResponse =
+                                          await supabase
+                                              .from('food_marking')
+                                              .select()
+                                              .eq('u_id', userId)
+                                              .eq('mark_date', formattedDate)
+                                              .execute();
 
-                                    final existingData =
-                                        existingDataResponse.data;
-
-                                    if (existingData != null &&
-                                        existingData.length == 1) {
-                                      // Existing data found, perform update
-                                      final updateResponse = await supabase
-                                          .from('food_marking')
-                                          .update({
-                                            'morning': value,
-                                          })
-                                          .eq('u_id', userId)
-                                          .eq('mark_date', formattedDate)
-                                          .execute();
-
-                                      if (updateResponse.error != null) {
+                                      if (existingDataResponse.error != null) {
                                         // Handle error
-                                        throw updateResponse.error!;
-                                      } else {
-                                        print(formattedDate);
+                                        throw existingDataResponse.error!;
                                       }
-                                      toastBar("Updated Morning");
-                                      print(
-                                          'Update operation completed successfully!');
-                                    } else {
-                                      // No existing data, perform insert
-                                      final insertResponse = await supabase
-                                          .from('food_marking')
-                                          .insert([
-                                        {
-                                          'u_id': userId,
-                                          'mark_date': formattedDate,
-                                          'morning': value,
+
+                                      final existingData =
+                                          existingDataResponse.data;
+
+                                      if (existingData != null &&
+                                          existingData.length == 1) {
+                                        // Existing data found, perform update
+                                        final updateResponse = await supabase
+                                            .from('food_marking')
+                                            .update({
+                                              'morning': value,
+                                            })
+                                            .eq('u_id', userId)
+                                            .eq('mark_date', formattedDate)
+                                            .execute();
+
+                                        if (updateResponse.error != null) {
+                                          // Handle error
+                                          throw updateResponse.error!;
+                                        } else {
+                                          print(formattedDate);
                                         }
-                                      ]).execute();
+                                        toastBar("Updated Morning");
+                                        print(
+                                            'Update operation completed successfully!');
+                                      } else {
+                                        // No existing data, perform insert
+                                        final insertResponse = await supabase
+                                            .from('food_marking')
+                                            .insert([
+                                          {
+                                            'u_id': userId,
+                                            'mark_date': formattedDate,
+                                            'morning': value,
+                                          }
+                                        ]).execute();
 
-                                      if (insertResponse.error != null) {
-                                        // Handle error
-                                        throw insertResponse.error!;
+                                        if (insertResponse.error != null) {
+                                          // Handle error
+                                          throw insertResponse.error!;
+                                        }
+                                        toastBar("Updated Morning");
+                                        print(
+                                            'Insert operation completed successfully!');
                                       }
-                                      toastBar("Updated Morning");
-                                      print(
-                                          'Insert operation completed successfully!');
+                                    } catch (e) {
+                                      toastBar("Error");
+                                      print('An error occurred: $e');
                                     }
-                                  } catch (e) {
-                                    toastBar("Error");
-                                    print('An error occurred: $e');
+                                  } else {
+                                    html.window.location.reload();
                                   }
                                 }
                               : null,
@@ -393,76 +411,86 @@ class _CheckboxListState extends State<CheckboxList> {
                   trailing: Switch(
                     value: noonToggleValue.value,
                     activeColor: Colors.green,
-                    onChanged: noon
+                    onChanged: noon 
                         ? (value) async {
-                            setState(() {
-                              noonToggleValue.value = value;
-                            });
-                            print("Selected Noon");
-                            try {
-                              final userId = widget.userId;
-                              DateTime dateTime =
-                                  DateTime.parse(widget.date.toString());
-                              String date =
-                                  DateFormat('yyyy-MM-dd').format(dateTime);
-                              // final date =
-                              //     DateTime.now().toLocal().toString().split(' ')[0];
+                            DateTime now = DateTime.now();
+                            DateTime tomorrow =
+                                DateTime.now().add(const Duration(days: 1));
+                            DateTime markingDate = widget.date!;
+                            if (now.hour < 13 ||
+                                (markingDate.day != tomorrow.day)) {
+                              setState(() {
+                                noonToggleValue.value = value;
+                              });
+                              print("Selected Noon");
+                              try {
+                                final userId = widget.userId;
+                                DateTime dateTime =
+                                    DateTime.parse(widget.date.toString());
+                                String date =
+                                    DateFormat('yyyy-MM-dd').format(dateTime);
+                                // final date =
+                                //     DateTime.now().toLocal().toString().split(' ')[0];
 
-                              final existingDataResponse = await supabase
-                                  .from('food_marking')
-                                  .select()
-                                  .eq('u_id', userId)
-                                  .eq('mark_date', date)
-                                  .execute();
-
-                              if (existingDataResponse.error != null) {
-                                // Handle error
-                                throw existingDataResponse.error!;
-                              }
-
-                              final existingData = existingDataResponse.data;
-
-                              if (existingData != null &&
-                                  existingData.length == 1) {
-                                // Existing data found, perform update
-                                final updateResponse = await supabase
+                                final existingDataResponse = await supabase
                                     .from('food_marking')
-                                    .update({
-                                      'noon': value,
-                                    })
+                                    .select()
                                     .eq('u_id', userId)
                                     .eq('mark_date', date)
                                     .execute();
 
-                                if (updateResponse.error != null) {
+                                if (existingDataResponse.error != null) {
                                   // Handle error
-                                  throw updateResponse.error!;
+                                  throw existingDataResponse.error!;
                                 }
-                                toastBar("Updated Noon");
-                                print(
-                                    'Update operation completed successfully!');
-                              } else {
-                                // No existing data, perform insert
-                                final insertResponse =
-                                    await supabase.from('food_marking').insert([
-                                  {
-                                    'u_id': userId,
-                                    'mark_date': date,
-                                    'noon': value,
-                                  }
-                                ]).execute();
 
-                                if (insertResponse.error != null) {
-                                  // Handle error
-                                  throw insertResponse.error!;
+                                final existingData = existingDataResponse.data;
+
+                                if (existingData != null &&
+                                    existingData.length == 1) {
+                                  // Existing data found, perform update
+                                  final updateResponse = await supabase
+                                      .from('food_marking')
+                                      .update({
+                                        'noon': value,
+                                      })
+                                      .eq('u_id', userId)
+                                      .eq('mark_date', date)
+                                      .execute();
+
+                                  if (updateResponse.error != null) {
+                                    // Handle error
+                                    throw updateResponse.error!;
+                                  }
+                                  toastBar("Updated Noon");
+                                  print(
+                                      'Update operation completed successfully!');
+                                } else {
+                                  // No existing data, perform insert
+                                  final insertResponse = await supabase
+                                      .from('food_marking')
+                                      .insert([
+                                    {
+                                      'u_id': userId,
+                                      'mark_date': date,
+                                      'noon': value,
+                                    }
+                                  ]).execute();
+
+                                  if (insertResponse.error != null) {
+                                    // Handle error
+                                    throw insertResponse.error!;
+                                  }
+                                  toastBar("Updated Noon");
+                                  print(
+                                      'Insert operation completed successfully!');
                                 }
-                                toastBar("Updated Noon");
-                                print(
-                                    'Insert operation completed successfully!');
+                              } catch (e) {
+                                toastBar("Error");
+                                print('An error occurred: $e');
                               }
-                            } catch (e) {
-                              toastBar("Error");
-                              print('An error occurred: $e');
+                            } else {
+                              html.window.location.reload();
                             }
                           }
                         : null,
@@ -486,75 +514,85 @@ class _CheckboxListState extends State<CheckboxList> {
                   trailing: Switch(
                     value: eveningToggleValue.value,
                     activeColor: Colors.green,
-                    onChanged: evening
+                    onChanged: evening 
                         ? (value) async {
-                            setState(() {
-                              eveningToggleValue.value = value;
-                            });
-                            print("Selected Evening");
-                            try {
-                              final userId = widget.userId;
-                              DateTime dateTime =
-                                  DateTime.parse(widget.date.toString());
-                              String date =
-                                  DateFormat('yyyy-MM-dd').format(dateTime);
-                              // final date =
-                              //     DateTime.now().toLocal().toString().split(' ')[0];
+                            DateTime now = DateTime.now();
+                            DateTime tomorrow =
+                                DateTime.now().add(const Duration(days: 1));
+                            DateTime markingDate = widget.date!;
+                            if (now.hour < 13 ||
+                                (markingDate.day != tomorrow.day)) {
+                              setState(() {
+                                eveningToggleValue.value = value;
+                              });
+                              print("Selected Evening");
+                              try {
+                                final userId = widget.userId;
+                                DateTime dateTime =
+                                    DateTime.parse(widget.date.toString());
+                                String date =
+                                    DateFormat('yyyy-MM-dd').format(dateTime);
+                                // final date =
+                                //     DateTime.now().toLocal().toString().split(' ')[0];
 
-                              final existingDataResponse = await supabase
-                                  .from('food_marking')
-                                  .select()
-                                  .eq('u_id', userId)
-                                  .eq('mark_date', date)
-                                  .execute();
-
-                              if (existingDataResponse.error != null) {
-                                // Handle error
-                                throw existingDataResponse.error!;
-                              }
-
-                              final existingData = existingDataResponse.data;
-
-                              if (existingData != null &&
-                                  existingData.length == 1) {
-                                // Existing data found, perform update
-                                final updateResponse = await supabase
+                                final existingDataResponse = await supabase
                                     .from('food_marking')
-                                    .update({
-                                      'evening': value,
-                                    })
+                                    .select()
                                     .eq('u_id', userId)
                                     .eq('mark_date', date)
                                     .execute();
 
-                                if (updateResponse.error != null) {
+                                if (existingDataResponse.error != null) {
                                   // Handle error
-                                  throw updateResponse.error!;
+                                  throw existingDataResponse.error!;
                                 }
-                                toastBar("Updated Evening");
-                                print(
-                                    'Update operation completed successfully!');
-                              } else {
-                                // No existing data, perform insert
-                                final insertResponse =
-                                    await supabase.from('food_marking').insert([
-                                  {
-                                    'u_id': userId,
-                                    'mark_date': date,
-                                    'evening': value,
-                                  }
-                                ]).execute();
 
-                                if (insertResponse.error != null) {
-                                  // Handle error
-                                  throw insertResponse.error!;
+                                final existingData = existingDataResponse.data;
+
+                                if (existingData != null &&
+                                    existingData.length == 1) {
+                                  // Existing data found, perform update
+                                  final updateResponse = await supabase
+                                      .from('food_marking')
+                                      .update({
+                                        'evening': value,
+                                      })
+                                      .eq('u_id', userId)
+                                      .eq('mark_date', date)
+                                      .execute();
+
+                                  if (updateResponse.error != null) {
+                                    // Handle error
+                                    throw updateResponse.error!;
+                                  }
+                                  toastBar("Updated Evening");
+                                  print(
+                                      'Update operation completed successfully!');
+                                } else {
+                                  // No existing data, perform insert
+                                  final insertResponse = await supabase
+                                      .from('food_marking')
+                                      .insert([
+                                    {
+                                      'u_id': userId,
+                                      'mark_date': date,
+                                      'evening': value,
+                                    }
+                                  ]).execute();
+
+                                  if (insertResponse.error != null) {
+                                    // Handle error
+                                    throw insertResponse.error!;
+                                  }
+                                  toastBar("Updated Evening");
+                                  print(
+                                      'Insert operation completed successfully!');
                                 }
-                                toastBar("Updated Evening");
-                                print(
-                                    'Insert operation completed successfully!');
+                              } catch (e) {
+                                print('An error occurred: $e');
                               }
-                            } catch (e) {
-                              print('An error occurred: $e');
+                            } else {
+                              html.window.location.reload();
                             }
                           }
                         : null,

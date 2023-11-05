@@ -1,4 +1,4 @@
-// import 'dart:html' as html;
+import 'dart:html' as html;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -56,10 +56,7 @@ class _DailyCountState extends State<DailyCount> {
 
     for (final user in respo.data) {
       final uId = user['u_id'];
-      final firstName = user['first_name'];
-      final lastName = user['last_name'];
-      final fullName = '$firstName $lastName';
-
+      final fullName = "${user['first_name']} ${user['last_name']}";
       userNames[uId] = fullName;
     }
     if (respo.error == null) {
@@ -68,28 +65,16 @@ class _DailyCountState extends State<DailyCount> {
       final List<dynamic> userIds =
           data.map<dynamic>((user) => user['u_id']).toList();
 
-      for (final uids in userIds) {
         final allFood = await supabase
             .from('food_marking')
-            .select('morning , noon , evening')
-            .eq('u_id', uids)
+            .select('morning , noon , evening, u_id')
             .eq('mark_date', date)
             .execute();
 
-        final foodData = allFood.data;
-        final foodList = foodData.isNotEmpty
-            ? [
-                foodData[0]['morning'],
-                foodData[0]['noon'],
-                foodData[0]['evening'],
-              ]
-            : [true, true, true];
-        setState(() {
-          foodDetails[uids] = List.from(foodList);
-        });
-      }
-
-      // print(foodDetails.toString());
+            for(var i in allFood.data){
+              foodDetails[i['u_id']] = [i['morning'],i['noon'],i['evening']];
+            }
+        setState(() {});   // print(foodDetails.toString());
     } else {
       print("Failed to fetch data: ${respo.error}");
     }
@@ -205,62 +190,45 @@ class _DailyCountState extends State<DailyCount> {
 
   Map<String, int> mapMonthly = {};
   int totalCumulative = 0;
-
+  bool isLoad = false;
   Future<void> monthlyC(DateTime selectDate) async {
     setState(() {
-      isuserloading = true;
-      isLoading = true;
+      isLoad = true;
       totalCumulative = 0;
     });
     mapMonthly.clear();
     final now = selectDate;
     final startOfMonth = DateTime(now.year, now.month, 1);
-    final monthlyUser = await supabase.from("users").select("u_id").execute();
-    for (var user in monthlyUser.data) {
-      int morningCumulative = 0;
-      int noonCumulative = 0;
-      int eveningCumulative = 0;
-      final cumulative = await supabase
+    // final monthlyUser = await supabase.from("users").select("u_id").execute();
+    final cumulative = await supabase
           .from("food_marking")
-          .select("morning, noon, evening")
-          .eq("u_id", user['u_id'])
+          .select("morning, noon, evening , u_id ,users(first_name,last_name)")
           .gte("mark_date", startOfMonth.toString().substring(0, 10))
           .lte("mark_date", now.toString().substring(0, 10))
           .execute();
-      for (var cum in cumulative.data) {
-        if (cum['morning'] == true) {
-          morningCumulative++;
-        }
-        if (cum['noon'] == true) {
-          noonCumulative++;
-        }
-        if (cum['evening'] == true) {
-          eveningCumulative++;
-        }
-      }
-      final monthly = morningCumulative + noonCumulative + eveningCumulative;
-      final first_name = await supabase
-          .from("users")
-          .select("first_name")
-          .eq("u_id", user['u_id'])
-          .execute();
-      final last_name = await supabase
-          .from("users")
-          .select("last_name")
-          .eq("u_id", user['u_id'])
-          .execute();
-      final fname = first_name.data[0]['first_name'] as String;
-      final lname = last_name.data[0]['last_name'] as String;
-      final name = fname + " " + lname;
-      
-      totalCumulative += monthly;
+    print(cumulative.data.toString());
 
-      mapMonthly[name] = monthly;
+    for (var cum in cumulative.data) {
+      final name = "${cum['users']['first_name']} ${cum['users']['last_name']}";
+      final morning = cum['morning'];
+      final noon = cum['noon'];
+      final evening = cum['evening'];
+
+      final monthly = (morning ? 1 : 0) + (noon ? 1 : 0) + (evening ? 1 : 0);
+
+      if (mapMonthly.containsKey(name)) {
+        mapMonthly[name] = mapMonthly[name]! + monthly;
+      } else {
+        mapMonthly[name] = monthly;
+      }
+      totalCumulative += monthly;
     }
     print(mapMonthly.toString());
+
+
     setState(() {
-      isuserloading = false;
-      isLoading = false;
+      isLoad = false;
+      print("isload");
     });
   }
 
@@ -283,7 +251,7 @@ class _DailyCountState extends State<DailyCount> {
     // Helper function to add a new page and reset current page data
     void addPage() {
       final tableData = [
-        ['Name', 'Morning', 'Noon', 'Evening', 'Daily', 'Monthly'],
+        ['Name', 'Morning', 'Noon', 'Evening', 'Daily', 'Cumulative'],
         ...currentPageData, // Add rows for the current page here
       ];
 
@@ -296,16 +264,16 @@ class _DailyCountState extends State<DailyCount> {
 
     for (var key in downloadList.keys) {
       final value = downloadList[key];
-      final mrng = value![0] ? "Yes" : "No";
-      final noon = value[1] ? "Yes" : "No";
-      final evening = value[2] ? "Yes" : "No";
+      final mrng = value![0] ? "1" : "0";
+      final noon = value[1] ? "1" : "0";
+      final evening = value[2] ? "1" : "0";
       final month = mapMonthly[key];
       print(totalCumulative.toString());
 
-      // Calculate the Daily Cumulative (sum of Yes values)
-      final dailyCumulative = (mrng == "Yes" ? 1 : 0) +
-          (noon == "Yes" ? 1 : 0) +
-          (evening == "Yes" ? 1 : 0);
+      // Calculate the Daily Cumulative (sum of 1 values)
+      final dailyCumulative = (mrng == "1" ? 1 : 0) +
+          (noon == "1" ? 1 : 0) +
+          (evening == "1" ? 1 : 0);
 
       currentPageData.add([
         key,
@@ -369,9 +337,8 @@ class _DailyCountState extends State<DailyCount> {
 // Import the 'html' package for web platform
 
   Future<void> savePdf() async {
-/* 
 //
-//    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
+    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
 
     if (html.window.navigator.userAgent.contains("Android")) {
       // For Android platform, use the existing code to save the PDF
@@ -399,8 +366,6 @@ class _DailyCountState extends State<DailyCount> {
         ..click();
       html.Url.revokeObjectUrl(url);
     }
-
-    */
   }
 
   void showAlert(String title, String content) {
@@ -457,7 +422,7 @@ class _DailyCountState extends State<DailyCount> {
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: isuserloading
+              child: (isuserloading || isLoad)
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -553,7 +518,7 @@ class _DailyCountState extends State<DailyCount> {
             child:
                 // isdetail! ? Center(child: CircularProgressIndicator(),):
                 SingleChildScrollView(
-              child: isLoading
+              child: (isLoading || isLoad)
                   ? CircularProgressIndicator()
                   : ListView.builder(
                       shrinkWrap: true,

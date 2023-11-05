@@ -2,6 +2,7 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mini_project/screens/wardenpage/billStatus.dart';
+import 'dart:html' as html;
 
 
 import 'DailyCount.dart';
@@ -70,17 +71,7 @@ class _CalendarState extends State<Calendar> {
                  
                   child: const Text("Add Expense")),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ElevatedButton(
-            //       onPressed: () async {
-            //         Navigator.of(context)
-            //             .push(MaterialPageRoute(builder: (ctx) {
-            //           return generateBill();
-            //         }));
-            //       },
-            //       child: const Text("Generate Bill")),
-            // ),
+            
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
