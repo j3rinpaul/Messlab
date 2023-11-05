@@ -1,10 +1,13 @@
+// import 'dart:html' as html;
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
+
 import '../../supabase_config.dart';
 
 class DailyCount extends StatefulWidget {
@@ -15,7 +18,6 @@ class DailyCount extends StatefulWidget {
 }
 
 class _DailyCountState extends State<DailyCount> {
-  bool? isuserloading = false;
   bool? isdetail = false;
   String currentDate = DateTime.now().toString().substring(0, 10);
 
@@ -41,6 +43,7 @@ class _DailyCountState extends State<DailyCount> {
   List<bool> foodList = [];
   Map<dynamic, String> userNames = {};
   bool isLoading = false;
+  bool isuserloading = false;
 
   Future<dynamic> userdetails() async {
     setState(() {
@@ -58,7 +61,6 @@ class _DailyCountState extends State<DailyCount> {
       final fullName = '$firstName $lastName';
 
       userNames[uId] = fullName;
-      // print(userNames.toString());
     }
     if (respo.error == null) {
       final data = respo.data;
@@ -86,6 +88,8 @@ class _DailyCountState extends State<DailyCount> {
           foodDetails[uids] = List.from(foodList);
         });
       }
+
+      // print(foodDetails.toString());
     } else {
       print("Failed to fetch data: ${respo.error}");
     }
@@ -94,13 +98,11 @@ class _DailyCountState extends State<DailyCount> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    Sort();
-  }
-
   Future<void> Sort() async {
+    setState(() {
+      isuserloading = true;
+      isLoading = true;
+    });
     await userdetails();
     await fetchDataCount();
     var l1 = foodDetails.entries.toList();
@@ -110,6 +112,16 @@ class _DailyCountState extends State<DailyCount> {
       return nameA.compareTo(nameB);
     });
     foodDetails = Map.fromEntries(l1);
+    setState(() {
+      isLoading = false;
+      isuserloading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Sort();
   }
 
   Future<void> fetchDataCount() async {
@@ -176,13 +188,16 @@ class _DailyCountState extends State<DailyCount> {
   }
 
   Map<String, List<dynamic>> downloadList = {};
-
   void fetchDownload() {
-    for (final value in userNames.keys) {
-      final key = userNames[value];
+    final sortedUserNames = Map.fromEntries(userNames.entries.toList()
+      ..sort((a, b) => a.value!.compareTo(b.value)));
+
+    for (final entry in sortedUserNames.entries) {
+      final key = entry.key;
+      final name = entry.value;
       final List<dynamic> foodValues =
-          foodDetails[value] ?? List.filled(3, false);
-      downloadList[key!] = foodValues;
+          foodDetails[key] ?? List.filled(3, false);
+      downloadList[name] = foodValues;
     }
   }
 
@@ -195,26 +210,23 @@ class _DailyCountState extends State<DailyCount> {
       marginTop: 10.0, // Adjust the margins as needed
     );
 
+    List<List<String>> currentPageData = [];
     // Create a list of table data for each page
     final List<List<List<String>>> pages = [];
 
     // Initialize the current page data
-    List<List<String>> currentPageData = [];
 
     // Helper function to add a new page and reset current page data
     void addPage() {
       final tableData = [
-        ['Name', 'Morning', 'Noon', 'Evening'],
+        ['Name', 'Morning', 'Noon', 'Evening', 'Daily'],
         ...currentPageData, // Add rows for the current page here
       ];
-      tableData.add([
-        'Total',
-        parsedData[0]['morning_food'].toString(),
-        parsedData[0]['noon_food'].toString(),
-        parsedData[0]['evening_food'].toString(),
-      ]);
 
-      pages.add(tableData);
+      if (downloadList.keys.isNotEmpty) {
+        pages.add(tableData);
+      }
+
       currentPageData = [];
     }
 
@@ -224,7 +236,13 @@ class _DailyCountState extends State<DailyCount> {
       final noon = value[1] ? "Yes" : "No";
       final evening = value[2] ? "Yes" : "No";
 
-      currentPageData.add([key, mrng, noon, evening]);
+      // Calculate the Daily Cumulative (sum of Yes values)
+      final dailyCumulative = (mrng == "Yes" ? 1 : 0) +
+          (noon == "Yes" ? 1 : 0) +
+          (evening == "Yes" ? 1 : 0);
+
+      currentPageData
+          .add([key, mrng, noon, evening, dailyCumulative.toString()]);
 
       // Check if the current page is getting too long, and if so, add a new page
       if (currentPageData.length > 20) {
@@ -232,7 +250,19 @@ class _DailyCountState extends State<DailyCount> {
       }
     }
 
-    addPage(); // Add the last page
+// Calculate the "Total" values and add them to the last page
+    final total = [
+      'Total',
+      parsedData[0]['morning_food'].toString(),
+      parsedData[0]['noon_food'].toString(),
+      parsedData[0]['evening_food'].toString(),
+    ];
+    currentPageData.add(total);
+
+// If the last page isn't empty, add it to the pages list without headings
+    if (currentPageData.isNotEmpty) {
+      addPage();
+    }
 
     // Create a PDF with multiple pages
     for (final pageData in pages) {
@@ -243,7 +273,7 @@ class _DailyCountState extends State<DailyCount> {
             // Create a table from the page data
             final table = pw.Table.fromTextArray(
               context: context,
-              headers: ["Daily Count"],
+              headers: ["Staff Hostel Daily Count $date"],
               data: pageData,
               border: pw.TableBorder.all(),
               headerAlignment: pw.Alignment.centerLeft,
@@ -262,27 +292,41 @@ class _DailyCountState extends State<DailyCount> {
 
     return pdfBytes;
   }
+// Import the 'html' package for web platform
 
   Future<void> savePdf() async {
-    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
-    Permission.storage.request();
+/* 
+//
+//    final pdfBytes = await generatePdfFun(); // Wait for the PDF to be generated
 
-    if (statuses[Permission.storage]!.isGranted) {
-      String? downloadsDirectoryPath =
-          (await DownloadsPath.downloadsDirectory())?.path;
+    if (html.window.navigator.userAgent.contains("Android")) {
+      // For Android platform, use the existing code to save the PDF
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.storage,
+      ].request();
 
-      if (downloadsDirectoryPath != null) {
-        final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
-        await file.writeAsBytes(pdfBytes);
-        print("file saved: " + file.path);
+      if (statuses[Permission.storage]!.isGranted) {
+        String? downloadsDirectoryPath =
+            (await DownloadsPath.downloadsDirectory())?.path;
+
+        if (downloadsDirectoryPath != null) {
+          final file = File('$downloadsDirectoryPath/dailyCount_$date.pdf');
+          await file.writeAsBytes(pdfBytes);
+          print("file saved: " + file.path);
+        }
+        showAlert("Saved", "PDF saved successfully");
       }
-      showAlert("Saved", "PDF saved successfully");
     } else {
-      showAlert("Not Saved", "Error in saving PDF");
+      // For non-Android platforms (web), initiate the PDF download using an anchor element
+      final blob = html.Blob([Uint8List.fromList(pdfBytes)]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute("download", "dailyCount_$date.pdf")
+        ..click();
+      html.Url.revokeObjectUrl(url);
     }
+
+    */
   }
 
   void showAlert(String title, String content) {
@@ -298,7 +342,7 @@ class _DailyCountState extends State<DailyCount> {
                 Navigator.pop(context);
               },
               child: const Text('OK'),
-            ),
+            )
           ],
         );
       },
@@ -339,7 +383,7 @@ class _DailyCountState extends State<DailyCount> {
               ),
               height: 100,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: isuserloading!
+              child: isuserloading
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -435,64 +479,67 @@ class _DailyCountState extends State<DailyCount> {
             child:
                 // isdetail! ? Center(child: CircularProgressIndicator(),):
                 SingleChildScrollView(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: foodDetails.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final uids = foodDetails.keys.elementAt(index);
-                  final foodList = foodDetails[uids];
-                  // final foodList = repons[uids];
+              child: isLoading
+                  ? CircularProgressIndicator()
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: foodDetails.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final uids = foodDetails.keys.elementAt(index);
+                        final foodList = foodDetails[uids];
+                        // final foodList = repons[uids];
 
-                  final morningFood = foodList![0];
-                  final noonFood = foodList[1];
-                  final eveningFood = foodList[2];
+                        final morningFood = foodList![0];
+                        final noonFood = foodList[1];
+                        final eveningFood = foodList[2];
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 4.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 100,
-                            child: Text(
-                              // '$uids',
-                              userNames[uids]!,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              for (int i = 0; i < 3; i++)
-                                Container(
-                                  width: 10,
-                                  height: 10,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color:
-                                        foodList[i] ? Colors.green : Colors.red,
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 15.0, vertical: 4.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    // '$uids',
+                                    userNames[uids]!,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  _showEditDialog(index);
-                                },
-                              ),
-                            ],
+                                Row(
+                                  children: [
+                                    for (int i = 0; i < 3; i++)
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: foodList[i]
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                        _showEditDialog(index);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ],
@@ -613,6 +660,8 @@ class _DailyCountState extends State<DailyCount> {
                     Navigator.pop(context); // Close the dialog
                     _showSuccessDialog();
                     fetchDataCount();
+
+                    print(foodDetails.toString());
                   },
                   child: const Text('Save'),
                 ),
