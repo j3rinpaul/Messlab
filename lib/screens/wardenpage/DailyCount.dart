@@ -122,6 +122,7 @@ class _DailyCountState extends State<DailyCount> {
   void initState() {
     super.initState();
     Sort();
+    monthlyC(DateTime.now());
   }
 
   Future<void> fetchDataCount() async {
@@ -183,6 +184,7 @@ class _DailyCountState extends State<DailyCount> {
         date = passDate.toString().substring(0, 10);
         fetchDataCount();
         userdetails();
+        monthlyC(DateTime(passDate.year, passDate.month, passDate.day));
       });
     }
   }
@@ -201,8 +203,70 @@ class _DailyCountState extends State<DailyCount> {
     }
   }
 
+  Map<String, int> mapMonthly = {};
+  int totalCumulative = 0;
+
+  Future<void> monthlyC(DateTime selectDate) async {
+    setState(() {
+      isuserloading = true;
+      isLoading = true;
+      totalCumulative = 0;
+    });
+    mapMonthly.clear();
+    final now = selectDate;
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final monthlyUser = await supabase.from("users").select("u_id").execute();
+    for (var user in monthlyUser.data) {
+      int morningCumulative = 0;
+      int noonCumulative = 0;
+      int eveningCumulative = 0;
+      final cumulative = await supabase
+          .from("food_marking")
+          .select("morning, noon, evening")
+          .eq("u_id", user['u_id'])
+          .gte("mark_date", startOfMonth.toString().substring(0, 10))
+          .lte("mark_date", now.toString().substring(0, 10))
+          .execute();
+      for (var cum in cumulative.data) {
+        if (cum['morning'] == true) {
+          morningCumulative++;
+        }
+        if (cum['noon'] == true) {
+          noonCumulative++;
+        }
+        if (cum['evening'] == true) {
+          eveningCumulative++;
+        }
+      }
+      final monthly = morningCumulative + noonCumulative + eveningCumulative;
+      final first_name = await supabase
+          .from("users")
+          .select("first_name")
+          .eq("u_id", user['u_id'])
+          .execute();
+      final last_name = await supabase
+          .from("users")
+          .select("last_name")
+          .eq("u_id", user['u_id'])
+          .execute();
+      final fname = first_name.data[0]['first_name'] as String;
+      final lname = last_name.data[0]['last_name'] as String;
+      final name = fname + " " + lname;
+      
+      totalCumulative += monthly;
+
+      mapMonthly[name] = monthly;
+    }
+    print(mapMonthly.toString());
+    setState(() {
+      isuserloading = false;
+      isLoading = false;
+    });
+  }
+
   Future<Uint8List> generatePdfFun() async {
     fetchDownload();
+    await monthlyC(DateTime(passDate.year, passDate.month, passDate.day));
     final pdf = pw.Document();
 
     // Define a custom page format for multiple pages
@@ -219,7 +283,7 @@ class _DailyCountState extends State<DailyCount> {
     // Helper function to add a new page and reset current page data
     void addPage() {
       final tableData = [
-        ['Name', 'Morning', 'Noon', 'Evening', 'Daily'],
+        ['Name', 'Morning', 'Noon', 'Evening', 'Daily', 'Monthly'],
         ...currentPageData, // Add rows for the current page here
       ];
 
@@ -235,14 +299,22 @@ class _DailyCountState extends State<DailyCount> {
       final mrng = value![0] ? "Yes" : "No";
       final noon = value[1] ? "Yes" : "No";
       final evening = value[2] ? "Yes" : "No";
+      final month = mapMonthly[key];
+      print(totalCumulative.toString());
 
       // Calculate the Daily Cumulative (sum of Yes values)
       final dailyCumulative = (mrng == "Yes" ? 1 : 0) +
           (noon == "Yes" ? 1 : 0) +
           (evening == "Yes" ? 1 : 0);
 
-      currentPageData
-          .add([key, mrng, noon, evening, dailyCumulative.toString()]);
+      currentPageData.add([
+        key,
+        mrng,
+        noon,
+        evening,
+        dailyCumulative.toString(),
+        month.toString()
+      ]);
 
       // Check if the current page is getting too long, and if so, add a new page
       if (currentPageData.length > 20) {
@@ -256,6 +328,8 @@ class _DailyCountState extends State<DailyCount> {
       parsedData[0]['morning_food'].toString(),
       parsedData[0]['noon_food'].toString(),
       parsedData[0]['evening_food'].toString(),
+      " ",
+      totalCumulative.toString(),
     ];
     currentPageData.add(total);
 
