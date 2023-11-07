@@ -177,7 +177,7 @@ class _DailyCountState extends State<DailyCount> {
   Map<String, List<dynamic>> downloadList = {};
   void fetchDownload() {
     final sortedUserNames = Map.fromEntries(userNames.entries.toList()
-      ..sort((a, b) => a.value!.compareTo(b.value)));
+      ..sort((a, b) => a.value.compareTo(b.value)));
 
     for (final entry in sortedUserNames.entries) {
       final key = entry.key;
