@@ -205,17 +205,17 @@ class _CheckboxListState extends State<CheckboxList> {
 
   Future<void> selectiveToggle() async {
     await getActiveTime();
-    if (00 < currentTime.hour) {
+    if (00 <= currentTime.hour) {
       setState(() {
         mrng = false;
       });
     }
-    if (00 < currentTime.hour) {
+    if (00 <= currentTime.hour) {
       setState(() {
         noon = false;
       });
     }
-    if (00 < currentTime.hour) {
+    if (00 <= currentTime.hour) {
       setState(() {
         evening = false;
       });

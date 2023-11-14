@@ -28,15 +28,20 @@ class _MessHolidayState extends State<MessHoliday> {
         print(selectedDateRange!.start.toLocal().toString().substring(0, 10));
         print(selectedDateRange!.end.toLocal().toString().substring(0, 10));
       });
-      messHoliday(
-          startDate, endDate, selectedDateRange!.start, selectedDateRange!.end);
+      // messHoliday(
+      //     startDate, endDate, selectedDateRange!.start, selectedDateRange!.end);
     }
   }
 
   Future<void> messHoliday(
       String start, String end, DateTime startD, DateTime endD) async {
     final resposnse = await supabase.from('users').select().execute();
+    if (resposnse.error != null) {
+      throw resposnse.error!;
+    }
     if (start == end) {
+      print("inside");
+
       for (var item in resposnse.data) {
         final userId = item['u_id'];
         final updateRes = await supabase
@@ -49,6 +54,11 @@ class _MessHolidayState extends State<MessHoliday> {
             .eq('u_id', userId)
             .eq('mark_date', start)
             .execute();
+        if (updateRes.error != null) {
+          throw updateRes.error!;
+        }else{
+          print('Insert operation completed successfully!');
+        }
       }
     } else {
       // Convert your end date string to DateTime
@@ -93,6 +103,12 @@ class _MessHolidayState extends State<MessHoliday> {
                   return _selectDateRange(context);
                 },
                 child: Text("Select Range ")),
+            ElevatedButton(
+                onPressed: () async {
+                  await messHoliday(startDate, endDate,
+                      selectedDateRange!.start, selectedDateRange!.end);
+                },
+                child: Text("Submit"))
           ],
         ),
       ),
