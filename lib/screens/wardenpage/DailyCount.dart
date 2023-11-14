@@ -65,16 +65,16 @@ class _DailyCountState extends State<DailyCount> {
       final List<dynamic> userIds =
           data.map<dynamic>((user) => user['u_id']).toList();
 
-        final allFood = await supabase
-            .from('food_marking')
-            .select('morning , noon , evening, u_id')
-            .eq('mark_date', date)
-            .execute();
+      final allFood = await supabase
+          .from('food_marking')
+          .select('morning , noon , evening, u_id')
+          .eq('mark_date', date)
+          .execute();
 
-            for(var i in allFood.data){
-              foodDetails[i['u_id']] = [i['morning'],i['noon'],i['evening']];
-            }
-        setState(() {});   // print(foodDetails.toString());
+      for (var i in allFood.data) {
+        foodDetails[i['u_id']] = [i['morning'], i['noon'], i['evening']];
+      }
+      setState(() {}); // print(foodDetails.toString());
     } else {
       print("Failed to fetch data: ${respo.error}");
     }
@@ -108,6 +108,7 @@ class _DailyCountState extends State<DailyCount> {
     super.initState();
     Sort();
     monthlyC(DateTime.now());
+    ratePer();
   }
 
   Future<void> fetchDataCount() async {
@@ -201,11 +202,11 @@ class _DailyCountState extends State<DailyCount> {
     final startOfMonth = DateTime(now.year, now.month, 1);
     // final monthlyUser = await supabase.from("users").select("u_id").execute();
     final cumulative = await supabase
-          .from("food_marking")
-          .select("morning, noon, evening , u_id ,users(first_name,last_name)")
-          .gte("mark_date", startOfMonth.toString().substring(0, 10))
-          .lte("mark_date", now.toString().substring(0, 10))
-          .execute();
+        .from("food_marking")
+        .select("morning, noon, evening , u_id ,users(first_name,last_name)")
+        .gte("mark_date", startOfMonth.toString().substring(0, 10))
+        .lte("mark_date", now.toString().substring(0, 10))
+        .execute();
     print(cumulative.data.toString());
 
     for (var cum in cumulative.data) {
@@ -224,7 +225,6 @@ class _DailyCountState extends State<DailyCount> {
       totalCumulative += monthly;
     }
     print(mapMonthly.toString());
-
 
     setState(() {
       isLoad = false;
@@ -388,6 +388,70 @@ class _DailyCountState extends State<DailyCount> {
     );
   }
 
+  int monthly = 0;
+  Future<void> totalPoint() async {
+    setState(() {
+      monthly = 0;
+    });
+
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final cumulative = await supabase
+        .from("food_marking")
+        .select("morning, noon, evening")
+        .gte("mark_date", startOfMonth.toString().substring(0, 10))
+        .lte("mark_date", now.toString().substring(0, 10))
+        .execute();
+
+    int morningCumulative = 0;
+    int noonCumulative = 0;
+    int eveningCumulative = 0;
+
+    for (var cum in cumulative.data) {
+      if (cum['morning'] == true) {
+        morningCumulative++;
+      }
+      if (cum['noon'] == true) {
+        noonCumulative++;
+      }
+      if (cum['evening'] == true) {
+        eveningCumulative++;
+      }
+    }
+    monthly = morningCumulative + noonCumulative + eveningCumulative;
+  }
+
+  int ratePerPoint = 0;
+
+  Future<void> ratePer() async {
+
+    await totalPoint();
+    setState(() {
+      ratePerPoint = 0;
+    });
+    int amount = 0;
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final response = await supabase
+        .from("daily_expense")
+        .select("amount")
+        .gte("date", startOfMonth.toString().substring(0, 10))
+        .lte("date", now.toString().substring(0, 10))
+        .execute();
+    if (response.error == null) {
+      final data = response.data;
+      for (var i in data) {
+        amount += int.parse(i['amount'].toString());
+      }
+      setState(() {
+        ratePerPoint = amount ~/ monthly;
+      });
+      print("amount:"+ratePerPoint.toString());
+    } else {
+      print("Failed to fetch data: ${response.error}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -405,6 +469,13 @@ class _DailyCountState extends State<DailyCount> {
                   _selectDate(context);
                 },
                 child: const Text("Select Date")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Rate per point : $ratePerPoint ',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

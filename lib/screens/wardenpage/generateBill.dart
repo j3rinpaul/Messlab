@@ -126,6 +126,33 @@ class _generateBillState extends State<generateBill> {
 
   String? lastBill;
 
+  int TotalFixed = 0;
+
+  Future<void> _fixedCal() async {
+    setState(() {
+      TotalFixed = 0;
+    });
+    print(selectedMonth);
+    print(selectedYear);
+    final response = await supabase
+        .from('fixed')
+        .select("amount")
+        .eq("month", selectedMonth)
+        .eq("year", selectedYear)
+        .execute();
+    print(response.data);
+    if (response.data == null) {
+      setState(() {
+        TotalFixed = 0;
+      });
+    } else {
+      for (final data in response.data) {
+        TotalFixed += int.parse(data['amount'].toString());
+      }
+    }
+    print("Fixed :" + TotalFixed.toString());
+  }
+
   Future<void> _billg() async {
     if (selectedMonth == null || selectedYear == null || selectedMonth == 00) {
       showDialog(
@@ -278,6 +305,8 @@ class _generateBillState extends State<generateBill> {
               actions: [
                 TextButton(
                   onPressed: () {
+                    print(TotalFixed);
+
                     Navigator.pop(context);
                   },
                   child: const Text('Close'),
@@ -295,13 +324,14 @@ class _generateBillState extends State<generateBill> {
                           actions: [
                             TextButton(
                               onPressed: () async {
+                                await _fixedCal();
                                 Navigator.pop(context);
                                 final monthly =
                                     await supabase.from('monthly_bill').insert([
                                   {
                                     'month': selectedMonth,
                                     'year': selectedYear,
-                                    'fixed': int.parse(fixedExpenses.text),
+                                    'fixed': TotalFixed,
                                     'rate_per_cons': ratePerPoint,
                                     // Convert to decimal
                                     'total_exp': sum,
@@ -427,40 +457,21 @@ class _generateBillState extends State<generateBill> {
             ),
           ),
           const SizedBox(height: 15),
-          TextField(
-            controller: fixedExpenses,
-            maxLines: null,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-              labelText: 'Fixed Expenses',
-            ),
-          ),
+          // TextField(
+          //   controller: fixedExpenses,
+          //   maxLines: null,
+          //   keyboardType: TextInputType.number,
+          //   decoration: const InputDecoration(
+          //     border: OutlineInputBorder(
+          //       borderRadius: BorderRadius.all(Radius.circular(10)),
+          //     ),
+          //     labelText: 'Fixed Expenses',
+          //   ),
+          // ),
           const SizedBox(height: 10),
           ElevatedButton(
               onPressed: () async {
-                if (fixedExpenses.text.isEmpty) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Fixed Expenses'),
-                        content: const Text('Please enter the fixed expenses'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                  return;
-                } else if (startDate.isEmpty || endDate.isEmpty) {
+                 if (startDate.isEmpty || endDate.isEmpty) {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -500,6 +511,11 @@ class _generateBillState extends State<generateBill> {
               child: Text("Download Bill")),
 
           SizedBox(height: 5),
+          // ElevatedButton(
+          //     onPressed: () {
+          //       _fixedCal();
+          //     },
+          //     child: Text("Send Bill")),
           // Display a circular loading indicator based on the isSavingPdf flag
           isSaveLoad ? CircularProgressIndicator() : Container(),
           SizedBox(height: 5),
