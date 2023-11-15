@@ -422,14 +422,16 @@ class _DailyCountState extends State<DailyCount> {
   }
 
   int ratePerPoint = 0;
+  int amount = 0;
 
   Future<void> ratePer() async {
 
     await totalPoint();
     setState(() {
       ratePerPoint = 0;
+      amount = 0;
     });
-    int amount = 0;
+    // int amount = 0;
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final response = await supabase
@@ -471,16 +473,68 @@ class _DailyCountState extends State<DailyCount> {
                 child: const Text("Select Date")),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Rate per point : $ratePerPoint ',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: const Color.fromARGB(255, 213, 209, 209),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                
+                children: [
+                  Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Point Rate: $ratePerPoint ',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Points : $monthly',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+               Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Expenses : $amount',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            
+                ],
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Text(
+          //     'Rate per point : $ratePerPoint ',
+          //     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Text(
+          //     'Total Count : $monthly',
+          //     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
+          //  Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Text(
+          //     'Total Expenses: $amount',
+          //     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
+           Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Total Count : $date',
+              'Date : $date',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),

@@ -12,6 +12,9 @@ class _MessHolidayState extends State<MessHoliday> {
   String startDate = "";
   String endDate = "";
   DateTimeRange? selectedDateRange;
+
+  bool isLoading = false;
+
   void _selectDateRange(BuildContext context) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -22,27 +25,29 @@ class _MessHolidayState extends State<MessHoliday> {
     if (picked != null && picked != selectedDateRange) {
       setState(() {
         selectedDateRange = picked;
-        startDate =
-            selectedDateRange!.start.toLocal().toString().substring(0, 10);
+        startDate = selectedDateRange!.start.toLocal().toString().substring(0, 10);
         endDate = selectedDateRange!.end.toLocal().toString().substring(0, 10);
-        print(selectedDateRange!.start.toLocal().toString().substring(0, 10));
-        print(selectedDateRange!.end.toLocal().toString().substring(0, 10));
       });
-      // messHoliday(
-      //     startDate, endDate, selectedDateRange!.start, selectedDateRange!.end);
     }
   }
 
   Future<void> messHoliday(
-      String start, String end, DateTime startD, DateTime endD) async {
-    final resposnse = await supabase.from('users').select().execute();
-    if (resposnse.error != null) {
-      throw resposnse.error!;
-    }
-    if (start == end) {
-      print("inside");
+    String start,
+    String end,
+    DateTime startD,
+    DateTime endD,
+  ) async {
+    setState(() {
+      isLoading = true;
+    });
 
-      for (var item in resposnse.data) {
+    final response = await supabase.from('users').select().execute();
+    if (response.error != null) {
+      throw response.error!;
+    }
+
+    if (start == end) {
+      for (var item in response.data) {
         final userId = item['u_id'];
         final updateRes = await supabase
             .from("food_marking")
@@ -54,19 +59,16 @@ class _MessHolidayState extends State<MessHoliday> {
             .eq('u_id', userId)
             .eq('mark_date', start)
             .execute();
+
         if (updateRes.error != null) {
           throw updateRes.error!;
-        }else{
-          print('Insert operation completed successfully!');
         }
       }
     } else {
-      // Convert your end date string to DateTime
-
       for (DateTime time = startD;
           time.isBefore(endD.add(const Duration(days: 1)));
           time = time.add(const Duration(days: 1))) {
-        for (var item in resposnse.data) {
+        for (var item in response.data) {
           final userId = item['u_id'];
           final updateRes = await supabase
               .from("food_marking")
@@ -76,42 +78,95 @@ class _MessHolidayState extends State<MessHoliday> {
                 'evening': false,
               })
               .eq('u_id', userId)
-              .gt('mark_date', start)
-              .lt("mark_date", end)
+              .eq('mark_date', time.toLocal().toString().substring(0, 10))
               .execute();
+
           if (updateRes.error != null) {
-            // Handle error
             throw updateRes.error!;
           }
-          print('Insert operation completed successfully!');
         }
       }
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Mess Holiday"),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () {
-                  return _selectDateRange(context);
-                },
-                child: Text("Select Range ")),
-            ElevatedButton(
-                onPressed: () async {
-                  await messHoliday(startDate, endDate,
-                      selectedDateRange!.start, selectedDateRange!.end);
-                },
-                child: Text("Submit"))
+    setState(() {
+      isLoading = false;
+    });
+
+    // Show a dialog after the process is completed
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Process Completed'),
+          content: Text('Values updated for selected date.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: Text('OK'),
+            ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
+
+ 
+ @override
+Widget build(BuildContext context) {
+  return Dialog(
+    child: Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Mess Holiday",
+            style: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                _selectDateRange(context);
+              },
+              child: Text("Select Range "),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await messHoliday(
+                      startDate,
+                      endDate,
+                      selectedDateRange!.start,
+                      selectedDateRange!.end,
+                    );
+                  },
+                  child: Text("Submit"),
+                ),
+              ),
+              TextButton(onPressed: (){
+                Navigator.of(context).popUntil((route) => route.isFirst);
+
+              }, child: Text("Cancel"))
+            ],
+          ),
+          // Show loading indicator
+          if (isLoading) CircularProgressIndicator(),
+        ],
+      ),
+    ),
+  );
 }
+
+  }
+

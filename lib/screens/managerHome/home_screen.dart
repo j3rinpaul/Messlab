@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mini_project/screens/wardenpage/fixedExp.dart';
+import 'package:mini_project/screens/wardenpage/messHoliday.dart';
 import 'package:mini_project/widgets/bottomnav.dart';
 
 import '../../supabase_config.dart';
@@ -79,6 +80,16 @@ class ManagerHome extends StatelessWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (ctx1) => FixedExp(uid: u_id,)),
+                          );
+                        },
+                      ),
+                       ListTile(
+                        leading: const Icon(Icons.hourglass_disabled),
+                        title: const Text('Mess Holiday'),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (ctx1) => MessHoliday()),
                           );
                         },
                       ),

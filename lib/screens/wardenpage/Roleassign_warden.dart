@@ -60,6 +60,7 @@ class _RoleAssignState extends State<RoleAssign> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text("Username :${item['email']}"),
                   Text('Department: ${item['department']}'),
                   Text('Designation: ${item['designation']}'),
                   Text('Role: ${item['role']}'),
