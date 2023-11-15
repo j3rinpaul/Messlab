@@ -1,4 +1,5 @@
 import 'dart:io';
+ import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -586,7 +587,7 @@ class _generateBillState extends State<generateBill> {
           final tableData = <List<String>>[];
 
           // Add a header row
-          tableData.add(['Name', 'Total Cons', 'Total Bill']);
+          tableData.add(['Name', 'Consumption', 'Amount',"Point Rate","Fixed",]);
 
           // Add data from the response
           for (final record in data) {
@@ -594,8 +595,10 @@ class _generateBillState extends State<generateBill> {
             final name = nameMap[record['u_id']];
             final totalCons = record['total_cons'].toString();
             final totalBill = record['total_bill'].toString();
+            final ratePoint = record['rate_per_cons'].toString();
+            final fixed = record['fixed'].toString();
 
-            tableData.add([name!, totalCons, totalBill]);
+            tableData.add([name!, totalCons, totalBill,ratePoint,fixed]);
           }
 
           // Create a table from the data
@@ -621,38 +624,34 @@ class _generateBillState extends State<generateBill> {
     return pdfBytes;
   }
 
-  Future<void> savePdf() async {
-    if (selectedMonth == null || selectedYear == null) {
-      showAlert("Date not selected", "Please select the Month and Year");
-    } else {
-      setState(() {
-        isSaveLoad = true;
-      });
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.storage,
-      ].request();
 
-      // Wait for the PDF to be generated
+Future<void> savePdf() async {
+  if (selectedMonth == null || selectedYear == null) {
+    showAlert("Date not selected", "Please select the Month and Year");
+  } else {
+    setState(() {
+      isSaveLoad = true;
+    });
 
-      if (statuses[Permission.storage]!.isGranted) {
-        String? downloadsDirectoryPath =
-            (await DownloadsPath.downloadsDirectory())?.path;
-        print(downloadsDirectoryPath);
-        if (downloadsDirectoryPath != null) {
-          final pdfBytes = await generatePdf();
-          if (pdfBytes.lengthInBytes != 0) {
-            final file = File('$downloadsDirectoryPath/bill.pdf');
-            await file.writeAsBytes(pdfBytes);
-            print(" File saved to $downloadsDirectoryPath/bill.pdf");
-          }
-        }
-      }
-      setState(() {
-        isSaveLoad = false;
-      });
-      // showAlert("Saved", "Success");
+    final pdfBytes = await generatePdf();
+
+    if (pdfBytes.lengthInBytes != 0) {
+      final blob = html.Blob([pdfBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..target = 'blank'
+        ..download = 'bill.pdf'
+        ..click();
+
+      html.Url.revokeObjectUrl(url);
     }
+
+    setState(() {
+      isSaveLoad = false;
+    });
   }
+}
+
 
   void showAlert(String title, String content) {
     showDialog(
