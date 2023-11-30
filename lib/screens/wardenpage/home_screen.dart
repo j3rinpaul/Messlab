@@ -34,7 +34,7 @@ class wardenPage extends StatelessWidget {
           future: getName(u_id!),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
-              return Text(snapshot.data.toString() + " (Warden)");
+              return Text(snapshot.data.toString() + " (Admin)");
             } else {
               return Text("Mess Lab");
             }
