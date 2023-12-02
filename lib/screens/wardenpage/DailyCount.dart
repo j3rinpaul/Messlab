@@ -177,8 +177,8 @@ class _DailyCountState extends State<DailyCount> {
 
   Map<String, List<dynamic>> downloadList = {};
   void fetchDownload() {
-    final sortedUserNames = Map.fromEntries(userNames.entries.toList()
-      ..sort((a, b) => a.value.compareTo(b.value)));
+    final sortedUserNames = Map.fromEntries(
+        userNames.entries.toList()..sort((a, b) => a.value.compareTo(b.value)));
 
     for (final entry in sortedUserNames.entries) {
       final key = entry.key;
@@ -192,24 +192,50 @@ class _DailyCountState extends State<DailyCount> {
   Map<String, int> mapMonthly = {};
   int totalCumulative = 0;
   bool isLoad = false;
+
   Future<void> monthlyC(DateTime selectDate) async {
     setState(() {
       isLoad = true;
       totalCumulative = 0;
     });
+
     mapMonthly.clear();
     final now = selectDate;
     final startOfMonth = DateTime(now.year, now.month, 1);
-    // final monthlyUser = await supabase.from("users").select("u_id").execute();
-    final cumulative = await supabase
-        .from("food_marking")
-        .select("morning, noon, evening , u_id ,users(first_name,last_name)")
-        .gte("mark_date", startOfMonth.toString().substring(0, 10))
-        .lte("mark_date", now.toString().substring(0, 10))
-        .execute();
-    print(cumulative.data.toString());
 
-    for (var cum in cumulative.data) {
+    final pageSize = 1000; // Set your desired page size
+    int offset = 0;
+    List<Map<String, dynamic>> allRows = [];
+
+    while (true) {
+      final response = await supabase
+          .from("food_marking")
+          .select("morning, noon, evening, u_id, users(first_name, last_name)")
+          .gte("mark_date", startOfMonth.toString().substring(0, 10))
+          .lte("mark_date", now.toString().substring(0, 10))
+          .range(offset, offset + pageSize - 1)
+          .execute();
+
+      if (response.error != null) {
+        // Handle error
+        print("Error fetching data: ${response.error}");
+        break;
+      }
+
+      final List<dynamic> responseData = response.data as List<dynamic>;
+      final List<Map<String, dynamic>> rows = List.castFrom(responseData);
+
+      allRows.addAll(rows);
+
+      if (rows.length < pageSize) {
+        // Break the loop if there are fewer rows than the page size, indicating no more data
+        break;
+      }
+
+      offset += pageSize;
+    }
+
+    for (var cum in allRows) {
       final name = "${cum['users']['first_name']} ${cum['users']['last_name']}";
       final morning = cum['morning'];
       final noon = cum['noon'];
@@ -223,8 +249,8 @@ class _DailyCountState extends State<DailyCount> {
         mapMonthly[name] = monthly;
       }
       totalCumulative += monthly;
+      print("total" + totalCumulative.toString());
     }
-    print(mapMonthly.toString());
 
     setState(() {
       isLoad = false;
@@ -268,7 +294,8 @@ class _DailyCountState extends State<DailyCount> {
       final noon = value[1] ? "1" : "0";
       final evening = value[2] ? "1" : "0";
       final month = mapMonthly[key];
-      print(totalCumulative.toString());
+      print(month.toString() + "month");
+      // print("total"+totalCumulative.toString());
 
       // Calculate the Daily Cumulative (sum of 1 values)
       final dailyCumulative = (mrng == "1" ? 1 : 0) +
@@ -396,6 +423,7 @@ class _DailyCountState extends State<DailyCount> {
 
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
+
     final cumulative = await supabase
         .from("food_marking")
         .select("morning, noon, evening")
@@ -418,14 +446,15 @@ class _DailyCountState extends State<DailyCount> {
         eveningCumulative++;
       }
     }
+
     monthly = morningCumulative + noonCumulative + eveningCumulative;
+    print("monthly" + monthly.toString());
   }
 
   int ratePerPoint = 0;
   int amount = 0;
 
   Future<void> ratePer() async {
-
     await totalPoint();
     setState(() {
       ratePerPoint = 0;
@@ -448,7 +477,7 @@ class _DailyCountState extends State<DailyCount> {
       setState(() {
         ratePerPoint = amount ~/ monthly;
       });
-      print("amount:"+ratePerPoint.toString());
+      print("amount:" + ratePerPoint.toString());
     } else {
       print("Failed to fetch data: ${response.error}");
     }
@@ -482,30 +511,31 @@ class _DailyCountState extends State<DailyCount> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                
                 children: [
                   Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Point Rate: $ratePerPoint ',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Points : $monthly',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Expenses : $amount',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-            
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Point Rate: $ratePerPoint ',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Points : $monthly',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Expenses : $amount',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -531,7 +561,7 @@ class _DailyCountState extends State<DailyCount> {
           //     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           //   ),
           // ),
-           Padding(
+          Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               'Date : $date',

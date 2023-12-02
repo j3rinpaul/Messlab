@@ -16,6 +16,7 @@ class _MonthlyExpState extends State<FixedExp> {
       ValueNotifier([]);
 
   TextEditingController dateController = TextEditingController();
+  TextEditingController dateController2 = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController remarkController = TextEditingController();
 
@@ -178,6 +179,21 @@ class _MonthlyExpState extends State<FixedExp> {
     fetchExpenses(null, null);
   }
 
+  
+  Future<void> _selectDateRev(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2022),
+      lastDate: DateTime(2025),
+    );
+    if (picked != null) {
+      selectedDate = picked;
+      dateController2.text = DateFormat('yyyy-MM-dd').format(selectedDate!);
+      fetchExpenses(DateFormat('MM').format(selectedDate!), selectedDate!.year);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -285,10 +301,12 @@ class _MonthlyExpState extends State<FixedExp> {
                   },
                   child: const Text('Add Fixed'),
                 ),
-                // TextButton(
-                //   onPressed: _selectMonthAndYear,
-                //   child: const Text("View Bill"),
-                // ),
+                TextButton(
+                  onPressed: () {
+                    _selectDateRev(context);
+                  },
+                  child: const Text("View Expenses"),
+                ),
               ],
             ),
           ),

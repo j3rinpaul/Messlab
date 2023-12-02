@@ -1,9 +1,10 @@
 import 'dart:io';
- import 'dart:html' as html;
+import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
+import 'package:mini_project/screens/wardenpage/fixedExp.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
@@ -127,11 +128,11 @@ class _generateBillState extends State<generateBill> {
 
   String? lastBill;
 
-  int TotalFixed = 0;
+  int totalFixed = 0;
 
   Future<void> _fixedCal() async {
     setState(() {
-      TotalFixed = 0;
+      totalFixed = 0;
     });
     print(selectedMonth);
     print(selectedYear);
@@ -144,14 +145,14 @@ class _generateBillState extends State<generateBill> {
     print(response.data);
     if (response.data == null) {
       setState(() {
-        TotalFixed = 0;
+        totalFixed = 0;
       });
     } else {
       for (final data in response.data) {
-        TotalFixed += int.parse(data['amount'].toString());
+        totalFixed += int.parse(data['amount'].toString());
       }
     }
-    print("Fixed :" + TotalFixed.toString());
+    print("Fixed :" + totalFixed.toString());
   }
 
   Future<void> _billg() async {
@@ -206,7 +207,7 @@ class _generateBillState extends State<generateBill> {
             .lte('mark_date', endDate)
             .eq("noon", true)
             .execute();
-        // print(noonFoodResponse.data.length);
+        print(noonFoodResponse.data.length);
 
         final eveningFoodResponse = await supabase
             .from('food_marking')
@@ -215,6 +216,7 @@ class _generateBillState extends State<generateBill> {
             .lte('mark_date', endDate)
             .eq("evening", true)
             .execute();
+
         // print(eveningFoodResponse.data.length);
         // print(endDate);
         // print(startDate);
@@ -231,6 +233,10 @@ class _generateBillState extends State<generateBill> {
         // Calculate the total
         int totalFoodCount =
             morningFoodCount + noonFoodCount + eveningFoodCount;
+        print(morningFoodCount);
+        print(noonFoodCount);
+        print(eveningFoodCount);
+        print(totalFoodCount);
 
         final amount = await supabase
             .from('daily_expense')
@@ -238,6 +244,16 @@ class _generateBillState extends State<generateBill> {
             .gte('date', startDate)
             .lte('date', endDate)
             .execute();
+
+        final fixed = await supabase
+            .from('monthly_bill')
+            .select('fixed')
+            .eq('month', selectedMonth)
+            .eq('year', selectedYear)
+            .execute();
+
+        await _fixedCal();
+        int fixedExpe = totalFixed;
         setState(() {
           isLoading = false;
         });
@@ -297,7 +313,7 @@ class _generateBillState extends State<generateBill> {
                     DataRow(
                       cells: [
                         const DataCell(Text('Fixed Expenses')),
-                        DataCell(Text(fixedExpenses.text)),
+                        DataCell(Text(fixedExpe.toString())),
                       ],
                     ),
                   ],
@@ -306,7 +322,7 @@ class _generateBillState extends State<generateBill> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    print(TotalFixed);
+                    print(totalFixed);
 
                     Navigator.pop(context);
                   },
@@ -332,7 +348,7 @@ class _generateBillState extends State<generateBill> {
                                   {
                                     'month': selectedMonth,
                                     'year': selectedYear,
-                                    'fixed': TotalFixed,
+                                    'fixed': totalFixed,
                                     'rate_per_cons': ratePerPoint,
                                     // Convert to decimal
                                     'total_exp': sum,
@@ -472,7 +488,7 @@ class _generateBillState extends State<generateBill> {
           const SizedBox(height: 10),
           ElevatedButton(
               onPressed: () async {
-                 if (startDate.isEmpty || endDate.isEmpty) {
+                if (startDate.isEmpty || endDate.isEmpty) {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -542,11 +558,27 @@ class _generateBillState extends State<generateBill> {
         .eq("month", selectedMonth)
         .eq("year", selectedYear)
         .execute();
+    // print(response.data.toString());
 
-    if (response.data.isEmpty) {
+    if (response.data == null) {
       showAlert("No data", "No data found for the selected month and year");
       return Uint8List(0);
     }
+
+    final monthlydata = await supabase
+        .from('monthly_bill')
+        .select("fixed,rate_per_cons")
+        .eq("month", selectedMonth)
+        .eq("year", selectedYear)
+        .execute();
+
+    int fixedE = monthlydata.data[0]['fixed'];
+    int length = response.data.length;
+    double myround = fixedE / length;
+    int fixedExp = myround.round();
+    double rate_per_point = monthlydata.data[0]['rate_per_cons'];
+
+    print(monthlydata.data.toString());
 
     Map<String, String> nameMap = {}; // Create a HashMap to store the names
 
@@ -567,12 +599,22 @@ class _generateBillState extends State<generateBill> {
 
         // Save the full name to the HashMap
         nameMap[record['u_id']] = fullName;
+         record['Name'] = fullName;
+        
       }
+
+      
     }
 
     List<Map<String, dynamic>> data =
         (response.data as List<dynamic>).cast<Map<String, dynamic>>();
 
+   
+ data.sort((a, b) {
+    final nameA = nameMap[a['u_id']] ?? '';
+    final nameB = nameMap[b['u_id']] ?? '';
+    return nameA.compareTo(nameB);
+  });
     // print(data);
 
     // Create a PDF document
@@ -587,18 +629,27 @@ class _generateBillState extends State<generateBill> {
           final tableData = <List<String>>[];
 
           // Add a header row
-          tableData.add(['Name', 'Consumption', 'Amount',"Point Rate","Fixed",]);
+          tableData.add([
+            'Name',
+            'Consumption',
+            "Point Rate",
+            "Consumption Charge",
+            "Fixed",
+            'Amount',
+          ]);
 
           // Add data from the response
           for (final record in data) {
             // final name = nameEntry.keys;
             final name = nameMap[record['u_id']];
             final totalCons = record['total_cons'].toString();
+            final ratePoint = rate_per_point.toString();
+            final sub =
+                (record['total_cons'] * rate_per_point).ceil().toString();
+            final fixed = fixedExp.toString();
             final totalBill = record['total_bill'].toString();
-            final ratePoint = record['rate_per_cons'].toString();
-            final fixed = record['fixed'].toString();
 
-            tableData.add([name!, totalCons, totalBill,ratePoint,fixed]);
+            tableData.add([name!, totalCons, ratePoint, sub, fixed, totalBill]);
           }
 
           // Create a table from the data
@@ -624,34 +675,32 @@ class _generateBillState extends State<generateBill> {
     return pdfBytes;
   }
 
+  Future<void> savePdf() async {
+    if (selectedMonth == null || selectedYear == null) {
+      showAlert("Date not selected", "Please select the Month and Year");
+    } else {
+      setState(() {
+        isSaveLoad = true;
+      });
 
-Future<void> savePdf() async {
-  if (selectedMonth == null || selectedYear == null) {
-    showAlert("Date not selected", "Please select the Month and Year");
-  } else {
-    setState(() {
-      isSaveLoad = true;
-    });
+      final pdfBytes = await generatePdf();
 
-    final pdfBytes = await generatePdf();
+      if (pdfBytes.lengthInBytes != 0) {
+        final blob = html.Blob([pdfBytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..target = 'blank'
+          ..download = 'bill.pdf'
+          ..click();
 
-    if (pdfBytes.lengthInBytes != 0) {
-      final blob = html.Blob([pdfBytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..target = 'blank'
-        ..download = 'bill.pdf'
-        ..click();
+        html.Url.revokeObjectUrl(url);
+      }
 
-      html.Url.revokeObjectUrl(url);
+      setState(() {
+        isSaveLoad = false;
+      });
     }
-
-    setState(() {
-      isSaveLoad = false;
-    });
   }
-}
-
 
   void showAlert(String title, String content) {
     showDialog(
@@ -703,6 +752,7 @@ Future<void> savePdf() async {
       final data = response.data;
 
       if (data != null && data.isNotEmpty) {
+        print(data);
         final list = data.map((expense) => billTable(
               expense['month'],
               expense['year'],
@@ -714,7 +764,8 @@ Future<void> savePdf() async {
 
         setState(() {
           expenses = List<billTable>.from(list);
-          lastBill = data.isEmpty ? "Not" : data[0]['generated_on'];
+          lastBill =
+              data.isEmpty ? "Not" : data.last['generated_on'].toString();
         });
       }
     } else {
