@@ -552,10 +552,15 @@ class _generateBillState extends State<generateBill> {
   final pageSize = 1000; // Set your desired page size
 
   Future<void> _excelData() async {
-    if (startDate.isEmpty || endDate.isEmpty || selectedMonth == null || selectedYear == null) {
+    if (startDate.isEmpty ||
+        endDate.isEmpty ||
+        selectedMonth == null ||
+        selectedYear == null) {
       showAlert("Date not selected", "Please select the Month, Year & range");
       return;
     } else {
+      // print(sumList);
+
       // Assuming mark_date is a date column
       // final DateTime startDate = DateTime(int.parse(year), int.parse(month), 1);
       // final DateTime endDate =
@@ -625,7 +630,7 @@ class _generateBillState extends State<generateBill> {
       String year = selectedYear!.toString();
       final sheet = workbook.worksheets[0];
       //merge the cells from A1 to AH1,B1 to BH1,C1 to CH1
-      sheet.getRangeByName('A1:AH3').merge();
+      sheet.getRangeByName('A1:AN3').merge();
 
       // add text to merged cells
       //with font being bold and size 40 and centered
@@ -663,6 +668,8 @@ class _generateBillState extends State<generateBill> {
       int namelen = excelData.length * 3;
       List<bool> flattenOrginal = [];
 
+      //get the last used column
+
       for (final name in excelData.keys) {
         int l = i + 2;
 
@@ -680,7 +687,7 @@ class _generateBillState extends State<generateBill> {
         // print(details);
 
         //sort details
-        
+
         final sortedDetails = SplayTreeMap<String, List<bool>>.from(
             details, (key1, key2) => key1.compareTo(key2));
 
@@ -701,28 +708,25 @@ class _generateBillState extends State<generateBill> {
         //append the each flattaned list to the main list
         flattenOrginal.addAll(flattenedList1);
 
-        
         i += 3;
         j++;
       }
-      print(flattenOrginal);
+      // print(flattenOrginal);
       int m = 6;
-        int n = 4;
-        int z = 0;
-        int u = 0;
+      int n = 4;
+      int z = 0;
+      int u = 0;
 
       for (int s = 6; s < namelen + 6; s += 3) {
-          for (n = 4; n <= dates.length + 3; n++) {
-            for (m = u; m < u + 3; m++, z++) {
-              sheet
-                  .getRangeByIndex(m + 6, n)
-                  .setText(flattenOrginal[z] ? "1" : "0");
-
-            }
-          
+        for (n = 4; n <= dates.length + 3; n++) {
+          for (m = u; m < u + 3; m++, z++) {
+            sheet
+                .getRangeByIndex(m + 6, n)
+                .setNumber(flattenOrginal[z] ? 1 : 0);
           }
-          u += 3;
         }
+        u += 3;
+      }
 
       //date
       int firstRow = 4;
@@ -731,12 +735,85 @@ class _generateBillState extends State<generateBill> {
       sheet.importList(dates, firstRow, firstCol, isVertical);
       sheet.getRangeByIndex(4, 4, 4, 35).autoFitColumns();
 
+      // int lastCol = sheet.getLastColumn();
+      // print(lastCol);
 
-    
+      //create a hashmap to store the name as keys and their morning noon and evening count as values from excelData
+      Map<String, List<int>> sumM = {};
+      Map<String, int> sumN = {};
+      for (final name in excelData.keys) {
+        int sumMrg = 0;
+        int sumNoon = 0;
+        int sumEvng = 0;
+        final details = excelData[name]!;
+        for (final date in details.keys) {
+          if (details[date]![0] == true) {
+            sumMrg++;
+          }
+          if (details[date]![1] == true) {
+            sumNoon++;
+          }
+          if (details[date]![2] == true) {
+            sumEvng++;
+          }
+        }
+        sumM[name] = [sumMrg, sumNoon, sumEvng];
+        sumN[name] = sumMrg + sumNoon + sumEvng;
+      }
 
-    
-    
-      
+      //sort the sumMap by name
+      print(sumN);
+      //sort the sumN by name
+      sumN = SplayTreeMap<String, int>.from(
+          sumN, (key1, key2) => key1.compareTo(key2));
+
+      //convert to list
+      final List<int> sumList = [];
+      for (final value in sumN.values) {
+        sumList.add(value);
+      }
+
+      // print(sumMap);
+
+      int firstR = dates.length + 5;
+      int firstC = 6;
+      //loop through the sumList and insert the values in the excel sheet
+      for (int m = 0; m < sumList.length; m++) {
+        sheet.getRangeByIndex(firstC, firstR).setValue(sumList[m]);
+        //merge the cells
+        sheet.getRangeByIndex(firstC, firstR, firstC + 2, firstR).merge();
+        firstC += 3;
+      }
+
+      //make a list of the values of the hashmap
+      final List<List<int>> sumMList = [];
+      for (final value in sumM.values) {
+        sumMList.add(value);
+      }
+
+      //make it a single list
+      List<int> flattenMList = [];
+      for (final value in sumMList) {
+        flattenMList.addAll(value);
+      }
+
+      sheet.getRangeByIndex(4, dates.length + 4).setText('Cons');
+      sheet.getRangeByIndex(4, dates.length + 4).cellStyle.fontSize = 12;
+
+      sheet.getRangeByIndex(4, dates.length + 5).autoFit();
+
+      sheet.getRangeByIndex(4, dates.length + 5).setText("Total");
+      sheet.getRangeByIndex(4, dates.length + 5).cellStyle.fontSize = 12;
+
+      sheet.getRangeByIndex(4, dates.length + 5).autoFitColumns();
+
+      int firstRe = dates.length + 4;
+      int firstCe = 6;
+      //loop through the sumList and insert the values in the excel sheet
+      for (int m = 0; m < flattenMList.length; m++) {
+        sheet.getRangeByIndex(firstCe, firstRe).setValue(flattenMList[m]);
+        firstCe++;
+      }
 
       //save the excel file
 
@@ -1081,6 +1158,7 @@ class billTable {
 
 class TableView extends StatelessWidget {
   final List<billTable> tableData;
+  
   const TableView({super.key, required this.tableData});
 
   @override
@@ -1098,6 +1176,7 @@ class TableView extends StatelessWidget {
                 DataColumn(label: Text('Fixed')),
                 DataColumn(label: Text('Total Exp')),
                 DataColumn(label: Text('Rate per Point')),
+                DataColumn(label: Text('Delete')),
               ],
               rows: tableData.map<DataRow>((expense) {
                 return DataRow(
@@ -1108,6 +1187,42 @@ class TableView extends StatelessWidget {
                     DataCell(Text(expense.fixed_exp.toString())),
                     DataCell(Text(expense.total_exp.toString())),
                     DataCell(Text(expense.rate_per_point.toString())),
+                    DataCell(IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        print(expense.month);
+                        print(expense.year);
+                        //   final response = await supabase
+                        //       .from('bill_generated')
+                        //       .delete()
+                        //       .eq('month',month)
+                        //       .eq('year',year)
+                        //       .execute();
+                        //   if (response.error == null) {
+                        //     print("deleted");
+                        //     showDialog(
+                        //       context: context,
+                        //       builder: (BuildContext context) {
+                        //         return AlertDialog(
+                        //           title: Text("Deleted"),
+                        //           content: Text(
+                        //               "Bill deleted successfully"),
+                        //           actions: [
+                        //             TextButton(
+                        //                 onPressed: () {
+                        //                   Navigator.of(context).pop();
+                        //                 },
+                        //                 child: Text("OK"))
+                        //           ],
+                        //         );
+                        //       },
+                        //     );
+
+                        //   } else {
+                        //     print(response.error);
+                        //   }
+                      },
+                    ))
                   ],
                 );
               }).toList(),
