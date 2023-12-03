@@ -27,7 +27,18 @@ class _RoleAssignState extends State<RoleAssign> {
     } else {
       print('Failed to fetch data from Supabase');
     }
+   sortData();
   }
+
+  //sort parsedData based on name
+  void sortData() {
+    parsedData.sort((a, b) {
+      final aName = a['first_name'] + a['last_name'];
+      final bName = b['first_name'] + b['last_name'];
+      return bName.compareTo(aName);
+    });
+  }
+
 
   Future<void> deletePerson(dynamic id) async {
     final response =

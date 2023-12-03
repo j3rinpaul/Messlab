@@ -449,7 +449,8 @@ class ShowList extends StatelessWidget {
                 DataColumn(label: Text('Amount')),
                 DataColumn(label: Text('Remark')),
                 DataColumn(label: Text("User")),
-                DataColumn(label: Text("Edit"))
+                DataColumn(label: Text("Edit")),
+                DataColumn(label: Text("Delete"))
               ],
               rows: expenses.map<DataRow>((expense) {
                 print(expense.u_id);
@@ -576,6 +577,43 @@ class ShowList extends StatelessWidget {
                                     );
                                   },
                                 );
+                              },
+                            )
+                          : Text(""),
+                    ),
+                    DataCell(
+                      expense.u_id == uid
+                          ? IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                final response = await supabase
+                                    .from('daily_expense')
+                                    .delete()
+                                    .eq('updated_date', expense.updated_date)
+                                    .execute();
+                                if (response.error == null) {
+                                  print("deleted");
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Deleted"),
+                                        content: const Text(
+                                            "Expense deleted successfully"),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text("OK"))
+                                        ],
+                                      );
+                                    },
+                                  );
+                                  fetchDate!();
+                                } else {
+                                  print(response.error);
+                                }
                               },
                             )
                           : Text(""),

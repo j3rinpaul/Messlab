@@ -172,6 +172,7 @@ class _MonthlyExpState extends State<FixedExp> {
     }
   }
 
+ 
   @override
   void initState() {
     super.initState();
@@ -179,7 +180,6 @@ class _MonthlyExpState extends State<FixedExp> {
     fetchExpenses(null, null);
   }
 
-  
   Future<void> _selectDateRev(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -454,6 +454,8 @@ class ShowList extends StatelessWidget {
       required this.fetchDate})
       : super(key: key);
 
+  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -467,7 +469,8 @@ class ShowList extends StatelessWidget {
                 DataColumn(label: Text('Amount')),
                 DataColumn(label: Text('Remark')),
                 DataColumn(label: Text("User")),
-                DataColumn(label: Text("Edit"))
+                DataColumn(label: Text("Edit")),
+                DataColumn(label: Text("Delete"))
               ],
               rows: expenses.map<DataRow>((expense) {
                 print(expense.u_id);
@@ -582,8 +585,10 @@ class ShowList extends StatelessWidget {
                                                 .execute();
                                             if (response.error == null) {
                                               print("updated");
-                                              fetchDate!();
+                                              
+
                                               Navigator.of(context).pop();
+                                              fetchDate!();
                                             } else {
                                               print(response.error);
                                             }
@@ -598,6 +603,43 @@ class ShowList extends StatelessWidget {
                             )
                           : Text(""),
                     ),
+                    DataCell(
+                      expense.u_id == uid
+                          ? IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                final response = await supabase
+                                    .from('fixed')
+                                    .delete()
+                                    .eq('updated_date', expense.updated_date)
+                                    .execute();
+                                if (response.error == null) {
+                                  print("deleted");
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Deleted"),
+                                        content: Text(
+                                            "Expense deleted successfully"),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text("OK"))
+                                        ],
+                                      );
+                                    },
+                                  );
+                                  fetchDate!();
+                                } else {
+                                  print(response.error);
+                                }
+                              },
+                            )
+                          : Text(""),
+                    )
                   ],
                 );
               }).toList(),

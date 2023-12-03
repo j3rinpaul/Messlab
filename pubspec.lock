@@ -280,6 +280,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.18.1"
+  jiffy:
+    dependency: transitive
+    description:
+      name: jiffy
+      sha256: cc1d4b75016a9156c29b5d61f0c9176c3e0fb0580cc5a0e0422b5d2cab3fbfff
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.1"
   js:
     dependency: transitive
     description:
@@ -653,6 +661,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "88366a5e95ccb4091feb531021567f76ed3ceddab7424de02a9ac4a335d22a44"
+      url: "https://pub.dev"
+    source: hosted
+    version: "23.2.6"
+  syncfusion_flutter_xlsio:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_xlsio
+      sha256: "193812795c3357c2546344962a6949bda321bb1ed0bdaee381d6ed11dabd5149"
+      url: "https://pub.dev"
+    source: hosted
+    version: "23.2.6"
+  syncfusion_officecore:
+    dependency: transitive
+    description:
+      name: syncfusion_officecore
+      sha256: "361dca959709bcb68779911eb24fd48b5d6717c0f81dc94a21c1395af011a7d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "23.2.6"
   table_calendar:
     dependency: "direct main"
     description:

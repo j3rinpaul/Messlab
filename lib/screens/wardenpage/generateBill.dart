@@ -1,13 +1,11 @@
-import 'dart:io';
+import 'dart:collection';
 import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
-import 'package:mini_project/screens/wardenpage/fixedExp.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:permission_handler/permission_handler.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as excel;
 
 import '../../supabase_config.dart';
 // import 'package:path_provider/path_provider.dart';
@@ -528,12 +526,12 @@ class _generateBillState extends State<generateBill> {
               child: Text("Download Bill")),
 
           SizedBox(height: 5),
-          // ElevatedButton(
-          //     onPressed: () {
-          //       _fixedCal();
-          //     },
-          //     child: Text("Send Bill")),
-          // Display a circular loading indicator based on the isSavingPdf flag
+          ElevatedButton(
+              onPressed: () async {
+                await _excelData();
+              },
+              child: Text("Excel bill")),
+
           isSaveLoad ? CircularProgressIndicator() : Container(),
           SizedBox(height: 5),
           Text("Last bill was on $lastBill"),
@@ -549,6 +547,208 @@ class _generateBillState extends State<generateBill> {
   }
 
   bool isSaveLoad = false;
+
+  Map<String, Map<String, List<bool>>> excelData = {};
+  final pageSize = 1000; // Set your desired page size
+
+  Future<void> _excelData() async {
+    if (startDate.isEmpty || endDate.isEmpty || selectedMonth == null || selectedYear == null) {
+      showAlert("Date not selected", "Please select the Month, Year & range");
+      return;
+    } else {
+      // Assuming mark_date is a date column
+      // final DateTime startDate = DateTime(int.parse(year), int.parse(month), 1);
+      // final DateTime endDate =
+      //     DateTime(int.parse(year), int.parse(month) + 1, 1)
+      //         .subtract(Duration(days: 1));
+
+      int offset = 0;
+
+      while (true) {
+        final data = await supabase
+            .from('food_marking')
+            .select(
+                "mark_date,morning,noon,evening,u_id,users(u_id,first_name,last_name)")
+            .gte("mark_date", startDate)
+            .lte("mark_date", endDate)
+            .range(offset, offset + pageSize - 1)
+            .execute();
+
+        if (data.error != null) {
+          // Handle error
+          print("Error fetching data: ${data.error}");
+          break;
+        }
+
+        final List<dynamic> responseData = data.data as List<dynamic>;
+        final List<Map<String, dynamic>> rows =
+            (responseData as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+        for (var variables in rows) {
+          final name = variables['users']['first_name'] +
+              " " +
+              variables['users']['last_name'];
+
+          if (excelData.containsKey(name)) {
+            excelData[name]![variables['mark_date']] = [
+              variables['morning'],
+              variables['noon'],
+              variables['evening']
+            ];
+          } else {
+            excelData[name] = {
+              variables['mark_date']: [
+                variables['morning'],
+                variables['noon'],
+                variables['evening']
+              ]
+            };
+          }
+
+          // print(excelData);
+        }
+
+        // Break the loop if there are fewer rows than the page size, indicating no more data
+        if (rows.length < pageSize) {
+          break;
+        }
+
+        offset += pageSize;
+      }
+
+      //sort the excelData by name
+      excelData = SplayTreeMap<String, Map<String, List<bool>>>.from(
+          excelData, (key1, key2) => key1.compareTo(key2));
+
+      final workbook = excel.Workbook();
+      String month = selectedMonth!;
+      String year = selectedYear!.toString();
+      final sheet = workbook.worksheets[0];
+      //merge the cells from A1 to AH1,B1 to BH1,C1 to CH1
+      sheet.getRangeByName('A1:AH3').merge();
+
+      // add text to merged cells
+      //with font being bold and size 40 and centered
+      sheet
+          .getRangeByName('A1')
+          .setText('GECI SH Mess Attendence for $month/$year');
+      sheet.getRangeByName('A1').cellStyle.fontSize = 40;
+      sheet.getRangeByName('A1').cellStyle.bold = true;
+      sheet.getRangeByName('A1').cellStyle.hAlign = excel.HAlignType.center;
+      sheet.getRangeByName('A4').setText('SL No');
+      sheet.getRangeByName('A4').cellStyle.fontSize = 16;
+      sheet.getRangeByName('A4').cellStyle.bold = true;
+      sheet.getRangeByName('A4:A5').merge();
+      sheet.getRangeByName('B4').cellStyle.fontSize = 16;
+      sheet.getRangeByName('B4').cellStyle.bold = true;
+      sheet.getRangeByName('B4:C5').merge();
+      sheet.getRangeByName('B4').setText('Name');
+
+      //insert name under the name field
+      int i = 6;
+      int j = 1;
+
+      List<String> dates = [];
+
+      for (final details in excelData.values) {
+        for (final date in details.keys) {
+          if (!dates.contains(date)) {
+            dates.add(date);
+          }
+        }
+      }
+
+      dates.sort((a, b) => a.compareTo(b));
+
+      int namelen = excelData.length * 3;
+      List<bool> flattenOrginal = [];
+
+      for (final name in excelData.keys) {
+        int l = i + 2;
+
+        // Merge cells in column A
+        sheet.getRangeByName('A$i:A$l').merge();
+
+        // Set serial number in column A
+        sheet.getRangeByName('A$i').setText(j.toString());
+
+        // Set the name in columns B and C
+        sheet.getRangeByName('B$i:C$l').merge();
+        sheet.getRangeByName('B$i').setText(name);
+
+        final details = excelData[name]!;
+        // print(details);
+
+        //sort details
+        
+        final sortedDetails = SplayTreeMap<String, List<bool>>.from(
+            details, (key1, key2) => key1.compareTo(key2));
+
+        // print(sortedDetails);
+
+        //convert the sorted details values to list
+        final List<List<bool>> sortedDetailsList = [];
+        for (final value in sortedDetails.values) {
+          sortedDetailsList.add(value);
+        }
+
+        // print(sortedDetailsList);
+        List<bool> flatten2DList(List<List<bool>> inputList) {
+          return inputList.expand((innerList) => innerList).toList();
+        }
+
+        List<bool> flattenedList1 = flatten2DList(sortedDetailsList);
+        //append the each flattaned list to the main list
+        flattenOrginal.addAll(flattenedList1);
+
+        
+        i += 3;
+        j++;
+      }
+      print(flattenOrginal);
+      int m = 6;
+        int n = 4;
+        int z = 0;
+        int u = 0;
+
+      for (int s = 6; s < namelen + 6; s += 3) {
+          for (n = 4; n <= dates.length + 3; n++) {
+            for (m = u; m < u + 3; m++, z++) {
+              sheet
+                  .getRangeByIndex(m + 6, n)
+                  .setText(flattenOrginal[z] ? "1" : "0");
+
+            }
+          
+          }
+          u += 3;
+        }
+
+      //date
+      int firstRow = 4;
+      int firstCol = 4;
+      final bool isVertical = false;
+      sheet.importList(dates, firstRow, firstCol, isVertical);
+      sheet.getRangeByIndex(4, 4, 4, 35).autoFitColumns();
+
+
+    
+
+    
+    
+      
+
+      //save the excel file
+
+      final List<int> bytes = workbook.saveAsStream();
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..target = 'blank'
+        ..download = 'bill.xlsx'
+        ..click();
+    }
+  }
 
   Future<Uint8List> generatePdf() async {
     // Fetch data from Supabase
@@ -599,22 +799,18 @@ class _generateBillState extends State<generateBill> {
 
         // Save the full name to the HashMap
         nameMap[record['u_id']] = fullName;
-         record['Name'] = fullName;
-        
+        record['Name'] = fullName;
       }
-
-      
     }
 
     List<Map<String, dynamic>> data =
         (response.data as List<dynamic>).cast<Map<String, dynamic>>();
 
-   
- data.sort((a, b) {
-    final nameA = nameMap[a['u_id']] ?? '';
-    final nameB = nameMap[b['u_id']] ?? '';
-    return nameA.compareTo(nameB);
-  });
+    data.sort((a, b) {
+      final nameA = nameMap[a['u_id']] ?? '';
+      final nameB = nameMap[b['u_id']] ?? '';
+      return nameA.compareTo(nameB);
+    });
     // print(data);
 
     // Create a PDF document
