@@ -1176,7 +1176,7 @@ class TableView extends StatelessWidget {
                 DataColumn(label: Text('Fixed')),
                 DataColumn(label: Text('Total Exp')),
                 DataColumn(label: Text('Rate per Point')),
-                DataColumn(label: Text('Delete')),
+                DataColumn(label: Text(' ')),
               ],
               rows: tableData.map<DataRow>((expense) {
                 return DataRow(
