@@ -24,12 +24,26 @@ class _MonthlyExpState extends State<FixedExp> {
 
   Future<String> getName(String uid) async {
     var resp = await supabase.from('users').select().eq('u_id', uid).execute();
-    if (resp.error == null) {
-      print(resp.data);
-      print("-------------------------------");
+
+    if (resp.data.isNotEmpty) {
+    
       return "${resp.data[0]['first_name']} ${resp.data[0]['last_name']}";
-    } else
-      return Future.value("No name");
+    } else {
+      var response = await supabase
+          .from('deleted_users')
+          .select()
+          .eq('u_id', uid)
+          .execute();
+
+          print("resp"+response.data.toString()+uid);
+
+      if (response.error == null && response.data.isNotEmpty) {
+        return "${response.data[0]['first_name']} ${response.data[0]['last_name']}";
+      } else {
+        // Handle the case when user is not found in either 'users' or 'deleted_user' table
+        return "User Not Found";
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -135,44 +149,45 @@ class _MonthlyExpState extends State<FixedExp> {
       }
     }
   }
-
-  Future<void> fetchExpenses(String? date, int? year) async {
-    if (date == null && year == null) {
-      date = DateFormat('MM').format(DateTime.now());
-    }
-
-    final response = await supabase
-        .from('fixed')
-        .select()
-        .eq('month', date)
-        .eq(year != null ? 'year' : '', year)
-        .execute();
-    print(response.data);
-
-    if (response.error == null) {
-      final data = response.data;
-      if (data != null && data.isNotEmpty) {
-        final l = data.map((expense) async {
-          return ExpenseItem(
-              date: expense['date'] as String,
-              amount: (expense['amount'] as num).toDouble(),
-              remark: expense['remark'] as String,
-              updated_date: expense['updated_date'] as String,
-              u_id: expense['u_id'] as String,
-              name: await getName(expense['u_id']));
-        }).toList();
-        final list = [];
-        for (Future<ExpenseItem> i in l) {
-          list.add(await i);
-        }
-        expenseListNotifier.value = List.from(list);
-      }
-    } else {
-      print('Error: ${response.error?.message}');
-    }
+Future<void> fetchExpenses(String? date, int? year) async {
+  if (date == null && year == null) {
+    date = DateFormat('MM').format(DateTime.now());
   }
 
- 
+  // Clear existing data
+  // expenseListNotifier.value = [];
+
+  final response = await supabase
+      .from('fixed')
+      .select()
+      .eq('month', date)
+      .eq(year != null ? 'year' : '', year)
+      .execute();
+  print(response.data);
+
+  if (response.error == null) {
+    final data = response.data;
+    if (data != null && data.isNotEmpty) {
+      final l = data.map((expense) async {
+        return ExpenseItem(
+            date: expense['date'] as String,
+            amount: (expense['amount'] as num).toDouble(),
+            remark: expense['remark'] as String,
+            updated_date: expense['updated_date'] as String,
+            u_id: expense['u_id'] as String,
+            name: await getName(expense['u_id']));
+      }).toList();
+      final list = [];
+      for (Future<ExpenseItem> i in l) {
+        list.add(await i);
+      }
+      expenseListNotifier.value = List.from(list);
+    }
+  } else {
+    print('Error: ${response.error?.message}');
+  }
+}
+
   @override
   void initState() {
     super.initState();
@@ -318,8 +333,7 @@ class _MonthlyExpState extends State<FixedExp> {
                   expenses: expenses,
                   uid: widget.uid!,
                   fetchDate: () => setState(() {
-                    print("fetching");
-                    fetchExpenses(null, null);
+                    fetchExpenses(selectedDate!.month.toString(), selectedDate!.year);
                   }),
                 );
               },
@@ -442,10 +456,10 @@ class ExpenseItem {
       this.name});
 }
 
-class ShowList extends StatelessWidget {
+class ShowList extends StatefulWidget {
   final List<ExpenseItem> expenses;
   final String uid;
-  final void Function()? fetchDate;
+  final void Function() fetchDate;
 
   ShowList(
       {Key? key,
@@ -454,8 +468,11 @@ class ShowList extends StatelessWidget {
       required this.fetchDate})
       : super(key: key);
 
-  
+  @override
+  State<ShowList> createState() => _ShowListState();
+}
 
+class _ShowListState extends State<ShowList> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -472,9 +489,9 @@ class ShowList extends StatelessWidget {
                 DataColumn(label: Text("Edit")),
                 DataColumn(label: Text("Delete"))
               ],
-              rows: expenses.map<DataRow>((expense) {
+              rows: widget.expenses.map<DataRow>((expense) {
                 print(expense.u_id);
-                print(uid);
+                print(widget.uid);
                 return DataRow(
                   cells: [
                     DataCell(Text(expense.date)),
@@ -482,7 +499,7 @@ class ShowList extends StatelessWidget {
                     DataCell(Text(expense.remark)),
                     DataCell(Text(expense.name ?? "")),
                     DataCell(
-                      expense.u_id == uid
+                      expense.u_id == widget.uid
                           ? IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
@@ -585,10 +602,9 @@ class ShowList extends StatelessWidget {
                                                 .execute();
                                             if (response.error == null) {
                                               print("updated");
-                                              
 
                                               Navigator.of(context).pop();
-                                              fetchDate!();
+                                              widget.fetchDate();
                                             } else {
                                               print(response.error);
                                             }
@@ -604,7 +620,7 @@ class ShowList extends StatelessWidget {
                           : Text(""),
                     ),
                     DataCell(
-                      expense.u_id == uid
+                      expense.u_id == widget.uid
                           ? IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
@@ -626,13 +642,14 @@ class ShowList extends StatelessWidget {
                                           TextButton(
                                               onPressed: () {
                                                 Navigator.of(context).pop();
+                                                  widget.fetchDate();
                                               },
                                               child: Text("OK"))
                                         ],
                                       );
                                     },
                                   );
-                                  fetchDate!();
+                                  // widget.fetchDate();
                                 } else {
                                   print(response.error);
                                 }

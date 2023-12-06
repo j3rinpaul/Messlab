@@ -139,6 +139,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
     if (date == null && year == null) {
       date = DateFormat('MM').format(DateTime.now());
     }
+    expenseListNotifier.value = [];
 
     final response = await supabase
         .from('daily_expense')
@@ -301,7 +302,7 @@ class _MonthlyExpState extends State<MonthlyExp> {
                   uid: widget.uid!,
                   fetchDate: () => setState(() {
                     print("fetching");
-                    fetchExpenses(null, null);
+                    fetchExpenses(selectedMonth, selectedYear);
                   }),
                 );
               },
@@ -424,7 +425,7 @@ class ExpenseItem {
       this.name});
 }
 
-class ShowList extends StatelessWidget {
+class ShowList extends StatefulWidget {
   final List<ExpenseItem> expenses;
   final String uid;
   final void Function()? fetchDate;
@@ -436,6 +437,11 @@ class ShowList extends StatelessWidget {
       required this.fetchDate})
       : super(key: key);
 
+  @override
+  State<ShowList> createState() => _ShowListState();
+}
+
+class _ShowListState extends State<ShowList> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -452,9 +458,9 @@ class ShowList extends StatelessWidget {
                 DataColumn(label: Text("Edit")),
                 DataColumn(label: Text("Delete"))
               ],
-              rows: expenses.map<DataRow>((expense) {
+              rows: widget.expenses.map<DataRow>((expense) {
                 print(expense.u_id);
-                print(uid);
+                print(widget.uid);
                 return DataRow(
                   cells: [
                     DataCell(Text(expense.date)),
@@ -462,7 +468,7 @@ class ShowList extends StatelessWidget {
                     DataCell(Text(expense.remark)),
                     DataCell(Text(expense.name ?? "")),
                     DataCell(
-                      expense.u_id == uid
+                      expense.u_id == widget.uid
                           ? IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
@@ -565,7 +571,7 @@ class ShowList extends StatelessWidget {
                                                 .execute();
                                             if (response.error == null) {
                                               print("updated");
-                                              fetchDate!();
+                                              widget.fetchDate!();
                                               Navigator.of(context).pop();
                                             } else {
                                               print(response.error);
@@ -582,7 +588,7 @@ class ShowList extends StatelessWidget {
                           : Text(""),
                     ),
                     DataCell(
-                      expense.u_id == uid
+                      expense.u_id == widget.uid
                           ? IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
@@ -603,6 +609,8 @@ class ShowList extends StatelessWidget {
                                         actions: [
                                           TextButton(
                                               onPressed: () {
+                                                widget.fetchDate!();
+
                                                 Navigator.of(context).pop();
                                               },
                                               child: const Text("OK"))
@@ -610,7 +618,6 @@ class ShowList extends StatelessWidget {
                                       );
                                     },
                                   );
-                                  fetchDate!();
                                 } else {
                                   print(response.error);
                                 }

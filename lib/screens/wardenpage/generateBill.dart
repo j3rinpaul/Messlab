@@ -1192,35 +1192,35 @@ class TableView extends StatelessWidget {
                       onPressed: () async {
                         print(expense.month);
                         print(expense.year);
-                        //   final response = await supabase
-                        //       .from('bill_generated')
-                        //       .delete()
-                        //       .eq('month',month)
-                        //       .eq('year',year)
-                        //       .execute();
-                        //   if (response.error == null) {
-                        //     print("deleted");
-                        //     showDialog(
-                        //       context: context,
-                        //       builder: (BuildContext context) {
-                        //         return AlertDialog(
-                        //           title: Text("Deleted"),
-                        //           content: Text(
-                        //               "Bill deleted successfully"),
-                        //           actions: [
-                        //             TextButton(
-                        //                 onPressed: () {
-                        //                   Navigator.of(context).pop();
-                        //                 },
-                        //                 child: Text("OK"))
-                        //           ],
-                        //         );
-                        //       },
-                        //     );
+                           final response = await supabase
+                              .from('bill_generated')
+                              .delete()
+                              .eq('month',expense.month)
+                              .eq('year',expense.year)
+                              .execute();
+                          if (response.error == null) {
+                            print("deleted");
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Deleted"),
+                                  content: Text(
+                                      "Bill deleted successfully"),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("OK"))
+                                  ],
+                                );
+                              },
+                            );
 
-                        //   } else {
-                        //     print(response.error);
-                        //   }
+                          } else {
+                            print(response.error);
+                          }
                       },
                     ))
                   ],

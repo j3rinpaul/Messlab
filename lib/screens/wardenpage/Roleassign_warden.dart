@@ -85,7 +85,7 @@ class _RoleAssignState extends State<RoleAssign> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text('Warning'),
-                                content: const Text('Do you want to delete user?'),
+                                content: const Text('Do you want to delete user?\nGenerate bill for this mess cycle before you delete.'),
                                 actions: [
                                   TextButton(
                                     child: const Text('Confirm'),
