@@ -257,6 +257,10 @@ class _RoleAssignState extends State<RoleAssign> {
                         value: 'manager',
                         child: Text('Manager'),
                       ),
+                       DropdownMenuItem(
+                        value: 'warden',
+                        child: Text('warden'),
+                      ),
                       DropdownMenuItem(
                         value: 'user',
                         child: Text('User'),
