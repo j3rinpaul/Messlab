@@ -1,6 +1,6 @@
 // service_worker.js
 
-const cacheName = 'update-8';
+const cacheName = 'update-9';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -125,7 +125,7 @@ class wardenPage extends StatelessWidget {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.man_2),
+                        leading: const Icon(Icons.person_remove),
                         title: const Text('Unmark'),
                         onTap: () {
                           Navigator.of(context).push(

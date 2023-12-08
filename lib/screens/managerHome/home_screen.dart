@@ -6,6 +6,7 @@ import 'package:mini_project/widgets/bottomnav.dart';
 import '../../supabase_config.dart';
 import '../wardenpage/changePass.dart';
 import '../wardenpage/generateBill.dart';
+import '../wardenpage/unmark.dart';
 import 'ScreenHome.dart';
 //import 'package:intl/intl.dart';
 
@@ -90,6 +91,16 @@ class ManagerHome extends StatelessWidget {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (ctx1) => MessHoliday()),
+                          );
+                        },
+                      ),
+                       ListTile(
+                        leading: const Icon(Icons.person_remove),
+                        title: const Text('Unmark'),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (ctx1) => Unmark()),
                           );
                         },
                       ),
