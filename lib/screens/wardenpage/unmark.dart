@@ -105,11 +105,11 @@ class _UnmarkState extends State<Unmark> {
 
   //function to show the calendar to select the date range and add a confirm button to unmark the user
 
-  Future<void> _selectDateRange(BuildContext context) async {
+  Future<void> _selectDateRange(BuildContext context ,String uids) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
-      lastDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 0),
+      lastDate: DateTime(2030),
     );
 
     if (picked != null && picked.start != null && picked.end != null) {
@@ -117,6 +117,33 @@ class _UnmarkState extends State<Unmark> {
         now = picked.start!.toIso8601String().substring(0, 10);
         value = picked.end!.toIso8601String().substring(0, 10);
       });
+      
+       showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Unmark'),
+                                  content:  Text(
+                                    //from $now to $value
+                                      'Are you sure you want to unmark the user from $now to $value ?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        _unmark(uids);
+                                      },
+                                      child: const Text('Confirm'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
       
     }else{
       print("No date selected");
@@ -173,33 +200,33 @@ class _UnmarkState extends State<Unmark> {
                           icon: const Icon(Icons.edit),
                           onPressed: () async {
                             //show a warning
-                            await _selectDateRange(context);
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Unmark'),
-                                  content:  Text(
-                                    //from $now to $value
-                                      'Are you sure you want to unmark the user from $now to $value ?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        _unmark(uids);
-                                      },
-                                      child: const Text('Confirm'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            await _selectDateRange(context,uids);
+                            // showDialog(
+                            //   context: context,
+                            //   builder: (BuildContext context) {
+                            //     return AlertDialog(
+                            //       title: const Text('Unmark'),
+                            //       content:  Text(
+                            //         //from $now to $value
+                            //           'Are you sure you want to unmark the user from $now to $value ?'),
+                            //       actions: [
+                            //         TextButton(
+                            //           onPressed: () {
+                            //             Navigator.of(context).pop();
+                            //           },
+                            //           child: const Text('Cancel'),
+                            //         ),
+                            //         TextButton(
+                            //           onPressed: () {
+                            //             Navigator.of(context).pop();
+                            //             _unmark(uids);
+                            //           },
+                            //           child: const Text('Confirm'),
+                            //         ),
+                            //       ],
+                            //     );
+                            //   },
+                            // );
                           },
                         ),
                       ],
