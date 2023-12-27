@@ -105,7 +105,7 @@ class _UnmarkState extends State<Unmark> {
 
   //function to show the calendar to select the date range and add a confirm button to unmark the user
 
-  Future<void> _selectDateRange(BuildContext context ,String uids) async {
+  Future<void> _selectDateRange(BuildContext context ,String uids,String uname) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
@@ -125,7 +125,7 @@ class _UnmarkState extends State<Unmark> {
                                   title: const Text('Unmark'),
                                   content:  Text(
                                     //from $now to $value
-                                      'Are you sure you want to unmark the user from $now to $value ?'),
+                                      'Are you sure you want to unmark $uname from $now to $value ?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
@@ -200,7 +200,7 @@ class _UnmarkState extends State<Unmark> {
                           icon: const Icon(Icons.edit),
                           onPressed: () async {
                             //show a warning
-                            await _selectDateRange(context,uids);
+                            await _selectDateRange(context,uids,userNames[uids]!);
                             // showDialog(
                             //   context: context,
                             //   builder: (BuildContext context) {
