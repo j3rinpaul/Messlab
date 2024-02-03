@@ -21,17 +21,20 @@ class _CalendarState extends State<Calendar> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        DatePicker(
-          DateTime.now(),
-          initialSelectedDate: DateTime.now(),
-          selectionColor: Colors.blue,
-          selectedTextColor: Colors.white,
-          onDateChange: (date) {
-            setState(() {
-              selectedValue = date;
-              print(selectedValue);
-            });
-          },
+        SizedBox(
+          height: 100,
+          child: DatePicker(
+            DateTime.now(),
+            initialSelectedDate: DateTime.now(),
+            selectionColor: Colors.blue,
+            selectedTextColor: Colors.white,
+            onDateChange: (date) {
+              setState(() {
+                selectedValue = date;
+                print(selectedValue);
+              });
+            },
+          ),
         ),
         CheckboxList(
           date: selectedValue,
