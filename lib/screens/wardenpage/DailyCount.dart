@@ -290,9 +290,9 @@ class _DailyCountState extends State<DailyCount> {
 
     for (var key in downloadList.keys) {
       final value = downloadList[key];
-      final mrng = value![0] ? "1" : "0";
-      final noon = value[1] ? "1" : "0";
-      final evening = value[2] ? "1" : "0";
+      final mrng = value![0] == true ? "1" : "0";
+      final noon = value[1] == true ? "1" : "0";
+      final evening = value[2] == true ? "1" : "0";
       final month = mapMonthly[key];
       print(month.toString() + "month");
       // print("total"+totalCumulative.toString());
@@ -715,7 +715,7 @@ class _DailyCountState extends State<DailyCount> {
                                             horizontal: 5.0),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: foodList[i]
+                                          color: foodList[i] == true
                                               ? Colors.green
                                               : Colors.red,
                                         ),

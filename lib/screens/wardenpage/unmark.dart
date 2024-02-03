@@ -70,13 +70,20 @@ class _UnmarkState extends State<Unmark> {
 
   Future<void> _unmark(String uid) async {
     //unmark the user from current date to end of the month
-    final response = await supabase
-        .from('food_marking')
-        .update({"morning": false, "noon": false, "evening": false})
-        .eq('u_id', uid)
-        .gte("mark_date", now)
-        .lte("mark_date", value)
-        .execute();
+    // final response = await supabase
+    //     .from('food_marking')
+    //     .update({"morning": false, "noon": false, "evening": false})
+    //     .eq('u_id', uid)
+    //     .gte("mark_date", now)
+    //     .lte("mark_date", value)
+    //     .execute();
+    final response   =   await supabase.from('food_marking').upsert({
+      'u_id': uid,
+      'mark_date': now,
+      'morning': false,
+      'noon': false,
+      'evening': false,
+    }).execute();
 
     if (response.error == null) {
       print("Unmarked");

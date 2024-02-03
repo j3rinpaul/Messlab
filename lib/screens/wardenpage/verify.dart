@@ -87,37 +87,37 @@ class _VerifyUserState extends State<VerifyUser> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // TextButton(
-                      //     onPressed: () {
-                      //       showDialog(
-                      //         context: context,
-                      //         builder: (BuildContext context) {
-                      //           return AlertDialog(
-                      //             title: const Text('Warning'),
-                      //             content:
-                      //                 const Text('Do you want to delete user?'),
-                      //             actions: [
-                      //               TextButton(
-                      //                 child: const Text('Confirm'),
-                      //                 onPressed: () {
-                      //                   // Do something
-                      //                   DeleteData(item['id']);
-                      //                   Navigator.of(context).pop();
-                      //                 },
-                      //               ),
-                      //               TextButton(
-                      //                 child: const Text('Cancel'),
-                      //                 onPressed: () {
-                      //                   // Do something
-                      //                   Navigator.of(context).pop();
-                      //                 },
-                      //               ),
-                      //             ],
-                      //           );
-                      //         },
-                      //       );
-                      //     },
-                      //     child: const Text("Delete")),
+                      TextButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Warning'),
+                                  content:
+                                      const Text('Do you want to delete user from verification ?'),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text('Confirm'),
+                                      onPressed: () {
+                                        // Do something
+                                        DeleteData(item['id']);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        // Do something
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: const Text("Delete")),
                       ElevatedButton(
                           onPressed: () {
                             verifyData(
