@@ -636,7 +636,7 @@ class _generateBillState extends State<generateBill> {
       //with font being bold and size 40 and centered
       sheet
           .getRangeByName('A1')
-          .setText('GECI SH Mess Attendence for $month/$year');
+          .setText('GECI SH Mess Bill for $month/$year');
       sheet.getRangeByName('A1').cellStyle.fontSize = 40;
       sheet.getRangeByName('A1').cellStyle.bold = true;
       sheet.getRangeByName('A1').cellStyle.hAlign = excel.HAlignType.center;
@@ -666,6 +666,7 @@ class _generateBillState extends State<generateBill> {
       dates.sort((a, b) => a.compareTo(b));
 
       int namelen = excelData.length * 3;
+      print(namelen);
       List<bool> flattenOrginal = [];
 
       //get the last used column
@@ -716,6 +717,8 @@ class _generateBillState extends State<generateBill> {
       int n = 4;
       int z = 0;
       int u = 0;
+
+      print(flattenOrginal.length);
 
       for (int s = 6; s < namelen + 6; s += 3) {
         for (n = 4; n <= dates.length + 3; n++) {
@@ -773,6 +776,9 @@ class _generateBillState extends State<generateBill> {
         sumList.add(value);
       }
 
+      
+      print(sumList);
+
       // print(sumMap);
 
       int firstR = dates.length + 5;
@@ -784,6 +790,65 @@ class _generateBillState extends State<generateBill> {
         sheet.getRangeByIndex(firstC, firstR, firstC + 2, firstR).merge();
         firstC += 3;
       }
+
+      final resp = await supabase
+          .from('monthly_bill')
+          .select("fixed,rate_per_cons")
+          .eq("month", selectedMonth)
+          .eq("year", selectedYear)
+          .execute();
+
+          print(resp.data[0]['rate_per_cons']);
+          print(resp.data[0]['fixed']);
+
+
+
+      //rate per point * points
+      final List<int> rpp = [];
+      double rateppoint2 = resp.data[0]['rate_per_cons'] ;
+      int rateppoint = rateppoint2.round();
+      int firstRa = dates.length + 6;
+      int firstCa = 6;
+      //loop through the sumList and insert the values in the excel sheet
+      for (int m = 0; m < sumList.length; m++) {
+        int sumL = sumList[m] * rateppoint;
+        rpp.add(sumL);
+        sheet.getRangeByIndex(firstCa, firstRa).setValue(sumL);
+        //merge the cells
+        sheet.getRangeByIndex(firstCa, firstRa, firstCa + 2, firstRa).merge();
+        firstCa += 3;
+      }
+
+      //fixed addition
+
+       double fixed2 = resp.data[0]['fixed']/excelData.length;
+       int fixed = fixed2.round();
+
+
+      int firstRf = dates.length + 7;
+      int firstCf = 6;
+      //loop through the sumList and insert the values in the excel sheet
+      for (int m = 0; m < sumList.length; m++) {
+  
+        sheet.getRangeByIndex(firstCf, firstRf).setValue(fixed);
+        //merge the cells
+        sheet.getRangeByIndex(firstCf, firstRf, firstCf + 2, firstRf).merge();
+        firstCf += 3;
+      }
+
+      //total amount
+      
+      int firstRt = dates.length + 8;
+      int firstCt = 6;
+      //loop through the sumList and insert the values in the excel sheet
+      for (int m = 0; m < sumList.length; m++) {
+        int sumT = rpp[m] + fixed;
+        sheet.getRangeByIndex(firstCt, firstRt).setValue(sumT);
+        //merge the cells
+        sheet.getRangeByIndex(firstCt, firstRt, firstCt + 2, firstRt).merge();
+        firstCt += 3;
+      }
+
 
       //make a list of the values of the hashmap
       final List<List<int>> sumMList = [];
@@ -797,15 +862,32 @@ class _generateBillState extends State<generateBill> {
         flattenMList.addAll(value);
       }
 
-      sheet.getRangeByIndex(4, dates.length + 4).setText('Cons');
+      sheet.getRangeByIndex(4, dates.length + 4).setText('Points');
       sheet.getRangeByIndex(4, dates.length + 4).cellStyle.fontSize = 12;
 
       sheet.getRangeByIndex(4, dates.length + 5).autoFit();
 
-      sheet.getRangeByIndex(4, dates.length + 5).setText("Total");
+      sheet.getRangeByIndex(4, dates.length + 5).setText("Total Points");
       sheet.getRangeByIndex(4, dates.length + 5).cellStyle.fontSize = 12;
 
       sheet.getRangeByIndex(4, dates.length + 5).autoFitColumns();
+
+      sheet.getRangeByIndex(4, dates.length + 6).setText("Food Expense");
+      sheet.getRangeByIndex(4, dates.length + 6).cellStyle.fontSize = 12;
+
+      sheet.getRangeByIndex(4, dates.length + 6).autoFitColumns();
+
+      sheet.getRangeByIndex(4, dates.length + 7).setText("Fixed Charge");
+      sheet.getRangeByIndex(4, dates.length + 7).cellStyle.fontSize = 12;
+
+      sheet.getRangeByIndex(4, dates.length + 7).autoFitColumns();
+
+      sheet.getRangeByIndex(4, dates.length + 8).setText("Mess Bill");
+      sheet.getRangeByIndex(4, dates.length + 8).cellStyle.fontSize = 12;
+
+      sheet.getRangeByIndex(4, dates.length + 8).autoFitColumns();
+
+
 
       int firstRe = dates.length + 4;
       int firstCe = 6;
@@ -822,7 +904,7 @@ class _generateBillState extends State<generateBill> {
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.AnchorElement(href: url)
         ..target = 'blank'
-        ..download = 'bill.xlsx'
+        ..download = 'bill_$selectedMonth.xlsx'
         ..click();
     }
   }
@@ -1158,7 +1240,7 @@ class billTable {
 
 class TableView extends StatelessWidget {
   final List<billTable> tableData;
-  
+
   const TableView({super.key, required this.tableData});
 
   @override
@@ -1192,35 +1274,33 @@ class TableView extends StatelessWidget {
                       onPressed: () async {
                         print(expense.month);
                         print(expense.year);
-                           final response = await supabase
-                              .from('bill_generated')
-                              .delete()
-                              .eq('month',expense.month)
-                              .eq('year',expense.year)
-                              .execute();
-                          if (response.error == null) {
-                            print("deleted");
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("Deleted"),
-                                  content: Text(
-                                      "Bill deleted successfully"),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("OK"))
-                                  ],
-                                );
-                              },
-                            );
-
-                          } else {
-                            print(response.error);
-                          }
+                        final response = await supabase
+                            .from('bill_generated')
+                            .delete()
+                            .eq('month', expense.month)
+                            .eq('year', expense.year)
+                            .execute();
+                        if (response.error == null) {
+                          print("deleted");
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Deleted"),
+                                content: Text("Bill deleted successfully"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("OK"))
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          print(response.error);
+                        }
                       },
                     ))
                   ],

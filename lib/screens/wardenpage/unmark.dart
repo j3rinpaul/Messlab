@@ -8,13 +8,11 @@ class Unmark extends StatefulWidget {
   State<Unmark> createState() => _UnmarkState();
 }
 
- 
-
 class _UnmarkState extends State<Unmark> {
   Map<dynamic, String> userNames = {};
   bool isdetail = false;
-   String now = DateTime.now().toIso8601String().substring(0, 10);
-  
+  String now = DateTime.now().toIso8601String().substring(0, 10);
+
   String value = DateTime(DateTime.now().year, DateTime.now().month + 1, 0)
       .toIso8601String()
       .substring(0, 10);
@@ -67,7 +65,6 @@ class _UnmarkState extends State<Unmark> {
     });
   }
 
-
   Future<void> _unmark(String uid) async {
     //unmark the user from current date to end of the month
     // final response = await supabase
@@ -77,13 +74,18 @@ class _UnmarkState extends State<Unmark> {
     //     .gte("mark_date", now)
     //     .lte("mark_date", value)
     //     .execute();
-    final response   =   await supabase.from('food_marking').upsert({
-      'u_id': uid,
-      'mark_date': now,
-      'morning': false,
-      'noon': false,
-      'evening': false,
-    }).execute();
+    final response = await supabase.from('food_marking').upsert([
+      for (var date = DateTime.parse(now);
+          date.isBefore(DateTime.parse(value).add(Duration(days: 1)));
+          date = date.add(Duration(days: 1)))
+        {
+          'u_id': uid,
+          'mark_date': date.toIso8601String(),
+          'morning': false,
+          'noon': false,
+          'evening': false,
+        },
+    ]).execute();
 
     if (response.error == null) {
       print("Unmarked");
@@ -112,53 +114,51 @@ class _UnmarkState extends State<Unmark> {
 
   //function to show the calendar to select the date range and add a confirm button to unmark the user
 
-  Future<void> _selectDateRange(BuildContext context ,String uids,String uname) async {
+  Future<void> _selectDateRange(
+      BuildContext context, String uids, String uname) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
+      //firstDate: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
+      firstDate: DateTime(2023),
       lastDate: DateTime(2030),
     );
 
     if (picked != null && picked.start != null && picked.end != null) {
       setState(() {
-        now = picked.start!.toIso8601String().substring(0, 10);
-        value = picked.end!.toIso8601String().substring(0, 10);
+        now = picked.start.toIso8601String().substring(0, 10);
+        value = picked.end.toIso8601String().substring(0, 10);
       });
-      
-       showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Unmark'),
-                                  content:  Text(
-                                    //from $now to $value
-                                      'Are you sure you want to unmark $uname from $now to $value ?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        _unmark(uids);
-                                      },
-                                      child: const Text('Confirm'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-      
-    }else{
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Unmark'),
+            content: Text(
+                //from $now to $value
+                'Are you sure you want to unmark $uname from $now to $value ?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _unmark(uids);
+                },
+                child: const Text('Confirm'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
       print("No date selected");
       return;
     }
-
-    
-    
   }
 
   @override
@@ -207,7 +207,8 @@ class _UnmarkState extends State<Unmark> {
                           icon: const Icon(Icons.edit),
                           onPressed: () async {
                             //show a warning
-                            await _selectDateRange(context,uids,userNames[uids]!);
+                            await _selectDateRange(
+                                context, uids, userNames[uids]!);
                             // showDialog(
                             //   context: context,
                             //   builder: (BuildContext context) {
