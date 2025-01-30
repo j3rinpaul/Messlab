@@ -1,0 +1,12 @@
+workflows:
+  flutter-web:
+    name: Flutter Web Build
+    environment:
+      flutter: stable
+      vars:
+        DART_VERSION: "3.2.0"  # Set to a Dart 3+ version
+    scripts:
+      - flutter pub get
+      - flutter build web --release
+    artifacts:
+      - build/web/**
